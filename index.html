@@ -4,38 +4,19 @@
 
 <script>
 /* ============================================================
-   GITHUB PAGES -> APPS SCRIPT BRIDGE
-   Keeps the existing google.script.run calls working when this
-   Index.html is served from GitHub Pages.
+   GITHUB PAGES -> APPS SCRIPT BRIDGE v2
 ============================================================ */
 (function () {
   var API_URL = 'https://script.google.com/macros/s/AKfycbzNtZiGp7d26PT19l5lW7mYg7FyHq4DWBQvrT5uujSWuQ7WLfujvviqmQ-QCijNmAXwlQ/exec';
 
-  // Native Apps Script runtime: leave google.script.run untouched.
-  if (window.google && window.google.script && window.google.script.run) {
-    return;
-  }
+  if (window.google && window.google.script && window.google.script.run) return;
 
-  var pending = {};
-  var rpcCounter = 0;
+  var pending = Object.create(null);
+  var counter = 0;
 
   function makeId() {
-    rpcCounter += 1;
-    return 'ch_' + Date.now() + '_' + rpcCounter;
-  }
-
-  function ensureFrame() {
-    var id = 'ch_api_frame';
-    var frame = document.getElementById(id);
-    if (!frame) {
-      frame = document.createElement('iframe');
-      frame.id = id;
-      frame.name = id;
-      frame.style.display = 'none';
-      frame.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(frame);
-    }
-    return frame;
+    counter += 1;
+    return 'ch_' + Date.now() + '_' + counter;
   }
 
   window.addEventListener('message', function (event) {
@@ -45,34 +26,50 @@
     var id = String(data.id || '');
     var call = pending[id];
     if (!call) return;
-
     delete pending[id];
+
+    if (call.frame && call.frame.parentNode) {
+      call.frame.parentNode.removeChild(call.frame);
+    }
 
     if (data.ok) {
       if (typeof call.success === 'function') {
         call.success(data.result, call.userObject);
       }
-    } else {
-      if (typeof call.failure === 'function') {
-        call.failure({
-          message: String(data.error || 'Terjadi kesalahan pada server.')
-        }, call.userObject);
-      }
+    } else if (typeof call.failure === 'function') {
+      call.failure({message: String(data.error || 'Terjadi kesalahan pada server.')}, call.userObject);
     }
   });
 
   function send(method, args, handlers) {
     var rpcId = makeId();
+    var frame = document.createElement('iframe');
+    var frameName = 'ch_api_' + rpcId;
+
+    frame.name = frameName;
+    frame.id = frameName;
+    frame.setAttribute('aria-hidden', 'true');
+    frame.style.position = 'fixed';
+    frame.style.width = '1px';
+    frame.style.height = '1px';
+    frame.style.left = '-10000px';
+    frame.style.top = '-10000px';
+    frame.style.border = '0';
+    frame.style.opacity = '0';
+
+    document.body.appendChild(frame);
+
     pending[rpcId] = {
       success: handlers.success,
       failure: handlers.failure,
-      userObject: handlers.userObject
+      userObject: handlers.userObject,
+      frame: frame
     };
 
     var form = document.createElement('form');
     form.method = 'POST';
     form.action = API_URL;
-    form.target = 'ch_api_frame';
+    form.target = frameName;
     form.style.display = 'none';
 
     function add(name, value) {
@@ -88,55 +85,34 @@
     add('args', JSON.stringify(args || []));
 
     document.body.appendChild(form);
-    ensureFrame();
     form.submit();
+    if (form.parentNode) form.parentNode.removeChild(form);
 
     setTimeout(function () {
-      if (form.parentNode) form.parentNode.removeChild(form);
-    }, 1000);
+      var call = pending[rpcId];
+      if (!call) return;
+      delete pending[rpcId];
+      if (call.frame && call.frame.parentNode) call.frame.parentNode.removeChild(call.frame);
+      if (typeof call.failure === 'function') {
+        call.failure({message: 'Server tidak merespons. Coba refresh halaman lalu login lagi.'}, call.userObject);
+      }
+    }, 30000);
   }
 
   function createRunner(handlers) {
-    handlers = handlers || {
-      success: null,
-      failure: null,
-      userObject: null
-    };
-
+    handlers = handlers || {success:null, failure:null, userObject:null};
     return new Proxy({}, {
       get: function (_target, prop) {
-        if (prop === 'withSuccessHandler') {
-          return function (fn) {
-            return createRunner({
-              success: typeof fn === 'function' ? fn : null,
-              failure: handlers.failure,
-              userObject: handlers.userObject
-            });
-          };
-        }
-
-        if (prop === 'withFailureHandler') {
-          return function (fn) {
-            return createRunner({
-              success: handlers.success,
-              failure: typeof fn === 'function' ? fn : null,
-              userObject: handlers.userObject
-            });
-          };
-        }
-
-        if (prop === 'withUserObject') {
-          return function (obj) {
-            return createRunner({
-              success: handlers.success,
-              failure: handlers.failure,
-              userObject: obj
-            });
-          };
-        }
-
+        if (prop === 'withSuccessHandler') return function (fn) {
+          return createRunner({success: typeof fn === 'function' ? fn : null, failure: handlers.failure, userObject: handlers.userObject});
+        };
+        if (prop === 'withFailureHandler') return function (fn) {
+          return createRunner({success: handlers.success, failure: typeof fn === 'function' ? fn : null, userObject: handlers.userObject});
+        };
+        if (prop === 'withUserObject') return function (obj) {
+          return createRunner({success: handlers.success, failure: handlers.failure, userObject: obj});
+        };
         if (typeof prop === 'symbol') return undefined;
-
         return function () {
           send(String(prop), Array.prototype.slice.call(arguments), handlers);
         };
