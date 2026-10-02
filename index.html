@@ -1,6 +1,155 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+<script>
+/* ============================================================
+   GITHUB PAGES -> APPS SCRIPT BRIDGE
+   Keeps the existing google.script.run calls working when this
+   Index.html is served from GitHub Pages.
+============================================================ */
+(function () {
+  var API_URL = 'https://script.google.com/macros/s/AKfycbzNtZiGp7d26PT19l5lW7mYg7FyHq4DWBQvrT5uujSWuQ7WLfujvviqmQ-QCijNmAXwlQ/exec';
+
+  // Native Apps Script runtime: leave google.script.run untouched.
+  if (window.google && window.google.script && window.google.script.run) {
+    return;
+  }
+
+  var pending = {};
+  var rpcCounter = 0;
+
+  function makeId() {
+    rpcCounter += 1;
+    return 'ch_' + Date.now() + '_' + rpcCounter;
+  }
+
+  function ensureFrame() {
+    var id = 'ch_api_frame';
+    var frame = document.getElementById(id);
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.id = id;
+      frame.name = id;
+      frame.style.display = 'none';
+      frame.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(frame);
+    }
+    return frame;
+  }
+
+  window.addEventListener('message', function (event) {
+    var data = event && event.data;
+    if (!data || data.source !== 'CRIMSON_HERITAGE_API') return;
+
+    var id = String(data.id || '');
+    var call = pending[id];
+    if (!call) return;
+
+    delete pending[id];
+
+    if (data.ok) {
+      if (typeof call.success === 'function') {
+        call.success(data.result, call.userObject);
+      }
+    } else {
+      if (typeof call.failure === 'function') {
+        call.failure({
+          message: String(data.error || 'Terjadi kesalahan pada server.')
+        }, call.userObject);
+      }
+    }
+  });
+
+  function send(method, args, handlers) {
+    var rpcId = makeId();
+    pending[rpcId] = {
+      success: handlers.success,
+      failure: handlers.failure,
+      userObject: handlers.userObject
+    };
+
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = API_URL;
+    form.target = 'ch_api_frame';
+    form.style.display = 'none';
+
+    function add(name, value) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+
+    add('rpcId', rpcId);
+    add('method', method);
+    add('args', JSON.stringify(args || []));
+
+    document.body.appendChild(form);
+    ensureFrame();
+    form.submit();
+
+    setTimeout(function () {
+      if (form.parentNode) form.parentNode.removeChild(form);
+    }, 1000);
+  }
+
+  function createRunner(handlers) {
+    handlers = handlers || {
+      success: null,
+      failure: null,
+      userObject: null
+    };
+
+    return new Proxy({}, {
+      get: function (_target, prop) {
+        if (prop === 'withSuccessHandler') {
+          return function (fn) {
+            return createRunner({
+              success: typeof fn === 'function' ? fn : null,
+              failure: handlers.failure,
+              userObject: handlers.userObject
+            });
+          };
+        }
+
+        if (prop === 'withFailureHandler') {
+          return function (fn) {
+            return createRunner({
+              success: handlers.success,
+              failure: typeof fn === 'function' ? fn : null,
+              userObject: handlers.userObject
+            });
+          };
+        }
+
+        if (prop === 'withUserObject') {
+          return function (obj) {
+            return createRunner({
+              success: handlers.success,
+              failure: handlers.failure,
+              userObject: obj
+            });
+          };
+        }
+
+        if (typeof prop === 'symbol') return undefined;
+
+        return function () {
+          send(String(prop), Array.prototype.slice.call(arguments), handlers);
+        };
+      }
+    });
+  }
+
+  window.google = window.google || {};
+  window.google.script = window.google.script || {};
+  window.google.script.run = createRunner();
+})();
+</script>
+
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -74,7 +223,7 @@
       position: fixed;
       inset: 0;
       background:
-        url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E")
+        url("https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless")
         center 52% / min(620px, 55vw) auto no-repeat;
       opacity: .34;
       mix-blend-mode: screen;
@@ -120,7 +269,7 @@
           rgba(0,0,0,.90),
           rgba(0,0,0,.97)
         ),
-        url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E")
+        url("https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless")
         center / 360px auto no-repeat;
 
       display: flex;
@@ -2624,7 +2773,7 @@ html,body,button,input,select,textarea{
 
   <img
     class="loader-logo"
-    src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E"
+    src="https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless"
   >
 
   <div class="loader-title">
@@ -2650,7 +2799,7 @@ html,body,button,input,select,textarea{
 
     <img
       class="login-logo"
-      src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E"
+      src="https://media.discordapp.net/attachments/1370736488257687604/1553876223485026394/image.png?ex=6abad781&is=6ab98601&hm=8aa3369b6bd6451e373ca7dadb0c9c6a9b8496c31417b9861702597ab8b8c279&=&format=webp&quality=lossless&width=512&height=512"
     >
 
     <div class="login-title">
@@ -2729,7 +2878,7 @@ html,body,button,input,select,textarea{
     <div class="brand">
 
       <img
-        src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E"
+        src="https://media.discordapp.net/attachments/1370736488257687604/1553876223485026394/image.png?ex=6abad781&is=6ab98601&hm=8aa3369b6bd6451e373ca7dadb0c9c6a9b8496c31417b9861702597ab8b8c279&=&format=webp&quality=lossless&width=512&height=512"
       >
 
       <div class="brand-name">
@@ -2880,118 +3029,6 @@ html,body,button,input,select,textarea{
 <script>
 
 /* =====================================================
-   GITHUB PAGES ↔ APPS SCRIPT BRIDGE
-   Keeps the existing google.script.run calls intact.
-   On Apps Script-hosted pages, the native API is used.
-   On GitHub Pages, calls are tunneled through a hidden
-   iframe + POST so the existing frontend does not need
-   to be rewritten function-by-function.
-===================================================== */
-(function installCrimsonApiBridge_() {
-  if (window.google && window.google.script && window.google.script.run) return;
-
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzNtZiGp7d26PT19l5lW7mYg7FyHq4DWBQvrT5uujSWuQ7WLfujvviqmQ-QCijNmAXwlQ/exec';
-  const pending = new Map();
-  let sequence = 0;
-
-  function cleanup_(id) {
-    const item = pending.get(id);
-    if (!item) return;
-    pending.delete(id);
-    if (item.timer) clearTimeout(item.timer);
-    if (item.iframe && item.iframe.parentNode) item.iframe.parentNode.removeChild(item.iframe);
-  }
-
-  window.addEventListener('message', function(event) {
-    const data = event && event.data;
-    if (!data || data.source !== 'CRIMSON_HERITAGE_API' || !data.id) return;
-
-    const item = pending.get(data.id);
-    if (!item) return;
-
-    cleanup_(data.id);
-
-    if (data.ok) {
-      if (typeof item.success === 'function') item.success(data.result);
-    } else {
-      const err = { message: data.error || 'Terjadi kesalahan pada server.' };
-      if (typeof item.failure === 'function') item.failure(err);
-      else console.error(err);
-    }
-  });
-
-  function call_(method, args, success, failure) {
-    const id = 'ch_' + Date.now() + '_' + (++sequence);
-    const iframeName = 'ch_rpc_' + id;
-
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.display = 'none';
-    iframe.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(iframe);
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = API_URL;
-    form.target = iframeName;
-    form.style.display = 'none';
-
-    function addField_(name, value) {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    }
-
-    addField_('rpcId', id);
-    addField_('method', method);
-    addField_('args', JSON.stringify(args || []));
-
-    document.body.appendChild(form);
-
-    pending.set(id, {
-      success: success,
-      failure: failure,
-      iframe: iframe,
-      timer: setTimeout(function() {
-        cleanup_(id);
-        const err = { message: 'Server tidak merespons. Coba refresh halaman lalu ulangi.' };
-        if (typeof failure === 'function') failure(err);
-      }, 30000)
-    });
-
-    form.submit();
-    form.remove();
-  }
-
-  function makeRunner_(success, failure) {
-    return new Proxy({}, {
-      get: function(target, prop) {
-        if (prop === 'withSuccessHandler') {
-          return function(fn) { return makeRunner_(fn, failure); };
-        }
-        if (prop === 'withFailureHandler') {
-          return function(fn) { return makeRunner_(success, fn); };
-        }
-        if (prop === 'withUserObject') {
-          return function() { return makeRunner_(success, failure); };
-        }
-        if (typeof prop !== 'string') return undefined;
-        return function() {
-          call_(prop, Array.prototype.slice.call(arguments), success, failure);
-        };
-      }
-    });
-  }
-
-  window.google = window.google || {};
-  window.google.script = window.google.script || {};
-  window.google.script.run = makeRunner_(null, null);
-  window.CRIMSON_HERITAGE_API_URL = API_URL;
-})();
-
-/* =====================================================
    GLOBAL
 ===================================================== */
 
@@ -3025,10 +3062,10 @@ let CURRENT_MEMBERS = [];
 let CURRENT_USERS = [];
 
 const LOGO_1 =
-  'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E';
+  'https://media.discordapp.net/attachments/1370736488257687604/1553876223485026394/image.png?ex=6abad781&is=6ab98601&hm=8aa3369b6bd6451e373ca7dadb0c9c6a9b8496c31417b9861702597ab8b8c279&=&format=webp&quality=lossless&width=512&height=512';
 
 const LOGO_2 =
-  'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E';
+  'https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless';
 
 
 /* =====================================================
