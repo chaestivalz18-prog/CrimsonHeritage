@@ -4,80 +4,90 @@
 
 <script>
 /* ============================================================
-   GITHUB PAGES -> APPS SCRIPT BRIDGE
-   POST RPC + JSONP polling. Works outside Apps Script HTML Service.
+   GITHUB PAGES -> APPS SCRIPT BRIDGE (iframe)
+   Uses a hidden Apps Script HTML-service iframe. The iframe
+   has native google.script.run, so no CORS/JSONP is needed.
 ============================================================ */
 (function () {
   var API_URL = 'https://script.google.com/macros/s/AKfycbyodoFKu10C9NxSVgAKkn7YhEoMB4caa7m16oY4ryfJ5nqf6gfm6ZLkfKJDZhAlCbyUkg/exec';
   if (window.google && window.google.script && window.google.script.run) return;
 
-  var pending = {}, seq = 0;
-  function makeId() { return 'ch_' + Date.now() + '_' + (++seq); }
+  var pending = {};
+  var queue = [];
+  var seq = 0;
+  var ready = false;
+  var frame = null;
 
-  function getFrame() {
-    var f = document.getElementById('ch_api_frame');
-    if (!f) {
-      f = document.createElement('iframe');
-      f.id = 'ch_api_frame'; f.name = 'ch_api_frame'; f.style.display = 'none';
-      document.body.appendChild(f);
-    }
-    return f;
+  function makeId() {
+    return 'ch_' + Date.now() + '_' + (++seq);
   }
 
-  function finish(id, data) {
-    var p = pending[id]; if (!p) return;
+  function finish(id, ok, result, error) {
+    var p = pending[id];
+    if (!p) return;
     delete pending[id];
-    if (data && data.ok) {
-      if (typeof p.success === 'function') p.success(data.result, p.userObject);
-    } else if (typeof p.failure === 'function') {
-      p.failure({message: String((data && data.error) || 'Terjadi kesalahan pada server.')}, p.userObject);
+    if (ok) {
+      if (typeof p.success === 'function') p.success(result, p.userObject);
+    } else {
+      if (typeof p.failure === 'function') p.failure({message: String(error || 'Terjadi kesalahan pada server.')}, p.userObject);
     }
   }
 
-  function poll(id, started) {
-    if (!pending[id]) return;
-    if (Date.now() - started > 30000) {
-      finish(id, {ok:false, error:'Server tidak merespons. Coba deploy versi terbaru Apps Script.'});
+  function sendNow(req) {
+    if (!frame || !frame.contentWindow) {
+      queue.push(req);
       return;
     }
+    try {
+      frame.contentWindow.postMessage({
+        chBridgeRequest: true,
+        id: req.id,
+        method: req.method,
+        args: req.args
+      }, '*');
+    } catch (err) {
+      finish(req.id, false, null, err && err.message ? err.message : err);
+    }
+  }
 
-    var cb = '__ch_cb_' + id.replace(/[^A-Za-z0-9_$]/g, '_');
-    window[cb] = function (data) {
-      try {
-        if (!data || !data.ready) {
-          setTimeout(function(){ poll(id, started); }, 350);
-          return;
-        }
-        finish(id, data);
-      } finally {
-        try { delete window[cb]; } catch (_) { window[cb] = undefined; }
-      }
-    };
+  function flush() {
+    if (!ready) return;
+    var q = queue.splice(0);
+    q.forEach(sendNow);
+  }
 
-    var script = document.createElement('script');
-    script.async = true;
-    script.src = API_URL + '?chRpc=' + encodeURIComponent(id) + '&chCb=' + encodeURIComponent(cb) + '&_=' + Date.now();
-    script.onerror = function () {
-      try { delete window[cb]; } catch (_) { window[cb] = undefined; }
-      setTimeout(function(){ poll(id, started); }, 500);
-    };
-    document.head.appendChild(script);
-    setTimeout(function(){ if (script.parentNode) script.parentNode.removeChild(script); }, 1200);
+  window.addEventListener('message', function (event) {
+    var data = event.data || {};
+    if (data.chBridgeReady) {
+      ready = true;
+      flush();
+      return;
+    }
+    if (data.chBridgeResponse && data.id) {
+      finish(String(data.id), !!data.ok, data.result, data.error);
+    }
+  });
+
+  function ensureFrame() {
+    if (frame) return;
+    frame = document.createElement('iframe');
+    frame.id = 'ch_apps_script_bridge';
+    frame.title = 'Crimson Heritage API';
+    frame.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
+    frame.src = API_URL + '?bridge=1&_=' + Date.now();
+    document.body.appendChild(frame);
   }
 
   function send(method, args, handlers) {
     var id = makeId();
     pending[id] = handlers;
-    var form = document.createElement('form');
-    form.method = 'POST'; form.action = API_URL; form.target = getFrame().name; form.style.display = 'none';
-    function add(name, value) {
-      var i = document.createElement('input'); i.type='hidden'; i.name=name; i.value=value; form.appendChild(i);
-    }
-    add('rpcId', id); add('method', method); add('args', JSON.stringify(args || []));
-    document.body.appendChild(form);
-    form.submit();
-    setTimeout(function(){ if (form.parentNode) form.parentNode.removeChild(form); }, 1000);
-    setTimeout(function(){ poll(id, Date.now()); }, 200);
+    ensureFrame();
+    var req = {id:id, method:String(method), args:Array.isArray(args) ? args : []};
+    if (ready) sendNow(req); else queue.push(req);
+
+    setTimeout(function () {
+      if (pending[id]) finish(id, false, null, 'Server tidak merespons. Pastikan deployment Apps Script sudah memakai versi terbaru.');
+    }, 30000);
   }
 
   function runner(h) {
