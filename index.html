@@ -73,7 +73,7 @@
       position: fixed;
       inset: 0;
       background:
-        url("https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless")
+        url("assets/bintang-merah.png")
         center 52% / min(620px, 55vw) auto no-repeat;
       opacity: .34;
       mix-blend-mode: screen;
@@ -119,7 +119,7 @@
           rgba(0,0,0,.90),
           rgba(0,0,0,.97)
         ),
-        url("https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless")
+        url("assets/bintang-merah.png")
         center / 360px auto no-repeat;
 
       display: flex;
@@ -2649,7 +2649,7 @@ html,body,button,input,select,textarea{
 
     <img
       class="login-logo"
-      src="https://media.discordapp.net/attachments/1370736488257687604/1553876223485026394/image.png?ex=6abad781&is=6ab98601&hm=8aa3369b6bd6451e373ca7dadb0c9c6a9b8496c31417b9861702597ab8b8c279&=&format=webp&quality=lossless&width=512&height=512"
+      src="assets/crimson-logo.png"
     >
 
     <div class="login-title">
@@ -4023,8 +4023,8 @@ function loadPickupPage() {
           </div>
 
           <div style="color:#888;font-size:11px;margin-bottom:20px;line-height:1.6">
-            Satu transaksi untuk barang keluar sekaligus pengambilan.
-            Data masuk sebagai PENDING terlebih dahulu. Stock baru berkurang saat transaksi diproses.
+            Satu transaksi untuk mencatat barang keluar sekaligus pengambilan.
+            Stock langsung berkurang dan transaksi langsung tercatat.
           </div>
 
           <div class="grid grid-2">
@@ -4144,7 +4144,7 @@ function submitPickup() {
   google.script.run
     .withSuccessHandler(function(result) {
       toast(
-        result.message || 'Pengajuan barang keluar berhasil dibuat.',
+        result.message || 'Barang keluar berhasil dicatat.',
         'success'
       );
       loadPickupPage();
@@ -4173,8 +4173,8 @@ function loadPickupHistory() {
           <div class="section-title" style="margin-top:0">
             RIWAYAT BARANG KELUAR & PENGAMBILAN
           </div>
-          <div style="color:#888;font-size:10px;margin-bottom:15px;line-height:1.6">
-            <b>PENDING</b> = menunggu proses. <b>PROCESSED</b> = stock sudah dikurangi. <b>CANCELLED</b> = dibatalkan.
+          <div style="color:#888;font-size:10px;margin-bottom:15px">
+            Setiap baris adalah satu transaksi yang sudah langsung mengurangi stock.
           </div>
       `;
 
@@ -4192,7 +4192,6 @@ function loadPickupHistory() {
                   <th>Qty</th>
                   <th>Penyerah</th>
                   <th>Status</th>
-                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -4207,24 +4206,6 @@ function loadPickupHistory() {
               <td>${number(row.qty)}</td>
               <td>${escapeHTML(row.staffName)}</td>
               <td>${statusBadge(row.status)}</td>
-              <td>
-                ${
-                  String(row.status || '').toUpperCase() === 'PENDING'
-                  ? `
-                    <button
-                      class="btn btn-green"
-                      style="padding:7px 10px;font-size:9px;margin-right:4px"
-                      onclick="processPickup('${escapeAttr(row.id)}')"
-                    >PROSES</button>
-                    <button
-                      class="btn btn-danger"
-                      style="padding:7px 10px;font-size:9px"
-                      onclick="cancelPickup('${escapeAttr(row.id)}')"
-                    >BATAL</button>
-                  `
-                  : '-'
-                }
-              </td>
             </tr>
           `;
         });
@@ -4244,8 +4225,6 @@ function loadPickupHistory() {
 }
 
 
-
-
 function loadMyPickupHistory() {
 
   google.script.run
@@ -4257,9 +4236,6 @@ function loadMyPickupHistory() {
         <div class="card">
           <div class="section-title" style="margin-top:0">
             RIWAYAT BARANG KELUAR SAYA
-          </div>
-          <div style="color:#888;font-size:10px;margin-bottom:15px;line-height:1.6">
-            PENDING = menunggu proses. PROCESSED = stock sudah diproses. CANCELLED = dibatalkan.
           </div>
       `;
 
@@ -5920,13 +5896,11 @@ function processPickup(id) {
     .withSuccessHandler(function() {
 
       toast(
-        result && result.message
-          ? result.message
-          : 'Barang keluar berhasil diproses.',
+        'Pickup berhasil diproses.',
         'success'
       );
 
-      loadPickupPage();
+      loadHistoryPage();
 
     })
 
@@ -5948,13 +5922,11 @@ function cancelPickup(id) {
     .withSuccessHandler(function() {
 
       toast(
-        result && result.message
-          ? result.message
-          : 'Pengajuan barang keluar dibatalkan.',
+        'Pickup dibatalkan.',
         'success'
       );
 
-      loadPickupPage();
+      loadHistoryPage();
 
     })
 
