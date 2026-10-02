@@ -3,112 +3,92 @@
 <head>
 
 <script>
-/* CRIMSON HERITAGE - GITHUB PAGES -> APPS SCRIPT BRIDGE */
+/* ============================================================
+   GITHUB PAGES -> APPS SCRIPT BRIDGE
+   POST RPC + JSONP polling. Works outside Apps Script HTML Service.
+============================================================ */
 (function () {
   var API_URL = 'https://script.google.com/macros/s/AKfycbyodoFKu10C9NxSVgAKkn7YhEoMB4caa7m16oY4ryfJ5nqf6gfm6ZLkfKJDZhAlCbyUkg/exec';
-
   if (window.google && window.google.script && window.google.script.run) return;
 
-  var pending = {};
-  var counter = 0;
+  var pending = {}, seq = 0;
+  function makeId() { return 'ch_' + Date.now() + '_' + (++seq); }
 
-  function id() {
-    counter++;
-    return 'ch_' + Date.now() + '_' + counter;
-  }
-
-  function frame() {
+  function getFrame() {
     var f = document.getElementById('ch_api_frame');
     if (!f) {
       f = document.createElement('iframe');
-      f.id = 'ch_api_frame';
-      f.name = 'ch_api_frame';
-      f.style.display = 'none';
+      f.id = 'ch_api_frame'; f.name = 'ch_api_frame'; f.style.display = 'none';
       document.body.appendChild(f);
     }
     return f;
   }
 
-  function poll(rpcId, handlers) {
-    var cb = '__ch_cb_' + rpcId.replace(/[^A-Za-z0-9_$]/g, '_');
-    var attempts = 0;
+  function finish(id, data) {
+    var p = pending[id]; if (!p) return;
+    delete pending[id];
+    if (data && data.ok) {
+      if (typeof p.success === 'function') p.success(data.result, p.userObject);
+    } else if (typeof p.failure === 'function') {
+      p.failure({message: String((data && data.error) || 'Terjadi kesalahan pada server.')}, p.userObject);
+    }
+  }
 
+  function poll(id, started) {
+    if (!pending[id]) return;
+    if (Date.now() - started > 30000) {
+      finish(id, {ok:false, error:'Server tidak merespons. Coba deploy versi terbaru Apps Script.'});
+      return;
+    }
+
+    var cb = '__ch_cb_' + id.replace(/[^A-Za-z0-9_$]/g, '_');
     window[cb] = function (data) {
-      if (window[cb]) delete window[cb];
-      if (script && script.parentNode) script.parentNode.removeChild(script);
-      delete pending[rpcId];
-
-      if (data && data.ready) {
-        if (data.ok) {
-          if (typeof handlers.success === 'function') handlers.success(data.result, handlers.userObject);
-        } else if (typeof handlers.failure === 'function') {
-          handlers.failure({message: String(data.error || 'Terjadi kesalahan pada server.')}, handlers.userObject);
+      try {
+        if (!data || !data.ready) {
+          setTimeout(function(){ poll(id, started); }, 350);
+          return;
         }
-        return;
+        finish(id, data);
+      } finally {
+        try { delete window[cb]; } catch (_) { window[cb] = undefined; }
       }
-      next();
     };
 
-    var script;
-    function next() {
-      attempts++;
-      if (attempts > 100) {
-        if (window[cb]) delete window[cb];
-        delete pending[rpcId];
-        if (script && script.parentNode) script.parentNode.removeChild(script);
-        if (typeof handlers.failure === 'function') handlers.failure({message:'Server tidak merespons. Pastikan deployment Web App sudah diperbarui.'}, handlers.userObject);
-        return;
-      }
-      script = document.createElement('script');
-      script.src = API_URL + '?chRpc=' + encodeURIComponent(rpcId) + '&chCb=' + encodeURIComponent(cb) + '&_=' + Date.now();
-      script.onerror = function () {
-        if (script && script.parentNode) script.parentNode.removeChild(script);
-        setTimeout(next, 300);
-      };
-      document.head.appendChild(script);
-    }
-    next();
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = API_URL + '?chRpc=' + encodeURIComponent(id) + '&chCb=' + encodeURIComponent(cb) + '&_=' + Date.now();
+    script.onerror = function () {
+      try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+      setTimeout(function(){ poll(id, started); }, 500);
+    };
+    document.head.appendChild(script);
+    setTimeout(function(){ if (script.parentNode) script.parentNode.removeChild(script); }, 1200);
   }
 
   function send(method, args, handlers) {
-    var rpcId = id();
-    pending[rpcId] = true;
-
-    var f = frame();
+    var id = makeId();
+    pending[id] = handlers;
     var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = API_URL;
-    form.target = f.name;
-    form.style.display = 'none';
-
+    form.method = 'POST'; form.action = API_URL; form.target = getFrame().name; form.style.display = 'none';
     function add(name, value) {
-      var input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
+      var i = document.createElement('input'); i.type='hidden'; i.name=name; i.value=value; form.appendChild(i);
     }
-    add('rpcId', rpcId);
-    add('method', method);
-    add('args', JSON.stringify(args || []));
+    add('rpcId', id); add('method', method); add('args', JSON.stringify(args || []));
     document.body.appendChild(form);
     form.submit();
-    setTimeout(function () { if (form.parentNode) form.parentNode.removeChild(form); }, 1000);
-
-    poll(rpcId, handlers);
+    setTimeout(function(){ if (form.parentNode) form.parentNode.removeChild(form); }, 1000);
+    setTimeout(function(){ poll(id, Date.now()); }, 200);
   }
 
-  function runner(handlers) {
-    handlers = handlers || {success:null, failure:null, userObject:null};
-    return new Proxy({}, {
-      get: function (_t, prop) {
-        if (prop === 'withSuccessHandler') return function(fn) { return runner({success:typeof fn==='function'?fn:null, failure:handlers.failure, userObject:handlers.userObject}); };
-        if (prop === 'withFailureHandler') return function(fn) { return runner({success:handlers.success, failure:typeof fn==='function'?fn:null, userObject:handlers.userObject}); };
-        if (prop === 'withUserObject') return function(obj) { return runner({success:handlers.success, failure:handlers.failure, userObject:obj}); };
-        if (typeof prop === 'symbol') return undefined;
-        return function() { send(String(prop), Array.prototype.slice.call(arguments), handlers); };
-      }
-    });
+  function runner(h) {
+    h = h || {success:null, failure:null, userObject:null};
+    return new Proxy({}, { get:function(_, prop) {
+      if (prop === 'withSuccessHandler') return function(fn){ return runner({success:typeof fn==='function'?fn:null, failure:h.failure, userObject:h.userObject}); };
+      if (prop === 'withFailureHandler') return function(fn){ return runner({success:h.success, failure:typeof fn==='function'?fn:null, userObject:h.userObject}); };
+      if (prop === 'withUserObject') return function(obj){ return runner({success:h.success, failure:h.failure, userObject:obj}); };
+      if (typeof prop === 'symbol') return undefined;
+      return function(){ send(String(prop), Array.prototype.slice.call(arguments), h); };
+    }});
   }
 
   window.google = window.google || {};
