@@ -1,6 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+<script>
+/* CRIMSON HERITAGE - GITHUB PAGES -> APPS SCRIPT BRIDGE */
+(function () {
+  var API_URL = 'https://script.google.com/macros/s/AKfycbyodoFKu10C9NxSVgAKkn7YhEoMB4caa7m16oY4ryfJ5nqf6gfm6ZLkfKJDZhAlCbyUkg/exec';
+
+  if (window.google && window.google.script && window.google.script.run) return;
+
+  var pending = {};
+  var counter = 0;
+
+  function id() {
+    counter++;
+    return 'ch_' + Date.now() + '_' + counter;
+  }
+
+  function frame() {
+    var f = document.getElementById('ch_api_frame');
+    if (!f) {
+      f = document.createElement('iframe');
+      f.id = 'ch_api_frame';
+      f.name = 'ch_api_frame';
+      f.style.display = 'none';
+      document.body.appendChild(f);
+    }
+    return f;
+  }
+
+  function poll(rpcId, handlers) {
+    var cb = '__ch_cb_' + rpcId.replace(/[^A-Za-z0-9_$]/g, '_');
+    var attempts = 0;
+
+    window[cb] = function (data) {
+      if (window[cb]) delete window[cb];
+      if (script && script.parentNode) script.parentNode.removeChild(script);
+      delete pending[rpcId];
+
+      if (data && data.ready) {
+        if (data.ok) {
+          if (typeof handlers.success === 'function') handlers.success(data.result, handlers.userObject);
+        } else if (typeof handlers.failure === 'function') {
+          handlers.failure({message: String(data.error || 'Terjadi kesalahan pada server.')}, handlers.userObject);
+        }
+        return;
+      }
+      next();
+    };
+
+    var script;
+    function next() {
+      attempts++;
+      if (attempts > 100) {
+        if (window[cb]) delete window[cb];
+        delete pending[rpcId];
+        if (script && script.parentNode) script.parentNode.removeChild(script);
+        if (typeof handlers.failure === 'function') handlers.failure({message:'Server tidak merespons. Pastikan deployment Web App sudah diperbarui.'}, handlers.userObject);
+        return;
+      }
+      script = document.createElement('script');
+      script.src = API_URL + '?chRpc=' + encodeURIComponent(rpcId) + '&chCb=' + encodeURIComponent(cb) + '&_=' + Date.now();
+      script.onerror = function () {
+        if (script && script.parentNode) script.parentNode.removeChild(script);
+        setTimeout(next, 300);
+      };
+      document.head.appendChild(script);
+    }
+    next();
+  }
+
+  function send(method, args, handlers) {
+    var rpcId = id();
+    pending[rpcId] = true;
+
+    var f = frame();
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = API_URL;
+    form.target = f.name;
+    form.style.display = 'none';
+
+    function add(name, value) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+    add('rpcId', rpcId);
+    add('method', method);
+    add('args', JSON.stringify(args || []));
+    document.body.appendChild(form);
+    form.submit();
+    setTimeout(function () { if (form.parentNode) form.parentNode.removeChild(form); }, 1000);
+
+    poll(rpcId, handlers);
+  }
+
+  function runner(handlers) {
+    handlers = handlers || {success:null, failure:null, userObject:null};
+    return new Proxy({}, {
+      get: function (_t, prop) {
+        if (prop === 'withSuccessHandler') return function(fn) { return runner({success:typeof fn==='function'?fn:null, failure:handlers.failure, userObject:handlers.userObject}); };
+        if (prop === 'withFailureHandler') return function(fn) { return runner({success:handlers.success, failure:typeof fn==='function'?fn:null, userObject:handlers.userObject}); };
+        if (prop === 'withUserObject') return function(obj) { return runner({success:handlers.success, failure:handlers.failure, userObject:obj}); };
+        if (typeof prop === 'symbol') return undefined;
+        return function() { send(String(prop), Array.prototype.slice.call(arguments), handlers); };
+      }
+    });
+  }
+
+  window.google = window.google || {};
+  window.google.script = window.google.script || {};
+  window.google.script.run = runner();
+})();
+</script>
+
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -74,7 +190,7 @@
       position: fixed;
       inset: 0;
       background:
-        url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E")
+        url("https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless")
         center 52% / min(620px, 55vw) auto no-repeat;
       opacity: .34;
       mix-blend-mode: screen;
@@ -120,7 +236,7 @@
           rgba(0,0,0,.90),
           rgba(0,0,0,.97)
         ),
-        url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E")
+        url("https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless")
         center / 360px auto no-repeat;
 
       display: flex;
@@ -2624,7 +2740,7 @@ html,body,button,input,select,textarea{
 
   <img
     class="loader-logo"
-    src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E"
+    src="https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless"
   >
 
   <div class="loader-title">
@@ -2650,7 +2766,7 @@ html,body,button,input,select,textarea{
 
     <img
       class="login-logo"
-      src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E"
+      src="https://media.discordapp.net/attachments/1370736488257687604/1553876223485026394/image.png?ex=6abad781&is=6ab98601&hm=8aa3369b6bd6451e373ca7dadb0c9c6a9b8496c31417b9861702597ab8b8c279&=&format=webp&quality=lossless&width=512&height=512"
     >
 
     <div class="login-title">
@@ -2729,7 +2845,7 @@ html,body,button,input,select,textarea{
     <div class="brand">
 
       <img
-        src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E"
+        src="https://media.discordapp.net/attachments/1370736488257687604/1553876223485026394/image.png?ex=6abad781&is=6ab98601&hm=8aa3369b6bd6451e373ca7dadb0c9c6a9b8496c31417b9861702597ab8b8c279&=&format=webp&quality=lossless&width=512&height=512"
       >
 
       <div class="brand-name">
@@ -2879,153 +2995,6 @@ html,body,button,input,select,textarea{
 
 <script>
 
-/* ============================================================
-   CRIMSON HERITAGE - GITHUB PAGES BRIDGE v3
-   GitHub Pages tidak menyediakan google.script.run.
-   Request dikirim ke Apps Script lewat POST, lalu hasilnya
-   diambil melalui JSONP sehingga tidak bergantung pada CORS
-   atau postMessage dari HtmlService.
-============================================================ */
-(function installCrimsonApiBridge_() {
-  if (window.google && window.google.script && window.google.script.run) return;
-
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzNtZiGp7d26PT19l5lW7mYg7FyHq4DWBQvrT5uujSWuQ7WLfujvviqmQ-QCijNmAXwlQ/exec';
-  const pending = new Map();
-  let sequence = 0;
-
-  function cleanup_(id) {
-    const item = pending.get(id);
-    if (!item) return;
-    pending.delete(id);
-    if (item.timeout) clearTimeout(item.timeout);
-    if (item.pollTimer) clearTimeout(item.pollTimer);
-    if (item.iframe && item.iframe.parentNode) item.iframe.parentNode.removeChild(item.iframe);
-    if (item.script && item.script.parentNode) item.script.parentNode.removeChild(item.script);
-    try { delete window[item.callbackName]; } catch (e) { window[item.callbackName] = undefined; }
-  }
-
-  function finish_(id, data) {
-    const item = pending.get(id);
-    if (!item) return;
-    const success = item.success;
-    const failure = item.failure;
-    const userObject = item.userObject;
-    cleanup_(id);
-    if (data && data.ok) {
-      if (typeof success === 'function') success(data.result, userObject);
-    } else if (typeof failure === 'function') {
-      failure({ message: (data && data.error) || 'Terjadi kesalahan pada server.' }, userObject);
-    }
-  }
-
-  function poll_(id) {
-    const item = pending.get(id);
-    if (!item) return;
-    const script = document.createElement('script');
-    item.script = script;
-    script.async = true;
-    script.src = API_URL + '?chRpc=' + encodeURIComponent(id) + '&chCb=' + encodeURIComponent(item.callbackName) + '&_=' + Date.now();
-    script.onload = function() {
-      if (item.script === script) item.script = null;
-      if (script.parentNode) script.parentNode.removeChild(script);
-    };
-    script.onerror = function() {
-      if (script.parentNode) script.parentNode.removeChild(script);
-      if (!pending.has(id)) return;
-      item.pollTimer = setTimeout(function() { poll_(id); }, 500);
-    };
-    document.body.appendChild(script);
-  }
-
-  function call_(method, args, success, failure, userObject) {
-    const id = 'ch_' + Date.now() + '_' + (++sequence);
-    const iframeName = 'ch_post_' + id;
-    const callbackName = '__crimsonRpc_' + id.replace(/[^A-Za-z0-9_$]/g, '_');
-
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.position = 'fixed';
-    iframe.style.width = '1px';
-    iframe.style.height = '1px';
-    iframe.style.left = '-10000px';
-    iframe.style.top = '-10000px';
-    iframe.style.border = '0';
-    iframe.style.opacity = '0';
-    iframe.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(iframe);
-
-    const item = {
-      success: success,
-      failure: failure,
-      userObject: userObject,
-      iframe: iframe,
-      script: null,
-      callbackName: callbackName,
-      pollTimer: null,
-      timeout: null
-    };
-    pending.set(id, item);
-
-    window[callbackName] = function(data) {
-      if (!data || !data.ready) {
-        item.pollTimer = setTimeout(function() { poll_(id); }, 350);
-        return;
-      }
-      finish_(id, data);
-    };
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = API_URL;
-    form.target = iframeName;
-    form.style.display = 'none';
-
-    function addField_(name, value) {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    }
-
-    addField_('rpcId', id);
-    addField_('method', method);
-    addField_('args', JSON.stringify(args || []));
-    document.body.appendChild(form);
-    form.submit();
-    form.remove();
-
-    item.pollTimer = setTimeout(function() { poll_(id); }, 400);
-    item.timeout = setTimeout(function() {
-      if (pending.has(id)) finish_(id, { ok: false, error: 'Server tidak merespons dalam 30 detik. Coba refresh halaman lalu login lagi.' });
-    }, 30000);
-  }
-
-  function makeRunner_(handlers) {
-    handlers = handlers || { success: null, failure: null, userObject: null };
-    return new Proxy({}, {
-      get: function(target, prop) {
-        if (prop === 'withSuccessHandler') return function(fn) {
-          return makeRunner_({ success: typeof fn === 'function' ? fn : null, failure: handlers.failure, userObject: handlers.userObject });
-        };
-        if (prop === 'withFailureHandler') return function(fn) {
-          return makeRunner_({ success: handlers.success, failure: typeof fn === 'function' ? fn : null, userObject: handlers.userObject });
-        };
-        if (prop === 'withUserObject') return function(obj) {
-          return makeRunner_({ success: handlers.success, failure: handlers.failure, userObject: obj });
-        };
-        if (typeof prop !== 'string') return undefined;
-        return function() { call_(prop, Array.prototype.slice.call(arguments), handlers.success, handlers.failure, handlers.userObject); };
-      }
-    });
-  }
-
-  window.google = window.google || {};
-  window.google.script = window.google.script || {};
-  window.google.script.run = makeRunner_();
-  window.CRIMSON_HERITAGE_API_URL = API_URL;
-})();
-
 /* =====================================================
    GLOBAL
 ===================================================== */
@@ -3060,10 +3029,10 @@ let CURRENT_MEMBERS = [];
 let CURRENT_USERS = [];
 
 const LOGO_1 =
-  'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E';
+  'https://media.discordapp.net/attachments/1370736488257687604/1553876223485026394/image.png?ex=6abad781&is=6ab98601&hm=8aa3369b6bd6451e373ca7dadb0c9c6a9b8496c31417b9861702597ab8b8c279&=&format=webp&quality=lossless&width=512&height=512';
 
 const LOGO_2 =
-  'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cdefs%3E%3CradialGradient%20id%3D%22g%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff3340%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%237b0710%22%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22256%22%20height%3D%22256%22%20rx%3D%2244%22%20fill%3D%22%23090909%22%2F%3E%3Cpath%20d%3D%22M128%2024%20151%2092l70%200-56%2041%2021%2068-58-40-58%2040%2021-68-56-41h70z%22%20fill%3D%22url%28%23g%29%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%225%22%2F%3E%3Ccircle%20cx%3D%22128%22%20cy%3D%22128%22%20r%3D%2217%22%20fill%3D%22%23090909%22%20stroke%3D%22%23d9ad63%22%20stroke-width%3D%224%22%2F%3E%3C%2Fsvg%3E';
+  'https://media.discordapp.net/attachments/1554219465892302890/1554225366623719475/image.png?ex=6abebfab&is=6abd6e2b&hm=af3b6a4a26cf7dee8b71432dcd63338067aade44cf221c830b5e7d7adf819cc9&=&format=webp&quality=lossless';
 
 
 /* =====================================================
