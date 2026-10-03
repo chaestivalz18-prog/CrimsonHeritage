@@ -755,6 +755,14 @@
       font-weight:900;
     }
 
+    .quick-stock-minus {
+      font-size:18px !important;
+    }
+
+    .quick-stock-plus {
+      font-size:17px !important;
+    }
+
     .stock-toolbar {
       display:flex;
       align-items:center;
@@ -3807,7 +3815,13 @@ function renderStockPage_(query) {
             >
             <button
               type="button"
-              class="btn btn-red quick-stock-btn"
+              class="btn btn-muted quick-stock-btn quick-stock-minus"
+              onclick="quickStockOut('${escapeAttr(item.id)}')"
+              title="Kurangi stok"
+            >−</button>
+            <button
+              type="button"
+              class="btn btn-red quick-stock-btn quick-stock-plus"
               onclick="quickAddStock('${escapeAttr(item.id)}')"
               title="Tambah stok"
             >+</button>
@@ -3891,6 +3905,39 @@ function quickAddStock(itemId) {
       handleServerError(error);
     })
     .quickStockIn(TOKEN, itemId, qty);
+}
+
+
+function quickStockOut(itemId) {
+  if (!USER || ['ADMIN', 'STAFF'].indexOf(String(USER.role || '').toUpperCase()) === -1) {
+    toast('Fitur ini hanya untuk ADMIN / STAFF.', 'error');
+    return;
+  }
+
+  const input = document.getElementById('quickStockQty_' + itemId);
+  const qty = Number(input ? input.value : 0);
+
+  if (!Number.isInteger(qty) || qty <= 0) {
+    toast('Jumlah stok harus berupa angka bulat lebih dari 0.', 'error');
+    return;
+  }
+
+  const buttons = document.querySelectorAll('.quick-stock-btn');
+  buttons.forEach(function(btn) { btn.disabled = true; });
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      toast(
+        result.message || ('Stok berhasil dikurangi −' + qty + '.'),
+        'success'
+      );
+      loadStockPage();
+    })
+    .withFailureHandler(function(error) {
+      buttons.forEach(function(btn) { btn.disabled = false; });
+      handleServerError(error);
+    })
+    .quickStockOut(TOKEN, itemId, qty);
 }
 
 
