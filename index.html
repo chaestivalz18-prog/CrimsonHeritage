@@ -2665,6 +2665,219 @@ html,body,button,input,select,textarea{
   .duplicate-row button{grid-column:1/-1;width:100%}
 }
 
+
+/* ==================================================
+   CRIMSON HERITAGE — LUXURY MOTION UPGRADE
+   Visual-only enhancement. No backend logic changed.
+================================================== */
+
+@keyframes crimsonAmbient {
+  0%   { transform: scale(1.02) translate3d(-1%, -0.5%, 0); opacity: .82; }
+  50%  { transform: scale(1.045) translate3d(0.5%, 0.5%, 0); opacity: .9; }
+  100% { transform: scale(1.02) translate3d(1%, -0.25%, 0); opacity: .82; }
+}
+
+@keyframes crimsonFadeUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes crimsonCardIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(.975);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes crimsonGlow {
+  0%, 100% { box-shadow: 0 10px 35px rgba(0,0,0,.18); }
+  50% { box-shadow: 0 14px 42px rgba(181,18,27,.12); }
+}
+
+@keyframes crimsonPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(181,18,27,0); }
+  50% { box-shadow: 0 0 0 5px rgba(181,18,27,.08); }
+}
+
+@keyframes crimsonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Background bergerak sangat halus */
+body::before {
+  animation: crimsonAmbient 18s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+/* Pergantian isi halaman terasa lebih smooth */
+#content > * {
+  animation: crimsonFadeUp .42s cubic-bezier(.2,.75,.25,1) both;
+}
+
+.item-card {
+  animation: crimsonCardIn .5s cubic-bezier(.2,.75,.25,1) both;
+  will-change: transform, opacity;
+}
+
+.item-card:nth-child(1) { animation-delay: .02s; }
+.item-card:nth-child(2) { animation-delay: .06s; }
+.item-card:nth-child(3) { animation-delay: .10s; }
+.item-card:nth-child(4) { animation-delay: .14s; }
+.item-card:nth-child(5) { animation-delay: .18s; }
+.item-card:nth-child(6) { animation-delay: .22s; }
+.item-card:nth-child(7) { animation-delay: .26s; }
+.item-card:nth-child(8) { animation-delay: .30s; }
+.item-card:nth-child(n+9) { animation-delay: .34s; }
+
+.item-card:hover {
+  animation-name: crimsonGlow;
+  animation-duration: 1.8s;
+  animation-iteration-count: infinite;
+}
+
+.item-icon {
+  transition: transform .28s cubic-bezier(.2,.75,.25,1),
+              box-shadow .28s ease,
+              background .28s ease;
+}
+
+.item-card:hover .item-icon {
+  transform: translateY(-2px) rotate(-2deg);
+  box-shadow: 0 0 22px rgba(181,18,27,.22);
+}
+
+/* Tombol terasa hidup saat hover/click */
+button,
+.btn,
+.nav-item {
+  transition:
+    transform .18s ease,
+    filter .18s ease,
+    box-shadow .22s ease,
+    background-color .22s ease,
+    border-color .22s ease,
+    color .22s ease;
+}
+
+button:hover,
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+button:active,
+.btn:active {
+  transform: translateY(1px) scale(.975);
+}
+
+.quick-stock-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-stock-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 25%,
+    rgba(255,255,255,.18) 48%,
+    transparent 70%
+  );
+  background-size: 220% 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.quick-stock-btn:hover::after {
+  opacity: 1;
+  animation: crimsonShimmer .8s ease forwards;
+}
+
+.quick-stock-plus:hover {
+  box-shadow: 0 0 18px rgba(227,38,49,.28);
+}
+
+.quick-stock-minus:hover {
+  box-shadow: 0 0 18px rgba(201,164,92,.18);
+}
+
+/* Input quick stock */
+.quick-stock-qty {
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease,
+    background .2s ease;
+}
+
+.quick-stock-qty:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(201,164,92,.07);
+}
+
+/* Sidebar navigation */
+.nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  border-radius: 4px;
+  background: var(--red2);
+  box-shadow: 0 0 12px rgba(227,38,49,.55);
+  transform: translateY(-50%);
+  transition: height .22s ease;
+}
+
+.nav-item:hover::before,
+.nav-item.active::before {
+  height: 60%;
+}
+
+/* Modal masuk/keluar */
+.modal.show .modal-box {
+  animation: crimsonFadeUp .32s cubic-bezier(.2,.75,.25,1) both;
+}
+
+/* Loading yang lebih halus */
+.loading,
+.loader,
+.spinner {
+  animation: crimsonPulse 1.5s ease-in-out infinite;
+}
+
+/* Hormati accessibility / user yang mematikan motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
 </style>
 </head>
 
@@ -8056,6 +8269,35 @@ document
     }
   );
 
+</script>
+
+
+<script>
+(function () {
+  function refreshCrimsonMotion(root) {
+    root = root || document;
+    var cards = root.querySelectorAll ? root.querySelectorAll('.item-card') : [];
+    cards.forEach(function (card, index) {
+      card.style.animationDelay = Math.min(index * 0.04, 0.34) + 's';
+      card.classList.remove('crimson-motion-ready');
+      void card.offsetWidth;
+      card.classList.add('crimson-motion-ready');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    refreshCrimsonMotion(document);
+
+    var content = document.getElementById('content');
+    if (!content || !window.MutationObserver) return;
+
+    var observer = new MutationObserver(function () {
+      refreshCrimsonMotion(content);
+    });
+
+    observer.observe(content, { childList: true, subtree: true });
+  });
+})();
 </script>
 
 </body>
