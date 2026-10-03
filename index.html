@@ -4043,8 +4043,14 @@ function loadPickupPage() {
 }
 
 
+function normalizeKasbonItemClient_(name) {
+  return String(name || '').trim().replace(/\s+/g, ' ').toUpperCase()
+    .replace(/^ROKOK\s*&\s*KOREK$/, 'ROKOK KOREK')
+    .replace(/^MAKAN\s*&\s*MINUM$/, 'PAKET MAKAN MINUM');
+}
+
 function getKasbonRateClient_(name) {
-  const key = String(name || '').trim().replace(/\s+/g, ' ').toUpperCase();
+  const key = normalizeKasbonItemClient_(name);
   const prices = {
     'ROKOK KOREK': 10000,
     'LIGHTER': 50000,
@@ -4059,16 +4065,17 @@ function getKasbonRateClient_(name) {
     'BOOMBOX': 0,
     'CERUTU': 15000,
     'IPRIDE': 0,
-    'SUPLEMEN': 8000
+    'SUPLEMEN': 8000,
+    'PAKET MAKAN MINUM': 1800
   };
-  return key === 'PAKET MAKAN MINUM' ? 1800 : (Object.prototype.hasOwnProperty.call(prices, key) ? prices[key] : 0);
+  return Object.prototype.hasOwnProperty.call(prices, key) ? prices[key] : 0;
 }
-
 
 function calculateKasbonClient_(name, qty) {
   const n = Number(qty) || 0;
-  if (String(name || '').trim().replace(/\s+/g, ' ').toUpperCase() === 'PAKET MAKAN MINUM') return (n / 10) * 18000;
-  return n * getKasbonRateClient_(name);
+  const key = normalizeKasbonItemClient_(name);
+  if (key === 'PAKET MAKAN MINUM') return (n / 10) * 18000;
+  return n * getKasbonRateClient_(key);
 }
 
 
