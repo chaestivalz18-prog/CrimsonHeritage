@@ -708,6 +708,53 @@
       color:#fff;
     }
 
+    .item-quick-stock {
+      display:flex;
+      align-items:center;
+      gap:7px;
+      margin-top:10px;
+      position:relative;
+      z-index:2;
+    }
+
+    .quick-stock-label {
+      color:#888;
+      font-size:8px;
+      font-weight:800;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      margin-right:auto;
+    }
+
+    .quick-stock-qty {
+      width:54px;
+      height:31px;
+      box-sizing:border-box;
+      padding:5px 7px;
+      border-radius:9px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.22);
+      color:#fff;
+      text-align:center;
+      font-size:11px;
+      font-weight:800;
+      outline:none;
+    }
+
+    .quick-stock-qty:focus {
+      border-color:rgba(201,164,92,.5);
+    }
+
+    .quick-stock-btn {
+      width:31px;
+      height:31px;
+      padding:0 !important;
+      border-radius:9px !important;
+      font-size:17px !important;
+      line-height:1 !important;
+      font-weight:900;
+    }
+
     .stock-toolbar {
       display:flex;
       align-items:center;
@@ -3720,6 +3767,11 @@ function loadStockPage() {
 
 function renderStockPage_(query) {
   const q = String(query || '').trim().toLowerCase();
+  const canQuickStock =
+    USER &&
+    ['ADMIN', 'STAFF'].indexOf(
+      String(USER.role || '').toUpperCase()
+    ) !== -1;
   const filtered = CURRENT_ITEMS.filter(function(item) {
     return String(item.name || '').toLowerCase().includes(q);
   });
@@ -3738,6 +3790,29 @@ function renderStockPage_(query) {
         <div class="item-stock-label">STOCK TERSEDIA</div>
         <div class="item-stock">${number(item.stock)}<span class="item-stock-unit">UNIT</span></div>
         <div class="item-min">Minimum stock: ${number(item.minimum)} pcs</div>
+
+        ${canQuickStock ? `
+          <div class="item-quick-stock">
+            <span class="quick-stock-label">TAMBAH STOK CEPAT</span>
+            <input
+              id="quickStockQty_${escapeAttr(item.id)}"
+              class="quick-stock-qty"
+              type="number"
+              min="1"
+              step="1"
+              value="1"
+              inputmode="numeric"
+              aria-label="Jumlah stok ${escapeAttr(item.name)}"
+              onkeydown="if(event.key === 'Enter'){ quickAddStock('${escapeAttr(item.id)}'); }"
+            >
+            <button
+              type="button"
+              class="btn btn-red quick-stock-btn"
+              onclick="quickAddStock('${escapeAttr(item.id)}')"
+              title="Tambah stok"
+            >+</button>
+          </div>
+        ` : ''}
 
         <div class="item-footer">
           <button
@@ -3783,6 +3858,39 @@ function renderStockPage_(query) {
       renderStockPage_(this.value);
     });
   }
+}
+
+
+function quickAddStock(itemId) {
+  if (!USER || ['ADMIN', 'STAFF'].indexOf(String(USER.role || '').toUpperCase()) === -1) {
+    toast('Fitur ini hanya untuk ADMIN / STAFF.', 'error');
+    return;
+  }
+
+  const input = document.getElementById('quickStockQty_' + itemId);
+  const qty = Number(input ? input.value : 0);
+
+  if (!Number.isInteger(qty) || qty <= 0) {
+    toast('Jumlah stok harus berupa angka bulat lebih dari 0.', 'error');
+    return;
+  }
+
+  const buttons = document.querySelectorAll('.quick-stock-btn');
+  buttons.forEach(function(btn) { btn.disabled = true; });
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      toast(
+        result.message || ('Stok berhasil ditambah +' + qty + '.'),
+        'success'
+      );
+      loadStockPage();
+    })
+    .withFailureHandler(function(error) {
+      buttons.forEach(function(btn) { btn.disabled = false; });
+      handleServerError(error);
+    })
+    .quickStockIn(TOKEN, itemId, qty);
 }
 
 
@@ -3957,64 +4065,117 @@ function loadPickupPage() {
 
   const privileged =
     USER &&
-    ['ADMIN', 'MANAGER', 'STAFF'].indexOf(String(USER.role || '').toUpperCase()) !== -1;
+    (
+      String(USER.role || '').toUpperCase() === 'ADMIN' ||
+      String(USER.role || '').toUpperCase() === 'MANAGER' ||
+      String(USER.role || '').toUpperCase() === 'STAFF'
+    );
 
-  const dataPromises = [getItemsPromise(), getStaffPromise()];
-  if (privileged) dataPromises.push(getMembersPromise());
+  const dataPromises = [
+    getItemsPromise(),
+    getStaffPromise()
+  ];
+
+  if (privileged) {
+    dataPromises.push(getMembersPromise());
+  }
 
   Promise.all(dataPromises)
     .then(function(results) {
+
       const items = results[0] || [];
       const staff = results[1] || [];
       const members = privileged ? (results[2] || []) : [];
 
-      let itemOptions = '<option value="">Pilih Barang</option>';
+      let itemOptions = '';
+      let staffOptions = '';
+      let memberOptions = '';
+
       items.forEach(function(item) {
-        itemOptions += `<option value="${escapeAttr(item.id)}" data-name="${escapeAttr(item.name)}" data-stock="${Number(item.stock) || 0}">${escapeHTML(item.name)} — Stock ${number(item.stock)}</option>`;
+        itemOptions += `
+          <option value="${escapeAttr(item.id)}">
+            ${escapeHTML(item.name)} — Stock ${number(item.stock)}
+          </option>
+        `;
       });
 
-      let staffOptions = '<option value="">Pilih ADMIN / MANAGER / STAFF</option>';
       staff.forEach(function(person) {
-        staffOptions += `<option value="${escapeAttr(person.id)}">${escapeHTML(person.nama)} — ${escapeHTML(person.role || '')}</option>`;
+        staffOptions += `
+          <option value="${escapeAttr(person.id)}">
+            ${escapeHTML(person.nama)} — ${escapeHTML(person.role || '')}
+          </option>
+        `;
       });
 
-      let memberOptions = '<option value="">Pilih Member</option>';
       if (privileged) {
-        members.filter(function(member) {
-          return String(member.status || '').toUpperCase() === 'ACTIVE';
-        }).forEach(function(member) {
-          memberOptions += `<option value="${escapeAttr(member.id)}">${escapeHTML(member.name)} — ${escapeHTML(member.rank || '-')}</option>`;
-        });
+        members
+          .filter(function(member) {
+            return String(member.status || '').toUpperCase() === 'ACTIVE';
+          })
+          .forEach(function(member) {
+            memberOptions += `
+              <option value="${escapeAttr(member.id)}">
+                ${escapeHTML(member.name)} — ${escapeHTML(member.rank || '-')}
+              </option>
+            `;
+          });
       }
 
       document.getElementById('content').innerHTML = `
+
         <div class="card">
-          <div class="section-title" style="margin-top:0">BARANG KELUAR & PENGAMBILAN</div>
-          <div style="color:#888;font-size:11px;margin-bottom:18px;line-height:1.6">
-            Tambahkan beberapa barang dalam satu pengambilan. Stock baru berkurang saat <b>ACC / PROSES</b> dan Kasbon otomatis dihitung berdasarkan daftar harga Kasbon.
+
+          <div class="section-title" style="margin-top:0">
+            BARANG KELUAR & PENGAMBILAN
           </div>
 
-          ${privileged ? `
+          <div style="color:#888;font-size:11px;margin-bottom:20px;line-height:1.6">
+            Satu transaksi untuk mencatat barang keluar sekaligus pengambilan.
+            Stock langsung berkurang dan transaksi langsung tercatat.
+          </div>
+
+          <div class="grid grid-2">
+
+            ${
+              privileged
+                ? `
+                  <div class="field">
+                    <label>Pengambil / Member</label>
+                    <select id="pickupMember">
+                      <option value="">Pilih Member</option>
+                      ${memberOptions}
+                    </select>
+                  </div>
+                `
+                : `
+                  <div class="field">
+                    <label>Pengambil / Member</label>
+                    <input value="${escapeAttr(USER.nama)}" disabled>
+                  </div>
+                `
+            }
+
             <div class="field">
-              <label>Pengambil / Member</label>
-              <select id="pickupMember">${memberOptions}</select>
+              <label>Barang</label>
+              <select id="pickupItem">
+                <option value="">Pilih Barang</option>
+                ${itemOptions}
+              </select>
             </div>
-          ` : `
+
             <div class="field">
-              <label>Pengambil / Member</label>
-              <input value="${escapeAttr(USER.nama)}" disabled>
+              <label>Jumlah</label>
+              <input id="pickupQty" type="number" min="1" placeholder="0">
             </div>
-          `}
 
-          <div id="pickupItems"></div>
+            <div class="field">
+              <label>Penyerah Barang</label>
+              <select id="pickupStaff">
+                <option value="">Pilih ADMIN / MANAGER / STAFF</option>
+                ${staffOptions}
+              </select>
+            </div>
 
-          <button class="btn btn-muted" type="button" onclick="addPickupRow()" style="margin-top:8px">
-            + TAMBAH BARANG
-          </button>
-
-          <div class="field" style="margin-top:16px">
-            <label>Penyerah Barang</label>
-            <select id="pickupStaff">${staffOptions}</select>
           </div>
 
           <div class="field">
@@ -4022,229 +4183,174 @@ function loadPickupPage() {
             <textarea id="pickupNote" placeholder="Keterangan pengambilan..."></textarea>
           </div>
 
-          <div id="pickupKasbonPreview" style="margin:15px 0"></div>
-
           <button class="btn btn-red" onclick="submitPickup()">
-            AJUKAN PENGAMBILAN
+            SIMPAN BARANG KELUAR
           </button>
+
         </div>
 
         <div id="pickupHistoryArea" style="margin-top:20px"></div>
+
       `;
 
-      window.PICKUP_ITEM_OPTIONS = itemOptions;
-      window.PICKUP_ITEMS = items;
-      addPickupRow();
+      if (privileged) {
+        loadPickupHistory();
+      } else {
+        loadMyPickupHistory();
+      }
 
-      if (privileged) loadPickupHistory();
-      else loadMyPickupHistory();
     })
     .catch(handleServerError);
 }
 
 
-function normalizeKasbonItemClient_(name) {
-  return String(name || '').trim().replace(/\s+/g, ' ').toUpperCase()
-    .replace(/^ROKOK\s*&\s*KOREK$/, 'ROKOK KOREK')
-    .replace(/^MAKAN\s*&\s*MINUM$/, 'PAKET MAKAN MINUM');
-}
-
-function getKasbonRateClient_(name) {
-  const key = normalizeKasbonItemClient_(name);
-  const prices = {
-    'ROKOK KOREK': 10000,
-    'LIGHTER': 50000,
-    'CROCKEY': 13000,
-    'SUSU': 1000,
-    'HP': 10000,
-    'RADIO': 10000,
-    'OLAHAN': 0,
-    'AMER': 0,
-    'CIU': 0,
-    'BEER': 0,
-    'BOOMBOX': 0,
-    'CERUTU': 15000,
-    'IPRIDE': 0,
-    'SUPLEMEN': 8000,
-    'PAKET MAKAN MINUM': 1800
-  };
-  return Object.prototype.hasOwnProperty.call(prices, key) ? prices[key] : 0;
-}
-
-function calculateKasbonClient_(name, qty) {
-  const n = Number(qty) || 0;
-  const key = normalizeKasbonItemClient_(name);
-  if (key === 'PAKET MAKAN MINUM') return (n / 10) * 18000;
-  return n * getKasbonRateClient_(key);
-}
-
-
-function formatIDRClient_(value) {
-  return 'Rp' + Number(value || 0).toLocaleString('id-ID');
-}
-
-
-function addPickupRow() {
-  const wrap = document.getElementById('pickupItems');
-  if (!wrap) return;
-
-  const rowId = 'pickupRow_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-  const div = document.createElement('div');
-  div.className = 'pickup-item-row';
-  div.id = rowId;
-  div.style.cssText = 'display:grid;grid-template-columns:minmax(0,1fr) 120px auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.025)';
-  div.innerHTML = `
-    <div class="field" style="margin:0">
-      <label>Barang</label>
-      <select class="pickup-item-select" onchange="updatePickupTotal()">${window.PICKUP_ITEM_OPTIONS || '<option value="">Pilih Barang</option>'}</select>
-      <div class="pickup-rate" style="font-size:10px;color:#888;margin-top:5px"></div>
-    </div>
-    <div class="field" style="margin:0">
-      <label>Jumlah</label>
-      <input class="pickup-qty-input" type="number" min="1" step="1" value="1" oninput="updatePickupTotal()">
-    </div>
-    <button class="btn btn-danger" type="button" onclick="removePickupRow('${rowId}')" style="padding:9px 12px">×</button>
-  `;
-  wrap.appendChild(div);
-  updatePickupTotal();
-}
-
-
-function removePickupRow(rowId) {
-  const row = document.getElementById(rowId);
-  if (row) row.remove();
-  const wrap = document.getElementById('pickupItems');
-  if (wrap && !wrap.children.length) addPickupRow();
-  updatePickupTotal();
-}
-
-
-function updatePickupTotal() {
-  const wrap = document.getElementById('pickupItems');
-  const preview = document.getElementById('pickupKasbonPreview');
-  if (!wrap || !preview) return;
-
-  let total = 0;
-  const details = [];
-
-  Array.from(wrap.querySelectorAll('.pickup-item-row')).forEach(function(row) {
-    const select = row.querySelector('.pickup-item-select');
-    const qtyInput = row.querySelector('.pickup-qty-input');
-    const rateEl = row.querySelector('.pickup-rate');
-    const opt = select && select.options[select.selectedIndex];
-    const name = opt ? opt.getAttribute('data-name') || opt.textContent.split('—')[0].trim() : '';
-    const qty = Number(qtyInput ? qtyInput.value : 0) || 0;
-    const amount = calculateKasbonClient_(name, qty);
-    total += amount;
-
-    if (rateEl) {
-      rateEl.textContent = name
-        ? (String(name).trim().replace(/\s+/g, ' ').toUpperCase() === 'PAKET MAKAN MINUM'
-          ? 'Tarif Kasbon: 10 pcs = Rp18.000'
-          : 'Tarif Kasbon: ' + formatIDRClient_(getKasbonRateClient_(name)) + ' / pcs')
-        : '';
-    }
-
-    if (name && qty > 0) details.push(escapeHTML(name) + ' × ' + number(qty) + ' = ' + formatIDRClient_(amount));
-  });
-
-  preview.innerHTML = `
-    <div style="padding:15px;border:1px solid rgba(201,164,92,.28);border-radius:12px;background:rgba(201,164,92,.06)">
-      <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.08em">Estimasi Kasbon Otomatis</div>
-      <div style="font-size:24px;font-weight:800;margin-top:5px">${formatIDRClient_(total)}</div>
-      <div style="font-size:10px;color:#888;margin-top:7px;line-height:1.6">${details.length ? details.join('<br>') : 'Pilih barang dan jumlah.'}</div>
-    </div>
-  `;
-}
-
-
-function collectPickupItems_() {
-  const wrap = document.getElementById('pickupItems');
-  const rows = wrap ? Array.from(wrap.querySelectorAll('.pickup-item-row')) : [];
-  const items = [];
-  const seen = {};
-
-  rows.forEach(function(row) {
-    const itemId = row.querySelector('.pickup-item-select').value;
-    const qty = Number(row.querySelector('.pickup-qty-input').value);
-    if (!itemId) throw new Error('Pilih semua barang terlebih dahulu.');
-    if (!Number.isInteger(qty) || qty <= 0) throw new Error('Jumlah barang harus angka bulat lebih dari 0.');
-    if (seen[itemId]) throw new Error('Barang yang sama dipilih lebih dari sekali. Gabungkan jumlahnya.');
-    seen[itemId] = true;
-    items.push({itemId:itemId, quantity:qty});
-  });
-
-  if (!items.length) throw new Error('Minimal satu barang harus dipilih.');
-  return items;
+/* Alias lama supaya link/page lama tidak rusak. */
+function loadStockOutPage() {
+  loadPickupPage();
 }
 
 
 function submitPickup() {
-  const privileged = USER && ['ADMIN','MANAGER','STAFF'].indexOf(String(USER.role || '').toUpperCase()) !== -1;
-  const memberEl = document.getElementById('pickupMember');
-  const member = privileged && memberEl ? memberEl.value : '';
+
+  const privileged =
+    USER &&
+    (
+      String(USER.role || '').toUpperCase() === 'ADMIN' ||
+      String(USER.role || '').toUpperCase() === 'MANAGER' ||
+      String(USER.role || '').toUpperCase() === 'STAFF'
+    );
+
+  const item = document.getElementById('pickupItem').value;
+  const qty = document.getElementById('pickupQty').value;
   const staff = document.getElementById('pickupStaff').value;
   const note = document.getElementById('pickupNote').value;
+  const member = privileged && document.getElementById('pickupMember')
+    ? document.getElementById('pickupMember').value
+    : '';
 
   if (privileged && !member) {
     toast('Pilih Member/Pengambil terlebih dahulu.', 'error');
     return;
   }
+
+  if (!item) {
+    toast('Pilih barang terlebih dahulu.', 'error');
+    return;
+  }
+
+  if (!qty || Number(qty) <= 0) {
+    toast('Jumlah harus lebih dari 0.', 'error');
+    return;
+  }
+
   if (!staff) {
     toast('Pilih ADMIN / MANAGER / STAFF sebagai penyerah.', 'error');
     return;
   }
 
-  let items;
-  try {
-    items = collectPickupItems_();
-  } catch (err) {
-    toast(err.message || 'Data barang belum lengkap.', 'error');
-    return;
-  }
-
   google.script.run
     .withSuccessHandler(function(result) {
-      toast(result.message || 'Pengambilan berhasil diajukan.', 'success');
+      toast(
+        result.message || 'Barang keluar berhasil dicatat.',
+        'success'
+      );
       loadPickupPage();
     })
     .withFailureHandler(handleServerError)
-    .addPickupBatch(TOKEN, items, staff, note, member);
+    .recordBarangKeluar(
+      TOKEN,
+      item,
+      qty,
+      staff,
+      note,
+      member
+    );
 }
 
 
 function loadPickupHistory() {
+
   google.script.run
     .withSuccessHandler(function(rows) {
+
       rows = rows || [];
+
       let html = `
         <div class="card">
-          <div class="section-title" style="margin-top:0">RIWAYAT BARANG KELUAR & PENGAMBILAN</div>
-          <div style="color:#888;font-size:10px;margin-bottom:15px">PENDING menunggu persetujuan. ACC / PROSES akan mengurangi stock dan otomatis menambahkan Kasbon.</div>
+          <div class="section-title" style="margin-top:0">
+            RIWAYAT BARANG KELUAR & PENGAMBILAN
+          </div>
+          <div style="color:#888;font-size:10px;margin-bottom:15px">
+            PENDING menunggu persetujuan. ACC / PROSES akan mengurangi stock dan mencatat transaksi.
+          </div>
       `;
 
       if (!rows.length) {
-        html += '<div class="empty">Belum ada transaksi barang keluar.</div>';
+        html += `<div class="empty">Belum ada transaksi barang keluar.</div>`;
       } else {
-        html += `<div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Pengambil</th><th>Barang</th><th>Qty</th><th>Penyerah</th><th>Status</th><th>Aksi</th></tr></thead><tbody>`;
+        html += `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Pengambil</th>
+                  <th>Barang</th>
+                  <th>Qty</th>
+                  <th>Penyerah</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
         rows.forEach(function(row) {
-          html += `<tr>
-            <td>${escapeHTML(row.timestamp)}</td>
-            <td>${escapeHTML(row.memberName)}</td>
-            <td>${escapeHTML(row.itemName)}</td>
-            <td>${number(row.qty)}</td>
-            <td>${escapeHTML(row.staffName)}</td>
-            <td>${statusBadge(row.status)}</td>
-            <td>${String(row.status || '').toUpperCase() === 'PENDING' ? `
-              <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button class="btn btn-green" style="padding:7px 9px;font-size:9px" onclick="processPickup('${escapeAttr(row.id)}')">ACC / PROSES</button>
-                <button class="btn btn-danger" style="padding:7px 9px;font-size:9px" onclick="cancelPickup('${escapeAttr(row.id)}')">BATAL</button>
-              </div>` : '-'}</td>
-          </tr>`;
+          html += `
+            <tr>
+              <td>${escapeHTML(row.timestamp)}</td>
+              <td>${escapeHTML(row.memberName)}</td>
+              <td>${escapeHTML(row.itemName)}</td>
+              <td>${number(row.qty)}</td>
+              <td>${escapeHTML(row.staffName)}</td>
+              <td>${statusBadge(row.status)}</td>
+              <td>
+                ${
+                  String(row.status || '').toUpperCase() === 'PENDING'
+                  ? `
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                      <button
+                        class="btn btn-green"
+                        style="padding:7px 9px;font-size:9px"
+                        onclick="processPickup('${escapeAttr(row.id)}')"
+                      >
+                        ACC / PROSES
+                      </button>
+
+                      <button
+                        class="btn btn-danger"
+                        style="padding:7px 9px;font-size:9px"
+                        onclick="cancelPickup('${escapeAttr(row.id)}')"
+                      >
+                        BATAL
+                      </button>
+                    </div>
+                  `
+                  : '-'
+                }
+              </td>
+            </tr>
+          `;
         });
-        html += '</tbody></table></div>';
+
+        html += `
+              </tbody>
+            </table>
+          </div>
+        `;
       }
-      html += '</div>';
+
+      html += `</div>`;
       document.getElementById('pickupHistoryArea').innerHTML = html;
     })
     .withFailureHandler(handleServerError)
@@ -4253,20 +4359,57 @@ function loadPickupHistory() {
 
 
 function loadMyPickupHistory() {
+
   google.script.run
     .withSuccessHandler(function(rows) {
+
       rows = rows || [];
-      let html = `<div class="card"><div class="section-title" style="margin-top:0">RIWAYAT BARANG KELUAR SAYA</div>`;
+
+      let html = `
+        <div class="card">
+          <div class="section-title" style="margin-top:0">
+            RIWAYAT BARANG KELUAR SAYA
+          </div>
+      `;
+
       if (!rows.length) {
-        html += '<div class="empty">Belum ada transaksi barang keluar.</div>';
+        html += `<div class="empty">Belum ada transaksi barang keluar.</div>`;
       } else {
-        html += `<div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Barang</th><th>Qty</th><th>Penyerah</th><th>Status</th></tr></thead><tbody>`;
+        html += `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Barang</th>
+                  <th>Qty</th>
+                  <th>Penyerah</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
         rows.forEach(function(row) {
-          html += `<tr><td>${escapeHTML(row.timestamp)}</td><td>${escapeHTML(row.itemName)}</td><td>${number(row.qty)}</td><td>${escapeHTML(row.staffName)}</td><td>${statusBadge(row.status)}</td></tr>`;
+          html += `
+            <tr>
+              <td>${escapeHTML(row.timestamp)}</td>
+              <td>${escapeHTML(row.itemName)}</td>
+              <td>${number(row.qty)}</td>
+              <td>${escapeHTML(row.staffName)}</td>
+              <td>${statusBadge(row.status)}</td>
+            </tr>
+          `;
         });
-        html += '</tbody></table></div>';
+
+        html += `
+              </tbody>
+            </table>
+          </div>
+        `;
       }
-      html += '</div>';
+
+      html += `</div>`;
       document.getElementById('pickupHistoryArea').innerHTML = html;
     })
     .withFailureHandler(handleServerError)
@@ -5883,14 +6026,14 @@ function processPickup(id) {
 
   google.script.run
 
-    .withSuccessHandler(function(result) {
+    .withSuccessHandler(function() {
 
       toast(
-        result && result.message ? result.message : 'Pickup berhasil diproses.',
+        'Pickup berhasil diproses.',
         'success'
       );
 
-      loadPickupPage();
+      loadHistoryPage();
 
     })
 
@@ -5909,14 +6052,14 @@ function cancelPickup(id) {
 
   google.script.run
 
-    .withSuccessHandler(function(result) {
+    .withSuccessHandler(function() {
 
       toast(
-        result && result.message ? result.message : 'Pickup dibatalkan.',
+        'Pickup dibatalkan.',
         'success'
       );
 
-      loadPickupPage();
+      loadHistoryPage();
 
     })
 
