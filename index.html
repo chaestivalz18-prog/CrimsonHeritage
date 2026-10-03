@@ -2665,63 +2665,92 @@ html,body,button,input,select,textarea{
   .duplicate-row button{grid-column:1/-1;width:100%}
 }
 
+</style>
+
+<style>
 
 /* ==================================================
-   CRIMSON HERITAGE — LIGHT MOTION
-   Ringan: hanya opacity/transform, tanpa blur/glow berulang.
+   CRIMSON HERITAGE — LUXURY SMOOTH MOTION
+   Ringan: transform + opacity saja.
 ================================================== */
 
-@keyframes lightFadeUp {
-  from { opacity: 0; transform: translateY(7px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes chSmoothIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes lightBg {
-  0%, 100% { opacity: .82; }
-  50% { opacity: .88; }
+@keyframes chSmoothModal {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-/* Background sangat pelan dan ringan */
-body::before {
-  animation: lightBg 12s ease-in-out infinite;
-}
-
-/* Konten masuk sekali saja */
+/* Konten masuk halus */
 #content > * {
-  animation: lightFadeUp .24s ease-out both;
+  animation: chSmoothIn .22s ease-out both;
 }
 
-/* Card: hanya transform + opacity */
+/* Card muncul berurutan */
 .item-card {
-  animation: lightFadeUp .28s ease-out both;
-  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  animation: chSmoothIn .24s ease-out both;
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease;
 }
 
 .item-card:nth-child(1) { animation-delay: .01s; }
-.item-card:nth-child(2) { animation-delay: .03s; }
-.item-card:nth-child(3) { animation-delay: .05s; }
-.item-card:nth-child(4) { animation-delay: .07s; }
-.item-card:nth-child(5) { animation-delay: .09s; }
-.item-card:nth-child(6) { animation-delay: .11s; }
-.item-card:nth-child(7) { animation-delay: .13s; }
-.item-card:nth-child(8) { animation-delay: .15s; }
-.item-card:nth-child(n+9) { animation-delay: .17s; }
+.item-card:nth-child(2) { animation-delay: .025s; }
+.item-card:nth-child(3) { animation-delay: .04s; }
+.item-card:nth-child(4) { animation-delay: .055s; }
+.item-card:nth-child(5) { animation-delay: .07s; }
+.item-card:nth-child(6) { animation-delay: .085s; }
+.item-card:nth-child(7) { animation-delay: .10s; }
+.item-card:nth-child(8) { animation-delay: .115s; }
+.item-card:nth-child(n+9) { animation-delay: .13s; }
 
+/* Hover elegan, tanpa glow berat */
 .item-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 13px 34px rgba(0,0,0,.24);
 }
 
+/* Tombol terasa responsif */
 button,
 .btn,
-.nav-item {
-  transition: transform .12s ease, filter .12s ease, background-color .15s ease;
+.nav-item,
+.item-edit,
+.quick-stock-btn {
+  transition:
+    transform .14s ease,
+    filter .14s ease,
+    background-color .16s ease,
+    border-color .16s ease;
+}
+
+button:hover,
+.btn:hover {
+  filter: brightness(1.04);
 }
 
 button:active,
-.btn:active {
+.btn:active,
+.quick-stock-btn:active {
   transform: scale(.98);
 }
 
+/* Icon mengikuti hover secara sangat kecil */
 .item-icon {
   transition: transform .16s ease;
 }
@@ -2730,22 +2759,18 @@ button:active,
   transform: translateY(-1px);
 }
 
+/* Input */
 .quick-stock-qty {
-  transition: border-color .15s ease, box-shadow .15s ease;
+  transition:
+    border-color .15s ease,
+    background-color .15s ease;
 }
 
 .quick-stock-qty:focus {
-  box-shadow: 0 0 0 2px rgba(201,164,92,.06);
+  background: rgba(255,255,255,.035);
 }
 
-.quick-stock-btn {
-  transition: transform .12s ease, filter .12s ease;
-}
-
-.quick-stock-btn:hover {
-  filter: brightness(1.06);
-}
-
+/* Sidebar */
 .nav-item {
   position: relative;
 }
@@ -2760,18 +2785,27 @@ button:active,
   border-radius: 4px;
   background: var(--red2);
   transform: translateY(-50%);
-  transition: height .16s ease;
+  transition: height .15s ease;
 }
 
 .nav-item:hover::before,
 .nav-item.active::before {
-  height: 55%;
+  height: 52%;
 }
 
+/* Modal */
 .modal.show .modal-box {
-  animation: lightFadeUp .2s ease-out both;
+  animation: chSmoothModal .18s ease-out both;
 }
 
+/* Jangan animasikan terus-menerus elemen berat */
+body::before,
+.loader-logo,
+.loader-line::after {
+  animation: none !important;
+}
+
+/* Aksesibilitas */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -8173,9 +8207,6 @@ document
   );
 
 </script>
-
-
-
 
 </body>
 </html>
