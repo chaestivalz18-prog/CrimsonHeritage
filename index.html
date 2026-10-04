@@ -3893,6 +3893,267 @@ html,body,button,input,select,textarea{
 }
 </style>
 
+
+<style id="royal-heritage-theme">
+:root{
+  --bg:#050505 !important;
+  --panel:rgba(14,13,11,.94) !important;
+  --panel2:rgba(24,21,17,.84) !important;
+  --red:#c99a55 !important;
+  --red2:#f0c980 !important;
+  --gold:#d8ad68 !important;
+  --text:#fff8e9 !important;
+  --muted:#a99a83 !important;
+  --border:rgba(216,173,104,.28) !important;
+  --green:#8fbc8f !important;
+  --yellow:#e1bd72 !important;
+  --danger:#d98978 !important;
+}
+
+/* Royal / palace atmosphere */
+body{
+  background:
+    radial-gradient(circle at 50% -10%,rgba(216,173,104,.10),transparent 35%),
+    radial-gradient(circle at 0% 100%,rgba(216,173,104,.055),transparent 28%),
+    #050505 !important;
+}
+body::before{
+  border-color:rgba(216,173,104,.13) !important;
+  box-shadow:inset 0 0 0 1px rgba(216,173,104,.05);
+}
+
+/* Fine royal framing around the application */
+.app-shell,
+.login-card,
+.card,
+.modal,
+.panel,
+.stat-card,
+.table-wrap,
+.section-card{
+  border-color:rgba(216,173,104,.26) !important;
+}
+
+.app-shell{
+  position:relative;
+}
+.app-shell::before{
+  content:"";
+  position:fixed;
+  inset:10px;
+  pointer-events:none;
+  z-index:999;
+  border:1px solid rgba(216,173,104,.10);
+  box-shadow:
+    inset 0 0 0 1px rgba(216,173,104,.035),
+    0 0 45px rgba(216,173,104,.025);
+}
+
+/* Elegant corner ornaments */
+.app-shell::after{
+  content:"✦";
+  position:fixed;
+  top:17px;
+  right:20px;
+  color:rgba(240,201,128,.65);
+  font-size:13px;
+  pointer-events:none;
+  z-index:1000;
+  text-shadow:0 0 14px rgba(216,173,104,.35);
+}
+
+/* Cards: thin gold keyline, no bulky yellow */
+.card,.stat-card,.panel,.section-card{
+  background:
+    linear-gradient(145deg,rgba(255,248,233,.018),rgba(216,173,104,.025)),
+    var(--panel) !important;
+  box-shadow:
+    0 18px 55px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,248,233,.035) !important;
+  position:relative;
+}
+.card::before,.stat-card::before,.panel::before,.section-card::before{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border:1px solid rgba(216,173,104,.07);
+  pointer-events:none;
+  border-radius:inherit;
+}
+
+/* Royal headings and dividers */
+h1,h2,h3,.section-title,.page-title,.login-title{
+  color:var(--text) !important;
+}
+.section-title::after,.page-title::after{
+  background:linear-gradient(90deg,transparent,var(--gold),transparent) !important;
+}
+hr{
+  border-color:rgba(216,173,104,.18) !important;
+}
+
+/* Buttons */
+.btn-red,.btn-primary,.primary-btn{
+  background:linear-gradient(135deg,#9b6b37,#d8ad68 55%,#f0c980) !important;
+  color:#171109 !important;
+  border-color:rgba(240,201,128,.6) !important;
+  box-shadow:0 8px 24px rgba(216,173,104,.14) !important;
+}
+.btn-red:hover,.btn-primary:hover,.primary-btn:hover{
+  filter:brightness(1.08);
+  box-shadow:0 10px 30px rgba(216,173,104,.22) !important;
+}
+button,.btn{
+  border-color:rgba(216,173,104,.25);
+}
+.btn-outline,.btn-secondary{
+  border-color:rgba(216,173,104,.32) !important;
+  color:var(--gold) !important;
+  background:rgba(216,173,104,.045) !important;
+}
+
+/* Inputs */
+input,select,textarea{
+  background:rgba(7,7,7,.78) !important;
+  border-color:rgba(216,173,104,.20) !important;
+  color:var(--text) !important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(240,201,128,.65) !important;
+  box-shadow:0 0 0 3px rgba(216,173,104,.08),0 0 22px rgba(216,173,104,.08) !important;
+}
+
+/* Sidebar / navigation */
+.sidebar,.side-nav,.nav{
+  background:linear-gradient(180deg,#080706,#050505) !important;
+  border-color:rgba(216,173,104,.20) !important;
+}
+.sidebar a,.nav a,.menu-item{
+  color:#bdb09b !important;
+}
+.sidebar a:hover,.nav a:hover,.menu-item:hover,
+.sidebar a.active,.nav a.active,.menu-item.active{
+  color:#f3d39a !important;
+  background:rgba(216,173,104,.065) !important;
+  box-shadow:inset 2px 0 0 var(--gold) !important;
+}
+
+/* Login = palace entrance */
+#loginPage{
+  background:
+    radial-gradient(circle at 50% 35%,rgba(216,173,104,.08),transparent 30%),
+    #050505 !important;
+}
+.login-card{
+  background:linear-gradient(145deg,rgba(18,16,13,.97),rgba(7,7,7,.96)) !important;
+  border:1px solid rgba(216,173,104,.48) !important;
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.72),
+    0 0 55px rgba(216,173,104,.08),
+    inset 0 0 0 7px rgba(216,173,104,.035) !important;
+}
+.login-card::before{
+  content:"✦";
+  position:absolute;
+  top:12px;
+  left:15px;
+  color:#e7c17e;
+  opacity:.75;
+}
+.login-card::after{
+  content:"✦";
+  position:absolute;
+  top:12px;
+  right:15px;
+  color:#e7c17e;
+  opacity:.75;
+}
+.login-subtitle{
+  color:var(--gold) !important;
+}
+.login-title{
+  letter-spacing:4px !important;
+  text-shadow:0 0 22px rgba(216,173,104,.12);
+}
+
+/* Loader */
+.loader-logo{
+  filter:drop-shadow(0 0 30px rgba(216,173,104,.30)) !important;
+}
+.loader-line::after{
+  background:linear-gradient(90deg,#8f6234,#f0c980,#8f6234) !important;
+}
+.loader-subtitle{
+  color:var(--gold) !important;
+}
+
+/* Gold accents replacing aggressive crimson */
+.text-red,.red,.accent-red{
+  color:var(--gold) !important;
+}
+.border-red{
+  border-color:rgba(216,173,104,.38) !important;
+}
+.bg-red{
+  background:rgba(216,173,104,.09) !important;
+}
+
+/* Tables */
+table thead{
+  background:linear-gradient(180deg,rgba(216,173,104,.10),rgba(216,173,104,.035)) !important;
+}
+th{
+  color:#e8c98f !important;
+  border-bottom-color:rgba(216,173,104,.24) !important;
+}
+td{
+  border-bottom-color:rgba(216,173,104,.08) !important;
+}
+
+/* Badges / chips */
+.badge,.chip,.tag{
+  border-color:rgba(216,173,104,.24) !important;
+  background:rgba(216,173,104,.055) !important;
+  color:#e5c58c !important;
+}
+
+/* Subtle royal glow, not neon */
+.card:hover,.stat-card:hover{
+  border-color:rgba(216,173,104,.40) !important;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.42),
+    0 0 24px rgba(216,173,104,.055) !important;
+}
+
+/* Preserve mobile layout */
+@media(max-width:700px){
+  .app-shell::before{inset:5px}
+  .login-card{box-shadow:0 20px 60px rgba(0,0,0,.68),inset 0 0 0 5px rgba(216,173,104,.035) !important}
+}
+</style>
+
+<style id="imperial-luxury-upgrade">
+:root{--bg:#030303!important;--panel:rgba(12,11,9,.96)!important;--panel2:rgba(20,17,13,.90)!important;--red:#c69a58!important;--red2:#f4d69b!important;--gold:#d9b36a!important;--text:#fff9ed!important;--muted:#aa9a82!important;--border:rgba(217,179,106,.24)!important}
+body{background:radial-gradient(ellipse at 50% -15%,rgba(244,214,155,.13),transparent 34%),radial-gradient(ellipse at 100% 50%,rgba(217,179,106,.045),transparent 30%),linear-gradient(135deg,#020202,#080705 48%,#020202)!important}
+.app-shell::before{inset:12px!important;border:1px solid rgba(217,179,106,.18)!important;box-shadow:inset 0 0 0 5px rgba(217,179,106,.018),0 0 70px rgba(217,179,106,.035)!important}
+.app-shell::after{content:"✦  ◆  ✦"!important;top:18px!important;right:24px!important;letter-spacing:5px!important;color:rgba(244,214,155,.72)!important}
+.card,.stat-card,.panel,.section-card{border:1px solid rgba(217,179,106,.30)!important;border-radius:18px!important;background:linear-gradient(145deg,rgba(255,249,237,.025),transparent 42%),linear-gradient(180deg,rgba(19,16,12,.97),rgba(7,7,6,.97))!important;box-shadow:0 24px 70px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,249,237,.05),inset 0 0 35px rgba(217,179,106,.018)!important;position:relative}
+.card::before,.stat-card::before,.panel::before,.section-card::before{inset:6px!important;border:1px solid rgba(217,179,106,.095)!important;border-radius:13px!important}
+h1,h2,h3,.section-title,.page-title,.login-title{letter-spacing:1.5px!important;text-shadow:0 1px 18px rgba(217,179,106,.10)!important}.login-title{letter-spacing:5px!important}
+.section-title::after,.page-title::after{height:1px!important;background:linear-gradient(90deg,transparent,#8f6938,#f4d69b,#8f6938,transparent)!important;box-shadow:0 0 10px rgba(244,214,155,.16)!important}
+.btn-red,.btn-primary,.primary-btn{background:linear-gradient(135deg,#775027,#b88748 30%,#f0cd8c 52%,#b88748 75%,#704b27)!important;border:1px solid rgba(255,229,178,.58)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 9px 28px rgba(0,0,0,.45),0 0 18px rgba(217,179,106,.08)!important;color:#171109!important}
+input,select,textarea{border:1px solid rgba(217,179,106,.23)!important;box-shadow:inset 0 0 18px rgba(0,0,0,.35)!important}
+input:focus,select:focus,textarea:focus{border-color:rgba(244,214,155,.72)!important;box-shadow:0 0 0 1px rgba(217,179,106,.15),0 0 22px rgba(217,179,106,.10),inset 0 0 18px rgba(0,0,0,.38)!important}
+.sidebar,.side-nav,.nav{background:linear-gradient(180deg,rgba(15,13,10,.99),rgba(3,3,3,.99))!important;border-right-color:rgba(217,179,106,.24)!important;box-shadow:18px 0 55px rgba(0,0,0,.30)!important}
+.sidebar a:hover,.nav a:hover,.menu-item:hover,.sidebar a.active,.nav a.active,.menu-item.active{border-color:rgba(217,179,106,.16)!important;background:linear-gradient(90deg,rgba(217,179,106,.08),rgba(217,179,106,.015))!important;box-shadow:inset 2px 0 0 #d9b36a,0 0 18px rgba(217,179,106,.035)!important}
+#loginPage{background:radial-gradient(circle at 50% 42%,rgba(217,179,106,.11),transparent 24%),linear-gradient(135deg,#020202,#0a0805,#020202)!important}
+.login-card{border:1px solid rgba(244,214,155,.52)!important;background:linear-gradient(145deg,rgba(24,20,15,.98),rgba(5,5,4,.98))!important;box-shadow:0 40px 120px rgba(0,0,0,.80),0 0 80px rgba(217,179,106,.075),inset 0 0 0 1px rgba(255,249,237,.035),inset 0 0 0 8px rgba(217,179,106,.025)!important}
+.login-subtitle{letter-spacing:4px!important;color:#e4bd78!important}
+table thead{background:linear-gradient(90deg,rgba(217,179,106,.025),rgba(217,179,106,.10),rgba(217,179,106,.025))!important}
+th{color:#efd39b!important;letter-spacing:.7px!important}
+.card:hover,.stat-card:hover{transform:translateY(-2px);border-color:rgba(244,214,155,.43)!important;box-shadow:0 30px 80px rgba(0,0,0,.52),0 0 30px rgba(217,179,106,.075)!important}
+@media(max-width:700px){.app-shell::before{inset:5px!important}.card,.stat-card,.panel,.section-card{border-radius:15px!important}.card:hover,.stat-card:hover{transform:none!important}}
+</style>
 </head>
 
 <body>
