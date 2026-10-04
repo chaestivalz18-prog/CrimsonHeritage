@@ -4639,6 +4639,107 @@ function navButton(
    PAGE ROUTER
 ===================================================== */
 
+/* =====================================================
+   PAGE ROUTER — FAST NAVIGATION
+===================================================== */
+
+const PAGE_CACHE = Object.create(null);
+const CACHE_TTL = 15000;
+const CACHEABLE_PAGES = [
+  'dashboard',
+  'stock',
+  'finance',
+  'members',
+  'history',
+  'rules'
+];
+
+let CURRENT_PAGE = '';
+let PAGE_CACHE_OBSERVER = null;
+
+function isPageCacheable(page) {
+  return CACHEABLE_PAGES.indexOf(page) !== -1;
+}
+
+function getPageCache(page) {
+  const cached = PAGE_CACHE[page];
+
+  if (!cached) {
+    return null;
+  }
+
+  if (Date.now() - cached.time > CACHE_TTL) {
+    delete PAGE_CACHE[page];
+    return null;
+  }
+
+  return cached.html;
+}
+
+function savePageCache(page) {
+  if (!isPageCacheable(page)) {
+    return;
+  }
+
+  const content = document.getElementById('content');
+
+  if (!content) {
+    return;
+  }
+
+  const html = content.innerHTML;
+
+  if (!html || html.indexOf('MEMUAT DATA...') !== -1) {
+    return;
+  }
+
+  PAGE_CACHE[page] = {
+    html: html,
+    time: Date.now()
+  };
+}
+
+function clearPageCache() {
+  Object.keys(PAGE_CACHE).forEach(function(page) {
+    delete PAGE_CACHE[page];
+  });
+}
+
+function clearSpecificPageCache() {
+  for (let i = 0; i < arguments.length; i++) {
+    delete PAGE_CACHE[arguments[i]];
+  }
+}
+
+function startPageCacheObserver(page) {
+  if (!isPageCacheable(page)) {
+    return;
+  }
+
+  const content = document.getElementById('content');
+
+  if (!content) {
+    return;
+  }
+
+  if (PAGE_CACHE_OBSERVER) {
+    PAGE_CACHE_OBSERVER.disconnect();
+  }
+
+  PAGE_CACHE_OBSERVER = new MutationObserver(function() {
+    setTimeout(function() {
+      if (CURRENT_PAGE === page && document.getElementById('content')) {
+        savePageCache(page);
+      }
+    }, 50);
+  });
+
+  PAGE_CACHE_OBSERVER.observe(content, {
+    childList: true,
+    subtree: true
+  });
+}
+
 function showPage(
   page,
   title
@@ -4662,98 +4763,91 @@ function showPage(
   const requiredPermission = protectedPermission[page];
 
   if (requiredPermission && !PERMISSIONS[requiredPermission]) {
-    toast('Akses ke halaman ini tidak tersedia untuk role ' + (USER && USER.role ? USER.role : '') + '.', 'error');
+    toast(
+      'Akses ke halaman ini tidak tersedia untuk role ' +
+      (USER && USER.role ? USER.role : '') + '.',
+      'error'
+    );
     return;
   }
 
-  document
-    .querySelectorAll('.nav-item')
-    .forEach(function(button) {
+  document.querySelectorAll('.nav-item').forEach(function(button) {
+    button.classList.toggle(
+      'active',
+      button.dataset.page === page
+    );
+  });
 
-      button.classList.toggle(
-        'active',
-        button.dataset.page === page
-      );
+  document.getElementById('pageTitle').textContent = title;
 
-    });
+  if (CURRENT_PAGE && isPageCacheable(CURRENT_PAGE)) {
+    savePageCache(CURRENT_PAGE);
+  }
 
-  document
-    .getElementById('pageTitle')
-    .textContent = title;
+  CURRENT_PAGE = page;
 
-  document
-    .getElementById('content')
-    .innerHTML =
-      loadingHTML();
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.remove('open');
+  }
 
-  document
-    .getElementById('sidebar')
-    .classList.remove('open');
+  const cachedHTML = getPageCache(page);
 
+  if (cachedHTML) {
+    document.getElementById('content').innerHTML = cachedHTML;
+    return;
+  }
+
+  document.getElementById('content').innerHTML = loadingHTML();
+
+  startPageCacheObserver(page);
 
   switch(page) {
-
     case 'dashboard':
       loadDashboardPage();
       break;
-
     case 'stock':
       loadStockPage();
       break;
-
     case 'stockin':
       loadStockInPage();
       break;
-
     case 'stockout':
       loadPickupPage();
       break;
-
     case 'pickup':
       loadPickupPage();
       break;
-
     case 'party':
       loadPartyPage();
       break;
-
     case 'kerjasama':
       loadPartnershipPage();
       break;
-
     case 'kasbon':
       loadKasbonPage();
       break;
-
     case 'finance':
       loadFinancePage();
       break;
-
     case 'members':
       loadMembersPage();
       break;
-
     case 'history':
       loadHistoryPage();
       break;
-
     case 'accounts':
       loadAccountsPage();
       break;
-
     case 'rules':
       loadRulesPage();
       break;
-
     case 'profile':
       loadProfilePage();
       break;
-
     default:
       loadDashboardPage();
-
   }
-
 }
 
 
