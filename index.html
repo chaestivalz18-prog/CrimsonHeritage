@@ -3837,6 +3837,17 @@ html,body,button,input,select,textarea{
 }
 </style>
 
+
+<style id="bearnad-single-background">
+/* Single hero background — foreground character removed */
+.bearnad-hero{
+  overflow:hidden !important;
+}
+.bearnad-character-pop{
+  display:none !important;
+}
+</style>
+
 </head>
 
 <body>
@@ -4991,12 +5002,7 @@ function loadDashboardPage() {
           class="bearnad-hero"
           style="--bearnad-welcome-bg:url('${BEARNAD_WELCOME}')"
         >
-
-          <div class="bearnad-character-pop" aria-hidden="true">
-            <img src="${BEARNAD_AVATAR}" alt="">
-          </div>
-
-          <div class="bearnad-hero-content">
+<div class="bearnad-hero-content">
 
             <img
               class="bearnad-logo"
