@@ -3162,6 +3162,93 @@ html,body,button,input,select,textarea{
   .bearnad-finance-note{grid-column:1/-1;grid-row:2}
 }
 
+
+
+/* =========================================================
+   BEARNAD CHARACTER POP-OUT — AVATAR BREAKS THE FRAME
+========================================================= */
+.bearnad-hero{
+  overflow:visible !important;
+  margin-bottom:76px !important;
+  isolation:isolate;
+}
+.bearnad-character-pop{
+  position:absolute;
+  left:-22px;
+  bottom:-82px;
+  width:min(49%,590px);
+  height:calc(100% + 82px);
+  z-index:4;
+  pointer-events:none;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  filter:drop-shadow(0 18px 22px rgba(0,0,0,.72)) drop-shadow(0 0 18px rgba(181,18,27,.16));
+}
+.bearnad-character-pop img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:calc(100% + 30px);
+  object-fit:contain;
+  object-position:center bottom;
+  transform:translateY(0) scale(1.07);
+  transform-origin:center bottom;
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.12));
+}
+.bearnad-character-pop::after{
+  content:"";
+  position:absolute;
+  left:10%;
+  right:10%;
+  bottom:30px;
+  height:90px;
+  background:radial-gradient(ellipse,rgba(181,18,27,.22),transparent 68%);
+  filter:blur(12px);
+  z-index:-1;
+}
+.bearnad-hero-content{
+  z-index:5 !important;
+}
+.bearnad-stat-grid{
+  position:relative;
+  z-index:6;
+}
+@media(max-width:820px){
+  .bearnad-hero{margin-bottom:58px !important;}
+  .bearnad-character-pop{
+    left:-12px;
+    bottom:-62px;
+    width:58%;
+    height:calc(100% + 62px);
+  }
+  .bearnad-character-pop img{transform:scale(1.03);}
+  .bearnad-hero-content{
+    position:relative;
+    z-index:7 !important;
+  }
+}
+@media(max-width:560px){
+  .bearnad-hero{margin-bottom:38px !important;}
+  .bearnad-character-pop{
+    left:-18px;
+    bottom:-38px;
+    width:62%;
+    height:calc(100% + 38px);
+    opacity:.96;
+  }
+  .bearnad-character-pop img{transform:scale(1);}
+  .bearnad-hero-content{
+    width:72% !important;
+    margin-left:auto !important;
+    padding-left:28px !important;
+    padding-top:145px !important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .bearnad-character-pop img{transform:none;}
+}
+
 </style>
 </head>
 
@@ -4317,6 +4404,10 @@ function loadDashboardPage() {
           class="bearnad-hero"
           style="--bearnad-welcome-bg:url('${BEARNAD_WELCOME}')"
         >
+
+          <div class="bearnad-character-pop" aria-hidden="true">
+            <img src="${BEARNAD_AVATAR}" alt="">
+          </div>
 
           <div class="bearnad-hero-content">
 
