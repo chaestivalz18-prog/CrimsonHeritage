@@ -8939,16 +8939,22 @@ function deleteUserConfirm(id) {
 
 let CURRENT_PARTNERS = [];
 let CURRENT_PARTNER = null;
+let CURRENT_PARTNERSHIP_ITEMS = [];
 
 function loadPartnershipPage() {
-  google.script.run
-    .withSuccessHandler(function(partners) {
-      if (CURRENT_PAGE !== 'kerjasama') return;
-      CURRENT_PARTNERS = partners || [];
-      renderPartnershipPage_();
-    })
-    .withFailureHandler(handleServerError)
-    .getPartners(TOKEN);
+  let loaded = 0;
+  let partners = [];
+  let items = [];
+  function done() {
+    loaded++;
+    if (loaded < 2 || CURRENT_PAGE !== 'kerjasama') return;
+    CURRENT_PARTNERS = partners || [];
+    CURRENT_PARTNERSHIP_ITEMS = (items || []).filter(function(item){ return item && item.id && item.name; });
+    renderPartnershipPage_();
+    if (CURRENT_PARTNER) refreshPartnerPurchases_();
+  }
+  google.script.run.withSuccessHandler(function(data){ partners=data||[]; done(); }).withFailureHandler(handleServerError).getPartners(TOKEN);
+  google.script.run.withSuccessHandler(function(data){ items=data||[]; done(); }).withFailureHandler(handleServerError).getItemsPublic(TOKEN);
 }
 
 function renderPartnershipPage_() {
@@ -8987,11 +8993,15 @@ function selectPartner(id) {
   if (!partner) return;
   CURRENT_PARTNER = partner;
   renderPartnershipPage_();
+  bindPartnershipCalculators_();
   refreshPartnerPurchases_();
 }
 
 function partnershipDetailHTML_(partner) {
   const disabled = String(partner.status).toUpperCase() === 'NONAKTIF' ? 'disabled' : '';
+  const itemOptions = (CURRENT_PARTNERSHIP_ITEMS || []).map(function(item) {
+    return `<option value="${escapeAttr(item.id)}">${escapeHTML(item.name)}</option>`;
+  }).join('');
   return `
     <div class="card">
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
@@ -9008,28 +9018,35 @@ function partnershipDetailHTML_(partner) {
       </div>
     </div>
 
+    <div id="partnerFinanceSummary" style="margin-top:15px"></div>
     <div class="grid grid-2" style="margin-top:15px">
       <div class="partnership-direction">
         <h3>📦 PEMBELIAN KITA <span style="color:#777;font-weight:400">— barang dari partner</span></h3>
         <div class="grid grid-2">
-          <div class="field"><label>Nama Barang</label><input id="pbItem" placeholder="Contoh: Air Mineral" ${disabled}></div>
+          <div class="field"><label>Nama Barang Crimson Heritage</label><select id="pbItem" ${disabled}><option value="">Pilih barang...</option>${itemOptions}</select></div>
           <div class="field"><label>Jumlah</label><input id="pbQty" type="number" min="1" placeholder="0" ${disabled}></div>
+          <div class="field"><label>Harga Satuan</label><input id="pbPrice" type="number" min="1" placeholder="Rp 0" ${disabled}></div>
+          <div class="field"><label>Total</label><input id="pbTotal" type="text" placeholder="Rp 0" readonly></div>
           <div class="field"><label>Tanggal</label><input id="pbDate" type="date" ${disabled}></div>
           <div class="field"><label>Keterangan</label><input id="pbNote" placeholder="Opsional" ${disabled}></div>
         </div>
         <button class="btn btn-red" onclick="savePartnerPurchase('BUY')" ${disabled}>SIMPAN PEMBELIAN KITA</button>
+        <div style="margin-top:7px;font-size:9px;color:#777">Otomatis: Stock bertambah + Finance UANG KELUAR.</div>
         <div id="partnerBuyHistory" style="margin-top:14px"></div>
       </div>
 
       <div class="partnership-direction">
         <h3>🛒 PEMBELIAN MEREKA <span style="color:#777;font-weight:400">— barang dari Crimson Heritage</span></h3>
         <div class="grid grid-2">
-          <div class="field"><label>Nama Item Crimson Heritage</label><input id="psItem" placeholder="Contoh: Produk A" ${disabled}></div>
+          <div class="field"><label>Nama Item Crimson Heritage</label><select id="psItem" ${disabled}><option value="">Pilih barang...</option>${itemOptions}</select></div>
           <div class="field"><label>Jumlah</label><input id="psQty" type="number" min="1" placeholder="0" ${disabled}></div>
+          <div class="field"><label>Harga Satuan</label><input id="psPrice" type="number" min="1" placeholder="Rp 0" ${disabled}></div>
+          <div class="field"><label>Total</label><input id="psTotal" type="text" placeholder="Rp 0" readonly></div>
           <div class="field"><label>Tanggal</label><input id="psDate" type="date" ${disabled}></div>
           <div class="field"><label>Keterangan</label><input id="psNote" placeholder="Opsional" ${disabled}></div>
         </div>
         <button class="btn btn-gold" onclick="savePartnerPurchase('SELL')" ${disabled}>SIMPAN PEMBELIAN MEREKA</button>
+        <div style="margin-top:7px;font-size:9px;color:#777">Otomatis: Stock berkurang + Finance UANG MASUK.</div>
         <div id="partnerSellHistory" style="margin-top:14px"></div>
       </div>
     </div>`;
@@ -9042,6 +9059,20 @@ function refreshPartnerPurchases_() {
     const sell = data && data.sell ? data.sell : [];
     const buyEl = document.getElementById('partnerBuyHistory');
     const sellEl = document.getElementById('partnerSellHistory');
+    const totalBuy = buy.reduce(function(sum,r){ return sum + (Number(r.totalAmount)||0); }, 0);
+    const totalSell = sell.reduce(function(sum,r){ return sum + (Number(r.totalAmount)||0); }, 0);
+    const summary = document.getElementById('partnerFinanceSummary');
+    if (summary) summary.innerHTML = `
+      <div class="grid grid-2" style="margin-bottom:12px">
+        <div class="card" style="padding:13px;border-left:3px solid var(--danger)">
+          <div style="font-size:9px;color:#888">UANG KELUAR • KITA MEMBELI</div>
+          <div style="font-size:17px;font-weight:900;margin-top:4px">${partnershipMoney_(totalBuy)}</div>
+        </div>
+        <div class="card" style="padding:13px;border-left:3px solid var(--green)">
+          <div style="font-size:9px;color:#888">UANG MASUK • MEREKA MEMBELI</div>
+          <div style="font-size:17px;font-weight:900;margin-top:4px">${partnershipMoney_(totalSell)}</div>
+        </div>
+      </div>`;
     if (buyEl) buyEl.innerHTML = purchaseHistoryHTML_(buy, 'Belum ada pembelian kita.');
     if (sellEl) sellEl.innerHTML = purchaseHistoryHTML_(sell, 'Belum ada pembelian mereka.');
   }).withFailureHandler(handleServerError).getPartnershipPurchases(TOKEN, CURRENT_PARTNER.id);
@@ -9049,9 +9080,30 @@ function refreshPartnerPurchases_() {
 
 function purchaseHistoryHTML_(rows, emptyText) {
   if (!rows.length) return `<div style="font-size:9px;color:#666;padding:10px 0">${emptyText}</div>`;
-  return `<div class="table-wrap"><table style="min-width:520px"><thead><tr><th>Item</th><th>Qty</th><th>Tanggal</th><th>Keterangan</th></tr></thead><tbody>` +
-    rows.map(function(r) { return `<tr><td>${escapeHTML(r.itemName)}</td><td>${number(r.qty)}</td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(r.note || '-')}</td></tr>`; }).join('') +
+  return `<div class="table-wrap"><table style="min-width:720px"><thead><tr><th>Item</th><th>Qty</th><th>Harga Satuan</th><th>Total</th><th>Tanggal</th><th>Keterangan</th></tr></thead><tbody>` +
+    rows.map(function(r) { return `<tr><td>${escapeHTML(r.itemName)}</td><td>${number(r.qty)}</td><td>Rp ${number(r.unitPrice)}</td><td><strong>Rp ${number(r.totalAmount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(r.note || '-')}</td></tr>`; }).join('') +
     `</tbody></table></div>`;
+}
+
+function partnershipMoney_(value) {
+  const n = Number(value) || 0;
+  return 'Rp ' + n.toLocaleString('id-ID');
+}
+
+function updatePartnershipTotal_(prefix) {
+  const qty = Number(document.getElementById(prefix + 'Qty')?.value || 0);
+  const price = Number(document.getElementById(prefix + 'Price')?.value || 0);
+  const total = document.getElementById(prefix + 'Total');
+  if (total) total.value = partnershipMoney_(qty * price);
+}
+
+function bindPartnershipCalculators_() {
+  ['pb','ps'].forEach(function(prefix) {
+    ['Qty','Price'].forEach(function(key) {
+      const el = document.getElementById(prefix + key);
+      if (el) el.addEventListener('input', function(){ updatePartnershipTotal_(prefix); });
+    });
+  });
 }
 
 function savePartnerPurchase(direction) {
@@ -9059,13 +9111,21 @@ function savePartnerPurchase(direction) {
   const prefix = direction === 'BUY' ? 'pb' : 'ps';
   const item = document.getElementById(prefix + 'Item').value;
   const qty = document.getElementById(prefix + 'Qty').value;
+  const price = document.getElementById(prefix + 'Price').value;
   const date = document.getElementById(prefix + 'Date').value;
   const note = document.getElementById(prefix + 'Note').value;
+  if (!item || !qty || !price || !date) {
+    toast('Barang, jumlah, harga satuan, dan tanggal wajib diisi.', 'error');
+    return;
+  }
   google.script.run.withSuccessHandler(function(result) {
     toast(result.message || 'Data berhasil disimpan.', 'success');
-    ['Item','Qty','Date','Note'].forEach(function(k){ const el=document.getElementById(prefix+k); if(el) el.value=''; });
+    ['Item','Qty','Price','Date','Note'].forEach(function(k){ const el=document.getElementById(prefix+k); if(el) el.value=''; });
+    const total=document.getElementById(prefix+'Total'); if(total) total.value='';
+    // Partnership mempengaruhi Stock + Finance, jadi cache halaman terkait dibersihkan.
+    if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','stock','finance','dashboard','history']);
     refreshPartnerPurchases_();
-  }).withFailureHandler(handleServerError).addPartnershipPurchase(TOKEN, direction, CURRENT_PARTNER.id, item, qty, date, note);
+  }).withFailureHandler(handleServerError).addPartnershipPurchase(TOKEN, direction, CURRENT_PARTNER.id, item, qty, price, date, note);
 }
 
 function openAddPartnerModal() {
