@@ -3809,6 +3809,34 @@ html,body,button,input,select,textarea{
 }
 </style>
 
+
+<style id="bearnad-dashboard-v2">
+/* Bearnad dashboard V2 — clean lower section */
+.bearnad-lower{
+  grid-template-columns:1fr !important;
+}
+.bearnad-panel{
+  width:100% !important;
+}
+</style>
+
+
+<style id="bearnad-stock-shortcut">
+.bearnad-stat .bearnad-shortcut-label{
+  margin-top:7px;
+  font-size:10px;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.52);
+}
+@media(max-width:480px){
+  .bearnad-stat .bearnad-shortcut-label{
+    font-size:9px;
+    letter-spacing:.8px;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -5051,13 +5079,8 @@ function loadDashboardPage() {
               <div class="bearnad-stat-label">
                 Stock Brangkas
               </div>
-            <div class="bearnad-stat-value">
-              ${number(stockTotal)}
-            </div>
-            <div class="bearnad-stat-note">
-              Total item tersimpan
-            </div>
-            </div>
+            <div class="bearnad-shortcut-label">Buka Stock Brangkas</div>
+</div>
           </div>
 
         </section>
@@ -5088,21 +5111,7 @@ function loadDashboardPage() {
             ${financeRows}
 
           </div>
-
-          <div class="bearnad-side">
-
-            <div
-              class="bearnad-brand-panel"
-              style="--bearnad-welcome-bg:url('${BEARNAD_WELCOME}')"
-            >
-              <div class="bearnad-brand-glow"></div>
-              <div class="bearnad-brand-mark">✦</div>
-              <img class="bearnad-brand-logo" src="${LOGO_1}" alt="Crimson Heritage">
-              <div class="bearnad-brand-title">CRIMSON HERITAGE</div>
-              <div class="bearnad-brand-rule">MORE THAN JUST A TEAM</div>
-            </div>
-
-          </div>
+</div>
 
         </section>
 
