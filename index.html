@@ -2676,12 +2676,12 @@ html,body,button,input,select,textarea{
 }
 /* Subtle cinematic motion for Bearnad welcome banner */
 @keyframes bearnadCinematicPan{
-  0%,100%{background-position:48% 50%;background-size:103% 103%;}
-  50%{background-position:52% 50%;background-size:106% 106%;}
+  0%,100%{background-position:48% 50%;}
+  50%{background-position:52% 50%;}
 }
 .bearnad-hero{
   animation:bearnadCinematicPan 14s ease-in-out infinite;
-  will-change:background-position,background-size;
+  will-change:background-position;
 }
 @media(max-width:750px){
   .bearnad-hero{animation-duration:18s;}
