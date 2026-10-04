@@ -3454,6 +3454,17 @@ html,body,button,input,select,textarea{
 @keyframes bearnadFloat{0%{transform:translateY(18px) translateX(0) scale(.7);opacity:0}20%{opacity:.75}100%{transform:translateY(-80px) translateX(15px) scale(1.1);opacity:0}}
 @media(prefers-reduced-motion:reduce){.bearnad-hero::after,.bearnad-hero .bearnad-animated-aura,.bearnad-hero .bearnad-particle{animation:none!important}}
 
+
+/* BEARNAD LIFE MOTION — subtle breathing + hair sway + blink */
+.bearnad-hero .bearnad-character-pop img{transform-origin:50% 78%;animation:bearnadLife 4.8s ease-in-out infinite}
+.bearnad-hero .bearnad-character-pop{filter:drop-shadow(0 0 18px rgba(190,20,30,.18))}
+.bearnad-hero .bearnad-character-pop::before{content:"";position:absolute;inset:8% 8% 20%;z-index:2;pointer-events:none;border-radius:48%;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.08) 47%,transparent 58%);background-size:220% 100%;animation:bearnadHairLight 7s ease-in-out infinite}
+@keyframes bearnadLife{0%,100%{transform:translate3d(0,0,0) scale(1) rotate(0deg)}25%{transform:translate3d(.4px,-1px,0) scale(1.006) rotate(-.18deg)}50%{transform:translate3d(0,0,0) scale(1.012) rotate(.12deg)}75%{transform:translate3d(-.4px,-.6px,0) scale(1.006) rotate(-.12deg)}}
+@keyframes bearnadHairLight{0%,65%{background-position:120% 0;opacity:0}72%{opacity:.35}86%{background-position:-25% 0;opacity:.18}100%{opacity:0}}
+/* Natural blink overlay; positioned over the eye region of the portrait */
+.bearnad-hero .bearnad-character-pop::after{content:"";position:absolute;left:36%;top:31%;width:23%;height:6%;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgba(8,8,10,.05),rgba(8,8,10,.78),rgba(8,8,10,.08));border-radius:50%;transform:scaleY(0);transform-origin:center;animation:bearnadBlink 6.8s ease-in-out infinite}
+@keyframes bearnadBlink{0%,88%,100%{transform:scaleY(0);opacity:0}90%{transform:scaleY(.35);opacity:.55}91%{transform:scaleY(1);opacity:.9}92%{transform:scaleY(0);opacity:0}}
+@media(prefers-reduced-motion:reduce){.bearnad-hero .bearnad-character-pop img,.bearnad-hero .bearnad-character-pop::before,.bearnad-hero .bearnad-character-pop::after{animation:none!important}}
 </style>
 
 <style id="bearnad-contained-character-final">
