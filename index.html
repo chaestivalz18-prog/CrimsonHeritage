@@ -3420,6 +3420,17 @@ html,body,button,input,select,textarea{
   .bearnad-stat-value{font-size:24px !important}
 }
 
+
+
+/* Ultra responsive navigation: never flash a full-page loader between menus. */
+#content.page-loading {
+  opacity: .94;
+  transition: opacity .08s ease;
+}
+#content:not(.page-loading) {
+  opacity: 1;
+  transition: opacity .12s ease;
+}
 </style>
 
 <style id="bearnad-contained-character-final">
@@ -4640,98 +4651,80 @@ function navButton(
 ===================================================== */
 
 /* =====================================================
-   PAGE ROUTER — FAST NAVIGATION
+   ULTRA RESPONSIVE PAGE ROUTER
+   - Never blanks the page while navigating.
+   - Keeps the previous content visible while Apps Script loads.
+   - Prevents a slow previous request from overwriting the newest page.
+   - Keeps a small HTML cache for instant revisits.
 ===================================================== */
-
 const PAGE_CACHE = Object.create(null);
-const CACHE_TTL = 15000;
-const CACHEABLE_PAGES = [
-  'dashboard',
-  'stock',
-  'finance',
-  'members',
-  'history',
-  'rules'
-];
-
+const PAGE_CACHE_TTL = 8000;
+const PAGE_CACHEABLE = new Set([
+  'dashboard', 'stock', 'finance', 'members', 'history', 'rules'
+]);
 let CURRENT_PAGE = '';
+let PAGE_NAV_SEQ = 0;
+let PAGE_LOADING = false;
 let PAGE_CACHE_OBSERVER = null;
+let PAGE_CACHE_SAVE_TIMER = null;
 
-function isPageCacheable(page) {
-  return CACHEABLE_PAGES.indexOf(page) !== -1;
-}
-
-function getPageCache(page) {
-  const cached = PAGE_CACHE[page];
-
-  if (!cached) {
-    return null;
-  }
-
-  if (Date.now() - cached.time > CACHE_TTL) {
+function pageCacheGet(page) {
+  if (!PAGE_CACHEABLE.has(page)) return null;
+  const item = PAGE_CACHE[page];
+  if (!item) return null;
+  if (Date.now() - item.time > PAGE_CACHE_TTL) {
     delete PAGE_CACHE[page];
     return null;
   }
-
-  return cached.html;
+  return item.html;
 }
 
-function savePageCache(page) {
-  if (!isPageCacheable(page)) {
-    return;
-  }
-
+function pageCacheSave(page) {
+  if (!PAGE_CACHEABLE.has(page)) return;
   const content = document.getElementById('content');
-
-  if (!content) {
-    return;
-  }
-
-  const html = content.innerHTML;
-
-  if (!html || html.indexOf('MEMUAT DATA...') !== -1) {
-    return;
-  }
-
+  if (!content || !content.innerHTML.trim()) return;
   PAGE_CACHE[page] = {
-    html: html,
+    html: content.innerHTML,
     time: Date.now()
   };
 }
 
-function clearPageCache() {
-  Object.keys(PAGE_CACHE).forEach(function(page) {
+function pageCacheClear() {
+  Object.keys(PAGE_CACHE).forEach(function(key) {
+    delete PAGE_CACHE[key];
+  });
+}
+
+function pageCacheClearPages() {
+  Array.prototype.slice.call(arguments).forEach(function(page) {
     delete PAGE_CACHE[page];
   });
 }
 
-function clearSpecificPageCache() {
-  for (let i = 0; i < arguments.length; i++) {
-    delete PAGE_CACHE[arguments[i]];
-  }
+function setPageBusy_(busy) {
+  PAGE_LOADING = !!busy;
+  const content = document.getElementById('content');
+  if (content) content.classList.toggle('page-loading', !!busy);
 }
 
-function startPageCacheObserver(page) {
-  if (!isPageCacheable(page)) {
-    return;
-  }
-
-  const content = document.getElementById('content');
-
-  if (!content) {
-    return;
-  }
-
+function watchPageCache_(page) {
   if (PAGE_CACHE_OBSERVER) {
     PAGE_CACHE_OBSERVER.disconnect();
+    PAGE_CACHE_OBSERVER = null;
   }
+  clearTimeout(PAGE_CACHE_SAVE_TIMER);
+  PAGE_CACHE_SAVE_TIMER = null;
+
+  if (!PAGE_CACHEABLE.has(page)) return;
+
+  const content = document.getElementById('content');
+  if (!content) return;
 
   PAGE_CACHE_OBSERVER = new MutationObserver(function() {
-    setTimeout(function() {
-      if (CURRENT_PAGE === page && document.getElementById('content')) {
-        savePageCache(page);
-      }
-    }, 50);
+    clearTimeout(PAGE_CACHE_SAVE_TIMER);
+    PAGE_CACHE_SAVE_TIMER = setTimeout(function() {
+      if (CURRENT_PAGE === page) pageCacheSave(page);
+    }, 120);
   });
 
   PAGE_CACHE_OBSERVER.observe(content, {
@@ -4740,11 +4733,7 @@ function startPageCacheObserver(page) {
   });
 }
 
-function showPage(
-  page,
-  title
-) {
-
+function showPage(page, title) {
   const protectedPermission = {
     dashboard: 'dashboard',
     stock: 'stock',
@@ -4761,47 +4750,52 @@ function showPage(
   };
 
   const requiredPermission = protectedPermission[page];
-
   if (requiredPermission && !PERMISSIONS[requiredPermission]) {
-    toast(
-      'Akses ke halaman ini tidak tersedia untuk role ' +
-      (USER && USER.role ? USER.role : '') + '.',
-      'error'
-    );
+    toast('Akses ke halaman ini tidak tersedia untuk role ' + (USER && USER.role ? USER.role : '') + '.', 'error');
     return;
   }
 
-  document.querySelectorAll('.nav-item').forEach(function(button) {
-    button.classList.toggle(
-      'active',
-      button.dataset.page === page
-    );
-  });
+  const content = document.getElementById('content');
+  const previousPage = CURRENT_PAGE;
+  const navSeq = ++PAGE_NAV_SEQ;
 
-  document.getElementById('pageTitle').textContent = title;
-
-  if (CURRENT_PAGE && isPageCacheable(CURRENT_PAGE)) {
-    savePageCache(CURRENT_PAGE);
-  }
+  // Save the current page before switching away from it.
+  if (previousPage && previousPage !== page) pageCacheSave(previousPage);
 
   CURRENT_PAGE = page;
+  watchPageCache_(page);
 
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar) {
-    sidebar.classList.remove('open');
+  document.querySelectorAll('.nav-item').forEach(function(button) {
+    button.classList.toggle('active', button.dataset.page === page);
+  });
+
+  const pageTitle = document.getElementById('pageTitle');
+  if (pageTitle) pageTitle.textContent = title;
+
+  document.getElementById('sidebar').classList.remove('open');
+
+  // IMPORTANT: do NOT replace content with a full loading screen.
+  // Restore cached HTML instantly when available; otherwise keep the
+  // previous screen visible until the new data arrives.
+  const cached = pageCacheGet(page);
+  if (cached) {
+    content.innerHTML = cached;
+    // Stock has one dynamically attached search listener; rebuild it immediately.
+    if (page === 'stock' && typeof renderStockPage_ === 'function' && CURRENT_ITEMS && CURRENT_ITEMS.length) {
+      renderStockPage_('');
+    }
+  } else if (!content.innerHTML.trim()) {
+    content.innerHTML = loadingHTML();
   }
 
-  const cachedHTML = getPageCache(page);
+  setPageBusy_(true);
 
-  if (cachedHTML) {
-    document.getElementById('content').innerHTML = cachedHTML;
-    return;
+  function safeDone() {
+    if (navSeq === PAGE_NAV_SEQ) setPageBusy_(false);
   }
 
-  document.getElementById('content').innerHTML = loadingHTML();
-
-  startPageCacheObserver(page);
-
+  // Route-specific loaders. The existing functions remain untouched.
+  // A loader response is responsible for rendering its page as before.
   switch(page) {
     case 'dashboard':
       loadDashboardPage();
@@ -4813,8 +4807,6 @@ function showPage(
       loadStockInPage();
       break;
     case 'stockout':
-      loadPickupPage();
-      break;
     case 'pickup':
       loadPickupPage();
       break;
@@ -4847,8 +4839,19 @@ function showPage(
       break;
     default:
       loadDashboardPage();
+      break;
   }
+
+  // If a loader is synchronous, clear the busy state on the next frame.
+  // Async loaders that finish later will simply leave the visual content intact.
+  requestAnimationFrame(function() {
+    if (navSeq === PAGE_NAV_SEQ && content && content.innerHTML.trim()) {
+      pageCacheSave(page);
+      safeDone();
+    }
+  });
 }
+
 
 
 /* =====================================================
@@ -5018,6 +5021,7 @@ function loadDashboardPage() {
     runPromise('getItemsPublic', [TOKEN])
   ])
   .then(function(results) {
+      if (CURRENT_PAGE !== 'dashboard') return;
 
     const finance = results[0] || {
       saldo: 0,
@@ -5277,6 +5281,7 @@ function loadStockPage() {
 
   google.script.run
     .withSuccessHandler(function(items) {
+      if (CURRENT_PAGE !== 'stock') return;
       CURRENT_ITEMS = items || [];
       renderStockPage_('');
     })
@@ -5461,6 +5466,7 @@ function loadStockInPage() {
   google.script.run
 
     .withSuccessHandler(function(items) {
+      if (CURRENT_PAGE !== 'stockin') return;
 
       CURRENT_ITEMS =
         items || [];
@@ -5640,6 +5646,7 @@ function loadPickupPage() {
 
   Promise.all(dataPromises)
     .then(function(results) {
+      if (CURRENT_PAGE !== 'pickup') return;
 
       const items = results[0] || [];
       const staff = results[1] || [];
@@ -5983,6 +5990,7 @@ function loadPartyPage() {
 
   google.script.run
     .withSuccessHandler(function(rows) {
+      if (CURRENT_PAGE !== 'party') return;
 
       rows = rows || [];
 
@@ -6385,6 +6393,7 @@ function loadKasbonPage() {
     getKasbonHistoryPromise()
   ])
   .then(function(results) {
+      if (CURRENT_PAGE !== 'kasbon') return;
 
     const balances = results[0] || [];
     const history = results[1] || [];
@@ -6980,6 +6989,7 @@ function loadFinancePage() {
 
   runPromise('getKeuanganReport', [TOKEN])
     .then(function(report) {
+      if (CURRENT_PAGE !== 'finance') return;
       FINANCE_REPORT = report || {
         saldo: 0,
         history: []
@@ -7259,6 +7269,7 @@ function loadMembersPage() {
   google.script.run
 
     .withSuccessHandler(function(members) {
+      if (CURRENT_PAGE !== 'members') return;
 
       CURRENT_MEMBERS =
         members || [];
@@ -7415,6 +7426,7 @@ function loadHistoryPage() {
     getPickupHistoryPromise()
   ])
   .then(function(results) {
+      if (CURRENT_PAGE !== 'history') return;
 
     const transactions = results[0];
     const pickups = results[1];
@@ -7641,6 +7653,7 @@ function loadAccountsPage() {
   google.script.run
 
     .withSuccessHandler(function(users) {
+      if (CURRENT_PAGE !== 'accounts') return;
 
       CURRENT_USERS =
         users || [];
@@ -7780,6 +7793,7 @@ function loadProfilePage() {
   google.script.run
 
     .withSuccessHandler(function(profile) {
+      if (CURRENT_PAGE !== 'profile') return;
 
       document
         .getElementById('content')
@@ -8894,6 +8908,7 @@ let CURRENT_PARTNER = null;
 function loadPartnershipPage() {
   google.script.run
     .withSuccessHandler(function(partners) {
+      if (CURRENT_PAGE !== 'kerjasama') return;
       CURRENT_PARTNERS = partners || [];
       renderPartnershipPage_();
     })
@@ -9338,6 +9353,10 @@ function statusBadge(status) {
 
 }
 
+
+function invalidatePageCache() {
+  pageCacheClearPages.apply(null, arguments);
+}
 
 function loadingHTML() {
 
