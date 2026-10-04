@@ -3480,6 +3480,335 @@ html,body,button,input,select,textarea{
 }
 </style>
 
+
+<style id="bearnad-clean-layout-final">
+/* =========================================================
+   CRIMSON HERITAGE — BEARNAD DASHBOARD CLEAN LAYOUT
+   Visual-only refinement. Existing functions/API untouched.
+========================================================= */
+
+.bearnad-dashboard{
+  width:100% !important;
+  max-width:1240px !important;
+  margin:0 auto !important;
+  padding:0 4px 28px !important;
+  gap:14px !important;
+  box-sizing:border-box !important;
+}
+
+/* HERO — lebih proporsional, tidak terlalu tinggi */
+.bearnad-hero{
+  height:320px !important;
+  min-height:320px !important;
+  border-radius:10px !important;
+  margin:0 !important;
+  box-shadow:0 16px 40px rgba(0,0,0,.38),inset 0 0 55px rgba(0,0,0,.30) !important;
+}
+.bearnad-hero-content{
+  width:48% !important;
+  max-width:560px !important;
+  margin-right:14px !important;
+  padding:34px 32px 30px 20px !important;
+}
+.bearnad-kicker{
+  font-size:14px !important;
+  letter-spacing:1px !important;
+}
+.bearnad-name{
+  font-size:52px !important;
+  line-height:1 !important;
+  margin-top:7px !important;
+}
+.bearnad-fullname{
+  font-size:11px !important;
+  letter-spacing:3px !important;
+}
+.bearnad-divider{
+  width:190px !important;
+  margin:15px 0 12px !important;
+}
+.bearnad-desc{
+  font-size:12px !important;
+  line-height:1.55 !important;
+}
+.bearnad-logo{
+  width:56px !important;
+  height:56px !important;
+  right:20px !important;
+  top:18px !important;
+}
+
+/* 3 KARTU — benar-benar sejajar dan tidak saling tindih */
+.bearnad-stat-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:12px !important;
+  margin:0 !important;
+}
+
+.bearnad-stat{
+  min-width:0 !important;
+  min-height:116px !important;
+  height:116px !important;
+  padding:16px 16px !important;
+  display:grid !important;
+  grid-template-columns:48px minmax(0,1fr) 16px !important;
+  column-gap:13px !important;
+  align-items:center !important;
+  border-radius:8px !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+
+.bearnad-stat-icon{
+  position:static !important;
+  grid-column:1 !important;
+  grid-row:1 !important;
+  width:48px !important;
+  height:48px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+  font-size:23px !important;
+}
+
+.bearnad-stat-copy{
+  grid-column:2 !important;
+  grid-row:1 !important;
+  min-width:0 !important;
+  overflow:hidden !important;
+}
+
+.bearnad-stat-arrow{
+  position:static !important;
+  grid-column:3 !important;
+  grid-row:1 !important;
+  justify-self:end !important;
+  font-size:24px !important;
+  line-height:1 !important;
+}
+
+.bearnad-stat-label{
+  font-size:13px !important;
+  line-height:1.25 !important;
+  white-space:normal !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.bearnad-stat-value{
+  margin-top:7px !important;
+  font-size:24px !important;
+  line-height:1.05 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.bearnad-stat-note{
+  margin-top:4px !important;
+  font-size:9px !important;
+  line-height:1.2 !important;
+}
+
+/* PANEL BAWAH — lebih seimbang */
+.bearnad-lower{
+  display:grid !important;
+  grid-template-columns:minmax(0,1.75fr) minmax(280px,.85fr) !important;
+  gap:12px !important;
+  margin:0 !important;
+  align-items:stretch !important;
+}
+
+.bearnad-panel,
+.bearnad-brand-panel{
+  border-radius:8px !important;
+}
+
+.bearnad-panel{
+  min-height:236px !important;
+}
+
+.bearnad-panel-head{
+  min-height:66px !important;
+  padding:15px 18px !important;
+  box-sizing:border-box !important;
+}
+
+.bearnad-panel-title{
+  font-size:13px !important;
+  letter-spacing:.2px !important;
+}
+.bearnad-panel-sub{
+  font-size:8px !important;
+}
+
+.bearnad-finance-row{
+  grid-template-columns:88px 108px minmax(0,1fr) 112px !important;
+  gap:10px !important;
+  padding:13px 18px !important;
+  min-height:54px !important;
+  box-sizing:border-box !important;
+}
+.bearnad-finance-date,
+.bearnad-finance-type,
+.bearnad-finance-note,
+.bearnad-finance-amount{
+  min-width:0 !important;
+}
+.bearnad-finance-note{
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.bearnad-finance-amount{
+  white-space:nowrap !important;
+}
+
+.bearnad-side{
+  min-width:0 !important;
+  height:100% !important;
+}
+.bearnad-brand-panel{
+  min-height:236px !important;
+  height:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Desktop kecil */
+@media(max-width:1100px){
+  .bearnad-dashboard{
+    max-width:100% !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+  }
+  .bearnad-stat{
+    grid-template-columns:44px minmax(0,1fr) 14px !important;
+    column-gap:10px !important;
+    padding:14px !important;
+  }
+  .bearnad-stat-icon{
+    width:44px !important;
+    height:44px !important;
+    font-size:21px !important;
+  }
+  .bearnad-stat-value{
+    font-size:21px !important;
+  }
+}
+
+/* Tablet / HP */
+@media(max-width:820px){
+  .bearnad-dashboard{
+    gap:12px !important;
+    padding-bottom:20px !important;
+  }
+
+  .bearnad-hero{
+    height:360px !important;
+    min-height:360px !important;
+    margin:0 !important;
+  }
+
+  .bearnad-hero-content{
+    width:100% !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding:185px 24px 25px !important;
+    box-sizing:border-box !important;
+    background:linear-gradient(
+      180deg,
+      transparent 15%,
+      rgba(0,0,0,.60) 52%,
+      rgba(0,0,0,.92) 100%
+    ) !important;
+  }
+
+  .bearnad-name{
+    font-size:43px !important;
+  }
+
+  .bearnad-stat-grid{
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  .bearnad-stat{
+    height:96px !important;
+    min-height:96px !important;
+    grid-template-columns:46px minmax(0,1fr) 16px !important;
+  }
+
+  .bearnad-lower{
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  .bearnad-panel,
+  .bearnad-brand-panel{
+    min-height:220px !important;
+    height:auto !important;
+  }
+}
+
+@media(max-width:480px){
+  .bearnad-hero{
+    height:330px !important;
+    min-height:330px !important;
+  }
+
+  .bearnad-hero-content{
+    padding:155px 18px 22px !important;
+  }
+
+  .bearnad-name{
+    font-size:38px !important;
+  }
+
+  .bearnad-fullname{
+    font-size:9px !important;
+    letter-spacing:2.2px !important;
+  }
+
+  .bearnad-logo{
+    width:48px !important;
+    height:48px !important;
+    right:14px !important;
+    top:14px !important;
+  }
+
+  .bearnad-stat{
+    height:92px !important;
+    min-height:92px !important;
+    padding:12px !important;
+  }
+
+  .bearnad-stat-value{
+    font-size:20px !important;
+  }
+
+  .bearnad-panel-head{
+    padding:13px 14px !important;
+  }
+
+  .bearnad-finance-row{
+    grid-template-columns:76px minmax(0,1fr) 100px !important;
+    gap:8px !important;
+    padding:11px 14px !important;
+  }
+
+  .bearnad-finance-note{
+    grid-column:2/-1 !important;
+    grid-row:2 !important;
+  }
+}
+
+/* Reduce motion */
+@media(prefers-reduced-motion:reduce){
+  .bearnad-hero,
+  .bearnad-stat{
+    animation:none !important;
+    transition:none !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
