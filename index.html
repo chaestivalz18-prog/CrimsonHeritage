@@ -4154,6 +4154,143 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 .card:hover,.stat-card:hover{transform:translateY(-2px);border-color:rgba(244,214,155,.43)!important;box-shadow:0 30px 80px rgba(0,0,0,.52),0 0 30px rgba(217,179,106,.075)!important}
 @media(max-width:700px){.app-shell::before{inset:5px!important}.card,.stat-card,.panel,.section-card{border-radius:15px!important}.card:hover,.stat-card:hover{transform:none!important}}
 </style>
+<style id="bearnad-full-bleed-upgrade">
+
+/* =========================================================
+   BEARNAD — FULL BLEED / CINEMATIC POP-OUT
+   Visual-only override. Login, data, functions and structure untouched.
+========================================================= */
+.bearnad-hero{
+  position:relative !important;
+  min-height:430px !important;
+  height:430px !important;
+  margin:0 0 34px !important;
+  border:0 !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+  background-size:cover !important;
+  background-position:center center !important;
+  box-shadow:none !important;
+  isolation:isolate !important;
+}
+
+/* Remove the old inner frame completely. */
+.bearnad-hero::after{
+  display:none !important;
+}
+
+/* Full cinematic fade: keeps text readable without putting a frame over the image. */
+.bearnad-hero::before{
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  background:
+    linear-gradient(90deg,
+      rgba(0,0,0,.08) 0%,
+      rgba(0,0,0,.05) 34%,
+      rgba(0,0,0,.32) 57%,
+      rgba(0,0,0,.76) 100%),
+    linear-gradient(180deg,
+      rgba(0,0,0,.02) 0%,
+      rgba(0,0,0,0) 48%,
+      rgba(0,0,0,.70) 100%) !important;
+}
+
+/* Let the artwork feel larger and closer instead of sitting inside a card. */
+.bearnad-hero{
+  background-size:110% auto !important;
+  background-repeat:no-repeat !important;
+}
+
+/* Soft cinematic glow at the bottom; no visible box edge. */
+.bearnad-hero .bearnad-animated-aura{
+  z-index:1 !important;
+  opacity:.72 !important;
+  pointer-events:none !important;
+}
+
+.bearnad-hero .bearnad-particles{
+  z-index:3 !important;
+}
+
+.bearnad-hero-content{
+  position:relative !important;
+  z-index:6 !important;
+  width:min(53%,680px) !important;
+  margin-left:auto !important;
+  padding:54px 54px 48px 24px !important;
+}
+
+.bearnad-name{
+  font-size:62px !important;
+  text-shadow:0 4px 28px rgba(0,0,0,.88) !important;
+}
+
+.bearnad-fullname,
+.bearnad-kicker,
+.bearnad-desc,
+.bearnad-divider{
+  filter:drop-shadow(0 3px 12px rgba(0,0,0,.72));
+}
+
+/* Logo floats over the artwork instead of looking pinned inside a frame. */
+.bearnad-logo{
+  right:34px !important;
+  top:30px !important;
+  z-index:7 !important;
+  filter:drop-shadow(0 0 18px rgba(201,164,92,.30)) !important;
+}
+
+/* Pull the stats visually closer to the artwork while keeping them separate. */
+.bearnad-stat-grid{
+  position:relative !important;
+  z-index:8 !important;
+  margin-top:0 !important;
+}
+
+@media(max-width:820px){
+  .bearnad-hero{
+    min-height:390px !important;
+    height:390px !important;
+    margin-bottom:28px !important;
+    background-size:125% auto !important;
+    background-position:center center !important;
+  }
+  .bearnad-hero-content{
+    width:62% !important;
+    padding:48px 26px 34px 18px !important;
+  }
+  .bearnad-name{font-size:48px !important;}
+}
+
+@media(max-width:560px){
+  .bearnad-hero{
+    min-height:360px !important;
+    height:360px !important;
+    margin-bottom:24px !important;
+    background-size:145% auto !important;
+    background-position:center 42% !important;
+  }
+  .bearnad-hero-content{
+    width:68% !important;
+    margin-left:auto !important;
+    padding:126px 16px 24px 16px !important;
+  }
+  .bearnad-name{font-size:42px !important;}
+  .bearnad-fullname{font-size:10px !important;letter-spacing:2.5px !important;}
+  .bearnad-kicker{font-size:10px !important;letter-spacing:1.8px !important;}
+  .bearnad-divider{width:150px !important;margin:14px 0 10px !important;}
+  .bearnad-desc{font-size:12px !important;}
+  .bearnad-logo{right:14px !important;top:18px !important;width:64px !important;height:64px !important;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .bearnad-hero .bearnad-animated-aura,
+  .bearnad-hero .bearnad-particle{animation:none !important;}
+}
+</style>
 </head>
 
 <body>
