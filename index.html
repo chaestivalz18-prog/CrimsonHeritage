@@ -11,17 +11,17 @@
 
   <style>
     :root {
-      --bg: #050505;
-      --panel: rgba(16,15,13,.90);
-      --panel2: rgba(29,25,20,.76);
-      --red: #b77a3e;
-      --red2: #e6b86a;
-      --gold: #d8a15f;
-      --text: #f7f1e7;
+      --bg: #080808;
+      --panel: rgba(18,18,18,.88);
+      --panel2: rgba(28,28,28,.72);
+      --red: #b5121b;
+      --red2: #e32631;
+      --gold: #c9a45c;
+      --text: #f5f5f5;
       --muted: #929292;
-      --border: rgba(216,161,95,.14);
+      --border: rgba(255,255,255,.08);
       --green: #37c978;
-      --yellow: #e7c77e;
+      --yellow: #e5b94d;
       --danger: #ef4d5a;
       --sidebar: 250px;
     }
@@ -77,7 +77,7 @@
         center 52% / min(620px, 55vw) auto no-repeat;
       opacity: .34;
       mix-blend-mode: screen;
-      filter: saturate(1.35) drop-shadow(0 0 35px rgba(216,161,95,.35));
+      filter: saturate(1.35) drop-shadow(0 0 35px rgba(181,18,27,.35));
       z-index: 0;
       pointer-events: none;
     }
@@ -88,7 +88,7 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 48%, rgba(216,161,95,.07), transparent 34%),
+        radial-gradient(circle at 50% 48%, rgba(181,18,27,.07), transparent 34%),
         linear-gradient(rgba(0,0,0,.66), rgba(0,0,0,.78));
       z-index: 0;
       pointer-events: none;
@@ -112,7 +112,7 @@
       background:
         radial-gradient(
           circle at 50% 45%,
-          rgba(216,161,95,.12),
+          rgba(181,18,27,.12),
           transparent 32%
         ),
         linear-gradient(
@@ -140,7 +140,7 @@
       height: 130px;
       object-fit: contain;
       animation: pulse 2s infinite;
-      filter: drop-shadow(0 0 30px rgba(216,161,95,.45));
+      filter: drop-shadow(0 0 30px rgba(181,18,27,.45));
     }
 
     .loader-title {
@@ -207,7 +207,7 @@
       border-radius: 24px;
       box-shadow:
         0 30px 100px rgba(0,0,0,.65),
-        0 0 50px rgba(216,161,95,.08);
+        0 0 50px rgba(181,18,27,.08);
     }
 
     .login-logo {
@@ -271,8 +271,8 @@
     .field input:focus,
     .field select:focus,
     .field textarea:focus {
-      border-color: rgba(216,161,95,.75);
-      box-shadow: 0 0 0 3px rgba(216,161,95,.09);
+      border-color: rgba(181,18,27,.75);
+      box-shadow: 0 0 0 3px rgba(181,18,27,.09);
     }
 
     select option {
@@ -297,7 +297,7 @@
     .btn-primary {
       width: 100%;
       background: linear-gradient(135deg, var(--red), #720a10);
-      box-shadow: 0 8px 30px rgba(216,161,95,.2);
+      box-shadow: 0 8px 30px rgba(181,18,27,.2);
     }
 
     .btn-red {
@@ -419,8 +419,8 @@
       background:
         linear-gradient(
           90deg,
-          rgba(216,161,95,.25),
-          rgba(216,161,95,.04)
+          rgba(181,18,27,.25),
+          rgba(181,18,27,.04)
         );
       border-left: 2px solid var(--red2);
     }
@@ -450,9 +450,9 @@
 
     .logout {
       width: 100%;
-      background: rgba(216,161,95,.12);
-      border: 1px solid rgba(216,161,95,.2);
-      color: #f0c98a;
+      background: rgba(181,18,27,.12);
+      border: 1px solid rgba(181,18,27,.2);
+      color: #ff737b;
       padding: 10px;
       border-radius: 10px;
       font-size: 11px;
@@ -531,7 +531,7 @@
     }
 
     .stat-red {
-      color: #d8a15f;
+      color: #ed4b55;
     }
 
     .stat-green {
@@ -560,7 +560,7 @@
       padding: 18px;
       border-radius: 18px;
       background:
-        linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018) 55%, rgba(216,161,95,.035));
+        linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018) 55%, rgba(181,18,27,.035));
       border-color: rgba(255,255,255,.075);
       box-shadow: 0 10px 35px rgba(0,0,0,.18);
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
@@ -585,7 +585,7 @@
       right: -45px;
       top: -45px;
       border-radius: 50%;
-      background: rgba(216,161,95,.10);
+      background: rgba(181,18,27,.10);
       filter: blur(2px);
       pointer-events: none;
     }
@@ -594,7 +594,7 @@
       transform: translateY(-4px);
       border-color: rgba(201,164,92,.28);
       background:
-        linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.022) 55%, rgba(216,161,95,.055));
+        linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.022) 55%, rgba(181,18,27,.055));
       box-shadow: 0 16px 42px rgba(0,0,0,.32);
     }
 
@@ -627,8 +627,8 @@
       align-items:center;
       justify-content:center;
       border-radius:11px;
-      background:rgba(216,161,95,.13);
-      border:1px solid rgba(216,161,95,.2);
+      background:rgba(181,18,27,.13);
+      border:1px solid rgba(181,18,27,.2);
       color:#e34a52;
       font-size:15px;
     }
@@ -807,7 +807,7 @@
     }
 
     .stock-search::placeholder { color:#707070; }
-    .stock-search:focus { border-color:rgba(216,161,95,.75); box-shadow:0 0 0 3px rgba(216,161,95,.09); background:rgba(255,255,255,.055); }
+    .stock-search:focus { border-color:rgba(181,18,27,.75); box-shadow:0 0 0 3px rgba(181,18,27,.09); background:rgba(255,255,255,.055); }
 
     .stock-toolbar-info {
       color:#777;
@@ -1024,7 +1024,7 @@
     }
 
     .finance-out {
-      color: #d8a15f !important;
+      color: #ed4b55 !important;
       font-weight: 800;
     }
 
@@ -1045,7 +1045,7 @@
     }
 
     .income-dot { background: #4bd58c; }
-    .expense-dot { background: #d8a15f; }
+    .expense-dot { background: #ed4b55; }
 
     .finance-chart {
       min-height: 155px;
@@ -1080,7 +1080,7 @@
     }
 
     .finance-bar.income { background: #4bd58c; }
-    .finance-bar.expense { background: #d8a15f; }
+    .finance-bar.expense { background: #ed4b55; }
 
     .finance-day-label {
       margin-top: 7px;
@@ -1104,7 +1104,7 @@
       border-radius: 14px;
       background: linear-gradient(
         135deg,
-        rgba(216,161,95,.12),
+        rgba(181,18,27,.12),
         rgba(255,255,255,.025)
       );
     }
@@ -1155,8 +1155,8 @@
 
     .quick-card:hover {
       transform: translateY(-1px);
-      border-color: rgba(216,161,95,.45);
-      background: rgba(216,161,95,.08);
+      border-color: rgba(181,18,27,.45);
+      background: rgba(181,18,27,.08);
     }
 
     .quick-icon {
@@ -1166,8 +1166,8 @@
       display: grid;
       place-items: center;
       border-radius: 10px;
-      background: rgba(216,161,95,.13);
-      color: #f0c98a;
+      background: rgba(181,18,27,.13);
+      color: #ff737b;
       font-size: 18px;
       font-weight: 800;
     }
@@ -1246,8 +1246,8 @@
       transition:transform .2s ease,border-color .2s ease,background .2s ease;
     }
 
-    .partner-card:hover { transform:translateY(-2px); border-color:rgba(216,161,95,.45); }
-    .partner-card.active { border-color:rgba(216,161,95,.7); background:rgba(216,161,95,.09); }
+    .partner-card:hover { transform:translateY(-2px); border-color:rgba(181,18,27,.45); }
+    .partner-card.active { border-color:rgba(181,18,27,.7); background:rgba(181,18,27,.09); }
     .partner-name { color:#f2f2f2; font-weight:800; font-size:13px; letter-spacing:.2px; }
     .partner-meta { color:var(--muted); font-size:9px; margin-top:6px; }
 
@@ -1713,10 +1713,10 @@
   --mafia-black:#050505;
   --mafia-panel:rgba(13,13,13,.86);
   --mafia-red:#a90f19;
-  --mafia-red-bright:#c58a4a;
+  --mafia-red-bright:#df2632;
   --mafia-gold:#c8a45b;
   --mafia-line:rgba(201,164,92,.20);
-  --mafia-white:#f7f1e7;
+  --mafia-white:#f4f1eb;
 }
 
 /* Dashboard welcome = luxury hero */
@@ -1731,8 +1731,8 @@
   border:1px solid rgba(201,164,92,.24) !important;
   border-radius:20px !important;
   background:
-    radial-gradient(circle at 88% 45%, rgba(216,161,95,.20), transparent 28%),
-    linear-gradient(115deg, rgba(255,255,255,.045), rgba(255,255,255,.012) 55%, rgba(216,161,95,.08)) !important;
+    radial-gradient(circle at 88% 45%, rgba(181,18,27,.20), transparent 28%),
+    linear-gradient(115deg, rgba(255,255,255,.045), rgba(255,255,255,.012) 55%, rgba(181,18,27,.08)) !important;
   box-shadow:
     0 24px 60px rgba(0,0,0,.35),
     inset 0 0 0 1px rgba(255,255,255,.025) !important;
@@ -1743,7 +1743,7 @@
   left:0; top:0; bottom:0;
   width:4px;
   background:linear-gradient(180deg,var(--mafia-red-bright),var(--mafia-gold),transparent);
-  box-shadow:0 0 22px rgba(216,161,95,.55);
+  box-shadow:0 0 22px rgba(181,18,27,.55);
 }
 .welcome-card::after{
   content:"CH";
@@ -1832,19 +1832,19 @@
   transform:translateY(-4px) !important;
   border-color:rgba(201,164,92,.34) !important;
   background:
-    linear-gradient(145deg,rgba(255,255,255,.075),rgba(216,161,95,.045) 75%),
+    linear-gradient(145deg,rgba(255,255,255,.075),rgba(181,18,27,.045) 75%),
     rgba(10,10,10,.82) !important;
-  box-shadow:0 18px 44px rgba(0,0,0,.34),0 0 28px rgba(216,161,95,.08) !important;
+  box-shadow:0 18px 44px rgba(0,0,0,.34),0 0 28px rgba(181,18,27,.08) !important;
 }
 .quick-icon{
   width:44px !important;
   height:44px !important;
   flex-basis:44px !important;
   border-radius:13px !important;
-  background:linear-gradient(145deg,rgba(216,161,95,.24),rgba(216,161,95,.07)) !important;
-  border:1px solid rgba(216,161,95,.28) !important;
+  background:linear-gradient(145deg,rgba(181,18,27,.24),rgba(181,18,27,.07)) !important;
+  border:1px solid rgba(181,18,27,.28) !important;
   color:#f05a62 !important;
-  box-shadow:inset 0 0 18px rgba(216,161,95,.08),0 7px 20px rgba(0,0,0,.18) !important;
+  box-shadow:inset 0 0 18px rgba(181,18,27,.08),0 7px 20px rgba(0,0,0,.18) !important;
 }
 .quick-card:hover .quick-icon{
   border-color:rgba(201,164,92,.38) !important;
@@ -1882,7 +1882,7 @@
   position:absolute;
   left:0;right:0;bottom:0;
   height:1px;
-  background:linear-gradient(90deg,rgba(216,161,95,.65),rgba(201,164,92,.18),transparent 80%);
+  background:linear-gradient(90deg,rgba(181,18,27,.65),rgba(201,164,92,.18),transparent 80%);
 }
 .page-title{
   font-family:Georgia,"Times New Roman",serif !important;
@@ -2217,7 +2217,7 @@ body::-webkit-scrollbar-thumb{
 .type-kasbon {
   background:rgba(190,27,49,.13);
   border:1px solid rgba(208,37,60,.24);
-  color:#e9bf7b;
+  color:#ff7c8e;
 }
 
 .type-setoran {
@@ -2227,7 +2227,7 @@ body::-webkit-scrollbar-thumb{
 }
 
 .amount-kasbon {
-  color:#e9bf7b !important;
+  color:#ff7c8e !important;
   font-weight:800;
   white-space:nowrap;
 }
@@ -2477,8 +2477,8 @@ body::-webkit-scrollbar-thumb{
 }
 
 .rule-card:hover {
-  background: rgba(216,161,95,.055);
-  border-color: rgba(216,161,95,.22);
+  background: rgba(181,18,27,.055);
+  border-color: rgba(181,18,27,.22);
 }
 
 .rule-number {
@@ -2487,8 +2487,8 @@ body::-webkit-scrollbar-thumb{
   display: grid;
   place-items: center;
   border-radius: 7px;
-  background: rgba(216,161,95,.13);
-  border: 1px solid rgba(216,161,95,.22);
+  background: rgba(181,18,27,.13);
+  border: 1px solid rgba(181,18,27,.22);
   color: #e7c77e;
   font-size: 11px;
   font-weight: 800;
@@ -2566,7 +2566,7 @@ html,body,button,input,select,textarea{
   border:1px solid rgba(201,164,92,.25);
   border-radius:20px;
   background:
-    radial-gradient(circle at 88% 45%,rgba(216,161,95,.22),transparent 30%),
+    radial-gradient(circle at 88% 45%,rgba(181,18,27,.22),transparent 30%),
     linear-gradient(115deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
   box-shadow:0 20px 50px rgba(0,0,0,.30),inset 0 0 0 1px rgba(255,255,255,.025);
 }
@@ -2574,7 +2574,7 @@ html,body,button,input,select,textarea{
   content:"";
   position:absolute;
   left:0;top:0;bottom:0;width:4px;
-  background:linear-gradient(180deg,#c58a4a,#c8a45b,transparent);
+  background:linear-gradient(180deg,#df2632,#c8a45b,transparent);
 }
 .keuangan-balance-label{
   color:#c9a45c;
@@ -2583,7 +2583,7 @@ html,body,button,input,select,textarea{
 }
 .keuangan-balance-value{
   margin-top:7px;
-  color:#f7f1e7;
+  color:#f4f1eb;
   font:700 clamp(30px,5vw,46px) var(--ch-body-font);
   letter-spacing:-1px;
 }
@@ -2614,10 +2614,10 @@ html,body,button,input,select,textarea{
 }
 .finance-out-badge{
   background:rgba(239,77,90,.12);
-  color:#e6b86a;
+  color:#ff7882;
 }
 .finance-in{color:#62e39a !important;font-weight:700}
-.finance-out{color:#e6b86a !important;font-weight:700}
+.finance-out{color:#ff7882 !important;font-weight:700}
 .finance-delete-btn{padding:7px 10px !important;font-size:9px !important}
 .duplicate-card{margin-top:20px;border:1px solid rgba(239,77,90,.22)}
 .duplicate-clean{
@@ -2656,7 +2656,7 @@ html,body,button,input,select,textarea{
   font-size:10px;
 }
 .duplicate-row:first-of-type{border-top:0}
-.duplicate-row strong{display:block;color:#f7f1e7}
+.duplicate-row strong{display:block;color:#f4f1eb}
 .duplicate-row span{display:block;margin-top:3px;color:rgba(255,255,255,.38);font-size:9px}
 @media(max-width:750px){
   .keuangan-balance{padding:24px 22px}
@@ -2704,7 +2704,7 @@ html,body,button,input,select,textarea{
   border:1px solid rgba(201,164,92,.28);
   border-radius:10px;
   pointer-events:none;
-  box-shadow:inset 0 0 28px rgba(216,161,95,.12);
+  box-shadow:inset 0 0 28px rgba(181,18,27,.12);
 }
 .bearnad-portrait-wrap{display:none}
 .bearnad-portrait{display:none}
@@ -2750,12 +2750,12 @@ html,body,button,input,select,textarea{
 }
 .bearnad-desc::before{
   content:'“';
-  color:#d8a15f;
+  color:#d9b56c;
   margin-right:4px;
 }
 .bearnad-desc::after{
   content:'”';
-  color:#d8a15f;
+  color:#d9b56c;
   margin-left:2px;
 }
 .bearnad-logo{
@@ -2766,7 +2766,7 @@ html,body,button,input,select,textarea{
   height:82px;
   object-fit:contain;
   opacity:.9;
-  filter:drop-shadow(0 0 16px rgba(216,161,95,.38));
+  filter:drop-shadow(0 0 16px rgba(181,18,27,.38));
 }
 .bearnad-stat-grid{
   display:grid;
@@ -2781,13 +2781,13 @@ html,body,button,input,select,textarea{
   border:1px solid rgba(201,164,92,.30);
   border-radius:14px;
   background:linear-gradient(145deg,rgba(18,10,8,.82),rgba(5,5,5,.9));
-  box-shadow:inset 0 0 24px rgba(216,161,95,.05);
+  box-shadow:inset 0 0 24px rgba(181,18,27,.05);
   transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
 }
 .bearnad-stat:hover{
   transform:translateY(-2px);
   border-color:rgba(201,164,92,.55);
-  box-shadow:0 12px 30px rgba(0,0,0,.25),inset 0 0 26px rgba(216,161,95,.08);
+  box-shadow:0 12px 30px rgba(0,0,0,.25),inset 0 0 26px rgba(181,18,27,.08);
 }
 .bearnad-stat::before{
   content:"";
@@ -2803,7 +2803,7 @@ html,body,button,input,select,textarea{
   position:absolute;
   right:16px;
   bottom:10px;
-  color:rgba(216,161,95,.24);
+  color:rgba(181,18,27,.24);
   font-size:32px;
 }
 .bearnad-stat-label{
@@ -2815,7 +2815,7 @@ html,body,button,input,select,textarea{
 }
 .bearnad-stat-value{
   margin-top:10px;
-  color:#f6efe4;
+  color:#f2eee7;
   font-size:28px;
   font-weight:800;
 }
@@ -2835,7 +2835,7 @@ html,body,button,input,select,textarea{
   border-radius:15px;
   background:linear-gradient(145deg,rgba(12,8,7,.88),rgba(3,3,3,.92));
   overflow:hidden;
-  box-shadow:inset 0 0 35px rgba(216,161,95,.04);
+  box-shadow:inset 0 0 35px rgba(181,18,27,.04);
 }
 .bearnad-panel-head{
   display:flex;
@@ -2844,7 +2844,7 @@ html,body,button,input,select,textarea{
   padding:18px 20px;
   border-bottom:1px solid rgba(255,255,255,.055);
 }
-.bearnad-panel-title{color:#f6efe4;font-size:14px;font-weight:800}
+.bearnad-panel-title{color:#f2eee7;font-size:14px;font-weight:800}
 .bearnad-panel-sub{margin-top:4px;color:rgba(255,255,255,.4);font-size:9px}
 .bearnad-finance-row{
   display:grid;
@@ -2858,19 +2858,19 @@ html,body,button,input,select,textarea{
 .bearnad-finance-date{color:rgba(255,255,255,.48);font-size:9px}
 .bearnad-finance-type{font-size:9px;font-weight:800}
 .bearnad-finance-type.in{color:#69d59a}
-.bearnad-finance-type.out{color:#d8a15f}
+.bearnad-finance-type.out{color:#ed5962}
 .bearnad-finance-note{color:rgba(255,255,255,.68);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bearnad-finance-amount{text-align:right;font-size:11px;font-weight:800}
 .bearnad-finance-amount.in{color:#69d59a}
-.bearnad-finance-amount.out{color:#d8a15f}
+.bearnad-finance-amount.out{color:#ed5962}
 .bearnad-side{display:flex;flex-direction:column;gap:18px}
 .bearnad-kasbon{
   min-height:250px;
   padding:24px;
-  border:1px solid rgba(216,161,95,.38);
+  border:1px solid rgba(181,18,27,.38);
   border-radius:15px;
   background:
-    radial-gradient(circle at 90% 10%,rgba(216,161,95,.24),transparent 34%),
+    radial-gradient(circle at 90% 10%,rgba(181,18,27,.24),transparent 34%),
     linear-gradient(145deg,rgba(48,7,10,.65),rgba(5,5,5,.92));
   position:relative;
   overflow:hidden;
@@ -2880,7 +2880,7 @@ html,body,button,input,select,textarea{
   position:absolute;
   right:20px;
   top:18px;
-  color:rgba(216,161,95,.30);
+  color:rgba(181,18,27,.30);
   font-size:54px;
 }
 .bearnad-kasbon-label{color:rgba(255,255,255,.52);font-size:10px;letter-spacing:1.6px;font-weight:800}
@@ -2942,7 +2942,7 @@ html,body,button,input,select,textarea{
   inset:9px;
   border-radius:0;
   border-color:rgba(201,164,92,.24);
-  box-shadow:inset 0 0 38px rgba(216,161,95,.16);
+  box-shadow:inset 0 0 38px rgba(181,18,27,.16);
 }
 .bearnad-hero-content{
   width:52%;
@@ -2998,9 +2998,9 @@ html,body,button,input,select,textarea{
   border-radius:0;
   border:1px solid rgba(201,164,92,.38);
   background:
-    radial-gradient(circle at 7% 50%,rgba(216,161,95,.18),transparent 28%),
+    radial-gradient(circle at 7% 50%,rgba(181,18,27,.18),transparent 28%),
     linear-gradient(145deg,rgba(15,8,7,.96),rgba(2,2,2,.96));
-  box-shadow:inset 0 0 28px rgba(216,161,95,.08),0 8px 26px rgba(0,0,0,.24);
+  box-shadow:inset 0 0 28px rgba(181,18,27,.08),0 8px 26px rgba(0,0,0,.24);
   cursor:pointer;
 }
 .bearnad-stat::before{
@@ -3010,22 +3010,22 @@ html,body,button,input,select,textarea{
   content:"";
   position:absolute;
   inset:7px;
-  border:1px solid rgba(216,161,95,.16);
+  border:1px solid rgba(181,18,27,.16);
   pointer-events:none;
-  background:linear-gradient(135deg,transparent 0 88%,rgba(216,161,95,.15) 88% 89%,transparent 89%);
+  background:linear-gradient(135deg,transparent 0 88%,rgba(181,18,27,.15) 88% 89%,transparent 89%);
 }
 .bearnad-stat-icon{
   position:absolute;
   left:22px;top:31px;
   width:58px;height:58px;
-  border:1px solid rgba(216,161,95,.72);
+  border:1px solid rgba(181,18,27,.72);
   border-radius:50%;
   display:grid;place-items:center;
-  color:#f0d39b;
+  color:#ead09c;
   font-family:Georgia,serif;
   font-size:28px;font-weight:700;
-  background:radial-gradient(circle,rgba(216,161,95,.18),rgba(0,0,0,.45));
-  box-shadow:0 0 18px rgba(216,161,95,.16),inset 0 0 18px rgba(216,161,95,.12);
+  background:radial-gradient(circle,rgba(181,18,27,.18),rgba(0,0,0,.45));
+  box-shadow:0 0 18px rgba(181,18,27,.16),inset 0 0 18px rgba(181,18,27,.12);
   z-index:2;
 }
 .bearnad-stat-arrow{
@@ -3042,7 +3042,7 @@ html,body,button,input,select,textarea{
   font-size:17px;
   letter-spacing:.2px;
   text-transform:none;
-  color:#f0d39b;
+  color:#ead09c;
 }
 .bearnad-stat-value{
   margin-top:10px;
@@ -3072,7 +3072,7 @@ html,body,button,input,select,textarea{
   font-family:Georgia,serif;
   font-size:14px;
   letter-spacing:.5px;
-  color:#efcf92;
+  color:#e8cd94;
 }
 .bearnad-panel-sub{display:none}
 .bearnad-finance-row{
@@ -3102,32 +3102,32 @@ html,body,button,input,select,textarea{
   border-radius:0;
   background:
     linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.76)),
-    radial-gradient(circle at 75% 25%,rgba(216,161,95,.32),transparent 28%),
+    radial-gradient(circle at 75% 25%,rgba(181,18,27,.32),transparent 28%),
     var(--bearnad-welcome-bg) center 58%/cover no-repeat;
-  box-shadow:inset 0 0 45px rgba(216,161,95,.16),0 12px 32px rgba(0,0,0,.28);
+  box-shadow:inset 0 0 45px rgba(181,18,27,.16),0 12px 32px rgba(0,0,0,.28);
 }
 .bearnad-brand-panel::before{
   content:"";position:absolute;inset:9px;border:1px solid rgba(201,164,92,.22);pointer-events:none;
 }
 .bearnad-brand-glow{
   position:absolute;inset:-25%;
-  background:radial-gradient(circle at 72% 28%,rgba(216,161,95,.25),transparent 26%);
+  background:radial-gradient(circle at 72% 28%,rgba(181,18,27,.25),transparent 26%);
   pointer-events:none;
 }
 .bearnad-brand-mark{
   position:absolute;top:28px;left:50%;transform:translateX(-50%);
-  color:#b77a3e;font-size:58px;line-height:1;
-  text-shadow:0 0 24px rgba(216,161,95,.52);
+  color:#b5121b;font-size:58px;line-height:1;
+  text-shadow:0 0 24px rgba(181,18,27,.52);
 }
 .bearnad-brand-logo{
   position:relative;z-index:2;width:74px;height:74px;object-fit:contain;opacity:.94;
-  filter:drop-shadow(0 0 18px rgba(216,161,95,.35));
+  filter:drop-shadow(0 0 18px rgba(181,18,27,.35));
   margin-bottom:8px;
 }
 .bearnad-brand-title{
   position:relative;z-index:2;
   font-family:Georgia,serif;
-  font-size:17px;letter-spacing:4px;color:#efcf92;
+  font-size:17px;letter-spacing:4px;color:#e8cd94;
   text-align:center;
 }
 .bearnad-brand-rule{
@@ -3183,7 +3183,7 @@ html,body,button,input,select,textarea{
   display:flex;
   align-items:flex-end;
   justify-content:center;
-  filter:drop-shadow(0 18px 22px rgba(0,0,0,.72)) drop-shadow(0 0 18px rgba(216,161,95,.16));
+  filter:drop-shadow(0 18px 22px rgba(0,0,0,.72)) drop-shadow(0 0 18px rgba(181,18,27,.16));
 }
 .bearnad-character-pop img{
   display:block;
@@ -3203,7 +3203,7 @@ html,body,button,input,select,textarea{
   right:10%;
   bottom:30px;
   height:90px;
-  background:radial-gradient(ellipse,rgba(216,161,95,.22),transparent 68%);
+  background:radial-gradient(ellipse,rgba(181,18,27,.22),transparent 68%);
   filter:blur(12px);
   z-index:-1;
 }
@@ -3292,7 +3292,7 @@ html,body,button,input,select,textarea{
   z-index:5 !important;
   align-items:flex-end !important;
   justify-content:flex-start !important;
-  filter:drop-shadow(0 15px 18px rgba(0,0,0,.72)) drop-shadow(0 0 13px rgba(216,161,95,.14)) !important;
+  filter:drop-shadow(0 15px 18px rgba(0,0,0,.72)) drop-shadow(0 0 13px rgba(181,18,27,.14)) !important;
 }
 .bearnad-character-pop img{
   width:100% !important;
@@ -3465,76 +3465,7 @@ html,body,button,input,select,textarea{
 .bearnad-hero .bearnad-character-pop::after{content:"";position:absolute;left:36%;top:31%;width:23%;height:6%;z-index:3;pointer-events:none;background:linear-gradient(180deg,rgba(8,8,10,.05),rgba(8,8,10,.78),rgba(8,8,10,.08));border-radius:50%;transform:scaleY(0);transform-origin:center;animation:bearnadBlink 6.8s ease-in-out infinite}
 @keyframes bearnadBlink{0%,88%,100%{transform:scaleY(0);opacity:0}90%{transform:scaleY(.35);opacity:.55}91%{transform:scaleY(1);opacity:.9}92%{transform:scaleY(0);opacity:0}}
 @media(prefers-reduced-motion:reduce){.bearnad-hero .bearnad-character-pop img,.bearnad-hero .bearnad-character-pop::before,.bearnad-hero .bearnad-character-pop::after{animation:none!important}}
-
-    /* ==================================================
-       CRIMSON HERITAGE — CHAMPAGNE GOLD THEME
-       VISUAL ONLY: no data, logic, API, login flow, or HTML structure changed.
-    ================================================== */
-    body, #app {
-      background-color: #050505;
-    }
-
-    .login-card {
-      border-color: rgba(216,161,95,.24);
-      box-shadow: 0 30px 100px rgba(0,0,0,.68), 0 0 55px rgba(216,161,95,.10);
-    }
-
-    .login-logo, .loader-logo {
-      filter: drop-shadow(0 0 28px rgba(216,161,95,.30));
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: rgba(216,161,95,.78);
-      box-shadow: 0 0 0 3px rgba(216,161,95,.11);
-    }
-
-    .btn-red {
-      background: linear-gradient(135deg, #b77a3e, #d8a15f);
-      color: #120d08;
-    }
-
-    .btn-red:hover, .btn-gold:hover {
-      filter: brightness(1.08);
-    }
-
-    .btn-gold {
-      background: linear-gradient(135deg, #8f5f32, #d8a15f);
-      color: #fff7e8;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(90deg, rgba(216,161,95,.22), rgba(216,161,95,.035));
-      border-left-color: #e6b86a;
-    }
-
-    .logout {
-      background: rgba(216,161,95,.10);
-      border-color: rgba(216,161,95,.22);
-      color: #f0c98a;
-    }
-
-    .item-card::before {
-      background: linear-gradient(90deg, #b77a3e, #e6b86a, transparent);
-    }
-
-    .loader-line::after {
-      background: linear-gradient(90deg, #b77a3e, #f0d39b);
-    }
-
-    .login-error {
-      background: rgba(216,161,95,.08);
-      border-color: rgba(216,161,95,.20);
-      color: #f0c98a;
-    }
-
-    ::selection {
-      background: rgba(216,161,95,.28);
-      color: #fff7e8;
-    }
-
-  </style>
+</style>
 
 <style id="bearnad-contained-character-final">
 /* Final fix: keep Bearnad fully contained inside the hero frame. */
@@ -3959,6 +3890,245 @@ html,body,button,input,select,textarea{
 }
 .bearnad-character-pop{
   display:none !important;
+}
+</style>
+
+
+<style id="royal-heritage-theme">
+:root{
+  --bg:#050505 !important;
+  --panel:rgba(14,13,11,.94) !important;
+  --panel2:rgba(24,21,17,.84) !important;
+  --red:#c99a55 !important;
+  --red2:#f0c980 !important;
+  --gold:#d8ad68 !important;
+  --text:#fff8e9 !important;
+  --muted:#a99a83 !important;
+  --border:rgba(216,173,104,.28) !important;
+  --green:#8fbc8f !important;
+  --yellow:#e1bd72 !important;
+  --danger:#d98978 !important;
+}
+
+/* Royal / palace atmosphere */
+body{
+  background:
+    radial-gradient(circle at 50% -10%,rgba(216,173,104,.10),transparent 35%),
+    radial-gradient(circle at 0% 100%,rgba(216,173,104,.055),transparent 28%),
+    #050505 !important;
+}
+body::before{
+  border-color:rgba(216,173,104,.13) !important;
+  box-shadow:inset 0 0 0 1px rgba(216,173,104,.05);
+}
+
+/* Fine royal framing around the application */
+.app-shell,
+.login-card,
+.card,
+.modal,
+.panel,
+.stat-card,
+.table-wrap,
+.section-card{
+  border-color:rgba(216,173,104,.26) !important;
+}
+
+.app-shell{
+  position:relative;
+}
+.app-shell::before{
+  content:"";
+  position:fixed;
+  inset:10px;
+  pointer-events:none;
+  z-index:999;
+  border:1px solid rgba(216,173,104,.10);
+  box-shadow:
+    inset 0 0 0 1px rgba(216,173,104,.035),
+    0 0 45px rgba(216,173,104,.025);
+}
+
+/* Elegant corner ornaments */
+.app-shell::after{
+  content:"✦";
+  position:fixed;
+  top:17px;
+  right:20px;
+  color:rgba(240,201,128,.65);
+  font-size:13px;
+  pointer-events:none;
+  z-index:1000;
+  text-shadow:0 0 14px rgba(216,173,104,.35);
+}
+
+/* Cards: thin gold keyline, no bulky yellow */
+.card,.stat-card,.panel,.section-card{
+  background:
+    linear-gradient(145deg,rgba(255,248,233,.018),rgba(216,173,104,.025)),
+    var(--panel) !important;
+  box-shadow:
+    0 18px 55px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,248,233,.035) !important;
+  position:relative;
+}
+.card::before,.stat-card::before,.panel::before,.section-card::before{
+  content:"";
+  position:absolute;
+  inset:7px;
+  border:1px solid rgba(216,173,104,.07);
+  pointer-events:none;
+  border-radius:inherit;
+}
+
+/* Royal headings and dividers */
+h1,h2,h3,.section-title,.page-title,.login-title{
+  color:var(--text) !important;
+}
+.section-title::after,.page-title::after{
+  background:linear-gradient(90deg,transparent,var(--gold),transparent) !important;
+}
+hr{
+  border-color:rgba(216,173,104,.18) !important;
+}
+
+/* Buttons */
+.btn-red,.btn-primary,.primary-btn{
+  background:linear-gradient(135deg,#9b6b37,#d8ad68 55%,#f0c980) !important;
+  color:#171109 !important;
+  border-color:rgba(240,201,128,.6) !important;
+  box-shadow:0 8px 24px rgba(216,173,104,.14) !important;
+}
+.btn-red:hover,.btn-primary:hover,.primary-btn:hover{
+  filter:brightness(1.08);
+  box-shadow:0 10px 30px rgba(216,173,104,.22) !important;
+}
+button,.btn{
+  border-color:rgba(216,173,104,.25);
+}
+.btn-outline,.btn-secondary{
+  border-color:rgba(216,173,104,.32) !important;
+  color:var(--gold) !important;
+  background:rgba(216,173,104,.045) !important;
+}
+
+/* Inputs */
+input,select,textarea{
+  background:rgba(7,7,7,.78) !important;
+  border-color:rgba(216,173,104,.20) !important;
+  color:var(--text) !important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(240,201,128,.65) !important;
+  box-shadow:0 0 0 3px rgba(216,173,104,.08),0 0 22px rgba(216,173,104,.08) !important;
+}
+
+/* Sidebar / navigation */
+.sidebar,.side-nav,.nav{
+  background:linear-gradient(180deg,#080706,#050505) !important;
+  border-color:rgba(216,173,104,.20) !important;
+}
+.sidebar a,.nav a,.menu-item{
+  color:#bdb09b !important;
+}
+.sidebar a:hover,.nav a:hover,.menu-item:hover,
+.sidebar a.active,.nav a.active,.menu-item.active{
+  color:#f3d39a !important;
+  background:rgba(216,173,104,.065) !important;
+  box-shadow:inset 2px 0 0 var(--gold) !important;
+}
+
+/* Login = palace entrance */
+#loginPage{
+  background:
+    radial-gradient(circle at 50% 35%,rgba(216,173,104,.08),transparent 30%),
+    #050505 !important;
+}
+.login-card{
+  background:linear-gradient(145deg,rgba(18,16,13,.97),rgba(7,7,7,.96)) !important;
+  border:1px solid rgba(216,173,104,.48) !important;
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.72),
+    0 0 55px rgba(216,173,104,.08),
+    inset 0 0 0 7px rgba(216,173,104,.035) !important;
+}
+.login-card::before{
+  content:"✦";
+  position:absolute;
+  top:12px;
+  left:15px;
+  color:#e7c17e;
+  opacity:.75;
+}
+.login-card::after{
+  content:"✦";
+  position:absolute;
+  top:12px;
+  right:15px;
+  color:#e7c17e;
+  opacity:.75;
+}
+.login-subtitle{
+  color:var(--gold) !important;
+}
+.login-title{
+  letter-spacing:4px !important;
+  text-shadow:0 0 22px rgba(216,173,104,.12);
+}
+
+/* Loader */
+.loader-logo{
+  filter:drop-shadow(0 0 30px rgba(216,173,104,.30)) !important;
+}
+.loader-line::after{
+  background:linear-gradient(90deg,#8f6234,#f0c980,#8f6234) !important;
+}
+.loader-subtitle{
+  color:var(--gold) !important;
+}
+
+/* Gold accents replacing aggressive crimson */
+.text-red,.red,.accent-red{
+  color:var(--gold) !important;
+}
+.border-red{
+  border-color:rgba(216,173,104,.38) !important;
+}
+.bg-red{
+  background:rgba(216,173,104,.09) !important;
+}
+
+/* Tables */
+table thead{
+  background:linear-gradient(180deg,rgba(216,173,104,.10),rgba(216,173,104,.035)) !important;
+}
+th{
+  color:#e8c98f !important;
+  border-bottom-color:rgba(216,173,104,.24) !important;
+}
+td{
+  border-bottom-color:rgba(216,173,104,.08) !important;
+}
+
+/* Badges / chips */
+.badge,.chip,.tag{
+  border-color:rgba(216,173,104,.24) !important;
+  background:rgba(216,173,104,.055) !important;
+  color:#e5c58c !important;
+}
+
+/* Subtle royal glow, not neon */
+.card:hover,.stat-card:hover{
+  border-color:rgba(216,173,104,.40) !important;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.42),
+    0 0 24px rgba(216,173,104,.055) !important;
+}
+
+/* Preserve mobile layout */
+@media(max-width:700px){
+  .app-shell::before{inset:5px}
+  .login-card{box-shadow:0 20px 60px rgba(0,0,0,.68),inset 0 0 0 5px rgba(216,173,104,.035) !important}
 }
 </style>
 
