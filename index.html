@@ -5102,6 +5102,156 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 }
 </style>
 
+
+<style id="bearnad-final-layout-v2">
+/* BEARNAD FINAL V2
+   Portrait is a true full-hero background.
+   Text is kept visible above it. */
+.bearnad-hero{
+  position:relative!important;
+  overflow:hidden!important;
+  background-image:none!important;
+  background-color:#050303!important;
+  min-height:430px!important;
+  height:430px!important;
+}
+
+/* The portrait fills the entire hero, not just the content column. */
+.bearnad-hero > .bearnad-profile-hero{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:1!important;
+  display:block!important;
+  overflow:hidden!important;
+  opacity:1!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+
+.bearnad-hero > .bearnad-profile-hero img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  display:block!important;
+  filter:none!important;
+  transform:none!important;
+}
+
+/* Dark left-to-right cinematic overlay. */
+.bearnad-hero::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(90deg,
+      rgba(0,0,0,.92) 0%,
+      rgba(0,0,0,.74) 23%,
+      rgba(0,0,0,.36) 46%,
+      rgba(0,0,0,.08) 73%,
+      rgba(0,0,0,.24) 100%),
+    linear-gradient(180deg,
+      rgba(0,0,0,.08) 0%,
+      transparent 50%,
+      rgba(0,0,0,.48) 100%)!important;
+}
+
+/* Text layer is always above the portrait. */
+.bearnad-hero > .bearnad-hero-content{
+  position:relative!important;
+  z-index:10!important;
+  width:min(48%,620px)!important;
+  max-width:620px!important;
+  margin-left:0!important;
+  margin-right:auto!important;
+  padding:70px 24px 55px 42px!important;
+  text-align:left!important;
+  background:none!important;
+}
+
+.bearnad-kicker,
+.bearnad-name,
+.bearnad-fullname,
+.bearnad-divider,
+.bearnad-desc,
+.bearnad-quote{
+  position:relative!important;
+  z-index:11!important;
+  text-align:left!important;
+}
+
+.bearnad-name{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  font-size:62px!important;
+  line-height:1!important;
+  text-shadow:0 5px 30px rgba(0,0,0,.96)!important;
+}
+
+.bearnad-kicker,
+.bearnad-fullname,
+.bearnad-desc{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+/* No old logo/frame/ornaments. */
+.bearnad-hero .bearnad-logo,
+.bearnad-hero .bearnad-luxury-frame,
+.bearnad-hero .bearnad-luxury-corner,
+.bearnad-hero .bearnad-luxury-ornament,
+.bearnad-hero .bearnad-particles,
+.bearnad-hero .bearnad-animated-aura{
+  display:none!important;
+}
+
+.bearnad-hero::after{
+  display:none!important;
+  border:0!important;
+}
+
+/* Mobile */
+@media(max-width:820px){
+  .bearnad-hero{
+    min-height:390px!important;
+    height:390px!important;
+  }
+  .bearnad-hero > .bearnad-profile-hero img{
+    object-position:center center!important;
+  }
+  .bearnad-hero > .bearnad-hero-content{
+    width:70%!important;
+    padding:82px 18px 34px 28px!important;
+  }
+  .bearnad-name{
+    font-size:48px!important;
+  }
+}
+
+@media(max-width:560px){
+  .bearnad-hero{
+    min-height:390px!important;
+    height:390px!important;
+  }
+  .bearnad-hero > .bearnad-profile-hero img{
+    object-position:center center!important;
+  }
+  .bearnad-hero > .bearnad-hero-content{
+    width:100%!important;
+    padding:150px 20px 24px!important;
+  }
+  .bearnad-name{
+    font-size:40px!important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -6383,10 +6533,7 @@ function loadDashboardPage() {
           class="bearnad-hero"
           style="--bearnad-welcome-bg:url('${BEARNAD_WELCOME}')"
         >
-<div class="bearnad-animated-aura" aria-hidden="true"></div><div class="bearnad-particles" aria-hidden="true"><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i></div>
-<div class="bearnad-hero-content"><div class="bearnad-luxury-frame" aria-hidden="true"></div><span class="bearnad-luxury-corner tl" aria-hidden="true"></span><span class="bearnad-luxury-corner tr" aria-hidden="true"></span><span class="bearnad-luxury-corner bl" aria-hidden="true"></span><span class="bearnad-luxury-corner br" aria-hidden="true"></span><span class="bearnad-luxury-ornament top" aria-hidden="true">◆ ✦ ◆</span><span class="bearnad-luxury-ornament bottom" aria-hidden="true">◆ ✦ ◆</span>
-
-            <div class="bearnad-profile-hero" aria-hidden="true">
+<div class="bearnad-profile-hero" aria-hidden="true">
   <img
     src="assets/bearnad.png"
     alt=""
@@ -6394,6 +6541,10 @@ function loadDashboardPage() {
     decoding="async"
   >
 </div>
+<div class="bearnad-animated-aura" aria-hidden="true"></div><div class="bearnad-particles" aria-hidden="true"><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i></div>
+<div class="bearnad-hero-content"><div class="bearnad-luxury-frame" aria-hidden="true"></div><span class="bearnad-luxury-corner tl" aria-hidden="true"></span><span class="bearnad-luxury-corner tr" aria-hidden="true"></span><span class="bearnad-luxury-corner bl" aria-hidden="true"></span><span class="bearnad-luxury-corner br" aria-hidden="true"></span><span class="bearnad-luxury-ornament top" aria-hidden="true">◆ ✦ ◆</span><span class="bearnad-luxury-ornament bottom" aria-hidden="true">◆ ✦ ◆</span>
+
+            
 
             <div class="bearnad-kicker">
               ✦ SELAMAT DATANG
