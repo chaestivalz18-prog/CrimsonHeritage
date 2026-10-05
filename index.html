@@ -4715,55 +4715,46 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 </style>
 
 
-<style id="crimson-welcome-banner-border">
-/*
-  VISUAL ONLY
-  The existing .gs / JavaScript logic is untouched.
-  The welcome-card border now takes its visual texture from the
-  same banner image already used by the dashboard: bearnad.png.
-*/
+<style id="crimson-welcome-banner-border-v2">
+/* CRIMSON HARITAGE — welcome border follows the BEARNAD banner */
 .welcome-card{
-  border:2px solid transparent !important;
+  position:relative !important;
+  border:0 !important;
   border-radius:20px !important;
-  background:
-    linear-gradient(
-      115deg,
-      rgba(8,8,8,.94),
-      rgba(18,15,12,.88) 55%,
-      rgba(8,8,8,.94)
-    ) padding-box,
-    url("bearnad.png") center / cover border-box !important;
-  box-shadow:
-    0 24px 60px rgba(0,0,0,.42),
-    0 0 0 1px rgba(201,164,92,.08),
-    inset 0 0 35px rgba(0,0,0,.18) !important;
+  isolation:isolate !important;
+  background:linear-gradient(115deg,rgba(8,8,8,.96),rgba(18,15,12,.90) 55%,rgba(8,8,8,.96)) !important;
+  box-shadow:0 24px 60px rgba(0,0,0,.42),inset 0 0 35px rgba(0,0,0,.22) !important;
 }
-
-/* Remove the old straight red strip so the frame is driven by the banner. */
 .welcome-card::before{
-  display:none !important;
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  width:auto !important;
+  height:auto !important;
+  padding:2px !important;
+  border-radius:inherit !important;
+  background:url("bearnad.png") center/cover no-repeat !important;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0) !important;
+  -webkit-mask-composite:xor !important;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0) !important;
+  mask-composite:exclude !important;
+  box-shadow:0 0 24px rgba(201,164,92,.28),0 0 45px rgba(181,18,27,.18) !important;
+  pointer-events:none !important;
+  z-index:1 !important;
 }
-
-/* Remove the old CH watermark; the banner supplies the visual identity. */
 .welcome-card::after{
   display:none !important;
 }
-
-/* Give the text a little more separation from the banner-derived frame. */
 .welcome-card > div{
-  position:relative;
-  z-index:2;
-  text-shadow:0 2px 14px rgba(0,0,0,.78);
+  position:relative !important;
+  z-index:2 !important;
+  text-shadow:0 2px 14px rgba(0,0,0,.82) !important;
 }
-
 @media(max-width:750px){
-  .welcome-card{
-    border-radius:16px !important;
-    border-width:2px !important;
-  }
+  .welcome-card{border-radius:16px !important;}
+  .welcome-card::before{padding:2px !important;}
 }
 </style>
-
 </head>
 
 <body>
