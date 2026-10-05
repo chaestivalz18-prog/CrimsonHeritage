@@ -5959,10 +5959,236 @@ function loadDashboardPageLegacy() {
 
 function loadDashboardPage() {
 
-  // Semua akun sekarang memakai dashboard yang sama.
-  // Tidak ada dashboard khusus Bearnad.
-  loadDashboardPageLegacy();
+  const isBearnad =
+    USER &&
+    (
+      /bearnad/i.test(String(USER.nama || '')) ||
+      /bearnad/i.test(String(USER.username || ''))
+    );
+
+  // Dashboard baru ini khusus akun Bearnad.
+  // Akun lain tetap memakai dashboard lama agar tidak mengubah alur mereka.
+  if (!isBearnad) {
+    loadDashboardPageLegacy();
+    return;
+  }
+
+  Promise.all([
+    runPromise('getKeuanganReport', [TOKEN]),
+    getKasbonPromise(),
+    runPromise('getItemsPublic', [TOKEN])
+  ])
+  .then(function(results) {
+      if (CURRENT_PAGE !== 'dashboard') return;
+
+    const finance = results[0] || {
+      saldo: 0,
+      history: []
+    };
+
+    const balances = results[1] || [];
+    const stockItems = results[2] || [];
+    const history = finance.history || [];
+
+    let personalKasbon = null;
+
+    if (USER && USER.memberId) {
+      personalKasbon = balances.find(function(row) {
+        return String(row.memberId || '') === String(USER.memberId || '');
+      });
+    }
+
+    if (!personalKasbon) {
+      personalKasbon = balances.find(function(row) {
+        return /bearnad/i.test(String(row.memberName || ''));
+      });
+    }
+
+    const saldo = Number(finance.saldo) || 0;
+
+    const kasbonPribadi = personalKasbon
+      ? Number(personalKasbon.remaining || 0)
+      : 0;
+
+    const stockTotal = stockItems.reduce(function(total, item) {
+      return total + (Number(item.stock) || 0);
+    }, 0);
+
+    const latestFinance = history.slice(0, 5);
+
+    let financeRows = '';
+
+    latestFinance.forEach(function(row) {
+      const isIn =
+        String(row.jenis || '').toUpperCase() === 'UANG MASUK';
+
+      financeRows += `
+        <div class="bearnad-finance-row">
+          <div class="bearnad-finance-date">
+            ${escapeHTML(row.tanggal || '-')}
+          </div>
+
+          <div class="bearnad-finance-type ${isIn ? 'in' : 'out'}">
+            ${isIn ? 'UANG MASUK' : 'UANG KELUAR'}
+          </div>
+
+          <div class="bearnad-finance-note">
+            ${escapeHTML(row.keterangan || '-')}
+          </div>
+
+          <div class="bearnad-finance-amount ${isIn ? 'in' : 'out'}">
+            ${isIn ? '+' : '-'} ${money(row.nominal)}
+          </div>
+        </div>
+      `;
+    });
+
+    if (!financeRows) {
+      financeRows = `
+        <div class="empty" style="padding:28px">
+          Belum ada transaksi keuangan.
+        </div>
+      `;
+    }
+
+    document.getElementById('content').innerHTML = `
+      <div class="bearnad-dashboard">
+
+        <section
+          class="bearnad-hero"
+          style="--bearnad-welcome-bg:url('${BEARNAD_WELCOME}')"
+        >
+<div class="bearnad-animated-aura" aria-hidden="true"></div><div class="bearnad-particles" aria-hidden="true"><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i></div>
+<div class="bearnad-hero-content"><div class="bearnad-luxury-frame" aria-hidden="true"></div><span class="bearnad-luxury-corner tl" aria-hidden="true"></span><span class="bearnad-luxury-corner tr" aria-hidden="true"></span><span class="bearnad-luxury-corner bl" aria-hidden="true"></span><span class="bearnad-luxury-corner br" aria-hidden="true"></span><span class="bearnad-luxury-ornament top" aria-hidden="true">◆ ✦ ◆</span><span class="bearnad-luxury-ornament bottom" aria-hidden="true">◆ ✦ ◆</span>
+
+            <img
+              class="bearnad-logo"
+              src="${LOGO_1}"
+              alt="Crimson Heritage"
+            >
+
+            <div class="bearnad-kicker">
+              ✦ SELAMAT DATANG
+            </div>
+
+            <div class="bearnad-name">
+              Bearnad
+            </div>
+
+            <div class="bearnad-fullname">
+              OSAZE N VERHOEVEN
+            </div>
+
+            <div class="bearnad-divider"></div>
+
+            <div class="bearnad-desc">
+              Met de deur in huis vallen
+            </div>
+
+          </div>
+
+        </section>
+
+        <section class="bearnad-stat-grid">
+
+          <div
+            class="bearnad-stat"
+            onclick="showPage('finance','LAPORAN KEUANGAN')"
+            style="cursor:pointer"
+          >
+            <div class="bearnad-stat-icon">▤</div>
+            <div class="bearnad-stat-arrow">›</div>
+            <div class="bearnad-stat-copy">
+              <div class="bearnad-stat-label">
+                Laporan Keuangan
+              </div>
+            <div class="bearnad-stat-value gold">
+              ${money(saldo)}
+            </div>
+            <div class="bearnad-stat-note">
+              Saldo saat ini
+            </div>
+            </div>
+          </div>
+
+          <div
+            class="bearnad-stat"
+            onclick="showPage('kasbon','KASBON SAYA')"
+            style="cursor:pointer"
+          >
+            <div class="bearnad-stat-icon">$</div>
+            <div class="bearnad-stat-arrow">›</div>
+            <div class="bearnad-stat-copy">
+              <div class="bearnad-stat-label">
+                Kasbon Pribadi
+              </div>
+            <div class="bearnad-stat-value">
+              ${money(kasbonPribadi)}
+            </div>
+            <div class="bearnad-stat-note">
+              Sisa kasbon Bearnad
+            </div>
+            </div>
+          </div>
+
+          <div
+            class="bearnad-stat"
+            onclick="showPage('stock','STOCK BRANGKAS')"
+            style="cursor:pointer"
+          >
+            <div class="bearnad-stat-icon">▣</div>
+            <div class="bearnad-stat-arrow">›</div>
+            <div class="bearnad-stat-copy">
+              <div class="bearnad-stat-label">
+                Stock Brangkas
+              </div>
+            <div class="bearnad-shortcut-label">Buka Stock Brangkas</div>
+</div>
+          </div>
+
+        </section>
+
+        <section class="bearnad-lower">
+
+          <div class="bearnad-panel">
+
+            <div class="bearnad-panel-head">
+              <div>
+                <div class="bearnad-panel-title">
+                  RIWAYAT TRANSAKSI KEUANGAN TERBARU
+                </div>
+                <div class="bearnad-panel-sub">
+                  Ringkasan transaksi terbaru
+                </div>
+              </div>
+
+              <button
+                class="btn btn-muted"
+                style="padding:8px 12px;font-size:9px"
+                onclick="showPage('finance','LAPORAN KEUANGAN')"
+              >
+                LIHAT SEMUA
+              </button>
+            </div>
+
+            ${financeRows}
+
+          </div>
+</div>
+
+        </section>
+
+
+      </div>
+    `;
+
+  })
+  .catch(handleServerError);
 }
+
+/* =====================================================
+   PERATURAN CRIMSON HERITAGE
+===================================================== */
 
 function loadRulesPage() {
 
