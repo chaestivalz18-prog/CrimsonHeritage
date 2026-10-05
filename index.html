@@ -4512,6 +4512,163 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 @media(max-width:820px){.bearnad-hero{min-height:390px!important;height:390px!important;margin-bottom:28px!important;background-size:cover!important;background-position:center center!important;border-radius:15px!important}.bearnad-hero::after{inset:6px!important;border-radius:11px!important}.bearnad-hero-content{width:62%!important;padding:48px 26px 34px 18px!important}.bearnad-name{font-size:48px!important}}
 @media(max-width:560px){.bearnad-hero{min-height:390px!important;height:390px!important;margin-bottom:24px!important;background-size:cover!important;background-position:center 42%!important;border-radius:13px!important}.bearnad-hero::after{inset:5px!important;border-radius:9px!important}.bearnad-hero-content{width:100%!important;margin-left:0!important;padding:168px 20px 22px!important;text-align:left!important}.bearnad-name{font-size:40px!important;line-height:1!important}.bearnad-fullname{font-size:9px!important;letter-spacing:2.1px!important}.bearnad-kicker{font-size:9px!important;letter-spacing:1.7px!important}.bearnad-divider{width:140px!important;margin:12px 0 9px!important}.bearnad-desc{font-size:11px!important}.bearnad-logo{right:16px!important;top:14px!important;width:58px!important;height:58px!important}}
 </style>
+
+<style id="bearnad-luxury-ornament-left">
+/* BEARNAD — IMPERIAL LUXURY ORNAMENT FRAME
+   VISUAL ONLY: preserves all existing functionality/data/logic. */
+.bearnad-hero{
+  position:relative!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:18px!important;
+  box-shadow:0 22px 60px rgba(0,0,0,.58), inset 0 0 55px rgba(0,0,0,.24)!important;
+  isolation:isolate!important;
+}
+.bearnad-hero::before{
+  z-index:1!important;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.62) 32%,rgba(0,0,0,.20) 64%,rgba(0,0,0,.04) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.38))!important;
+}
+.bearnad-hero::after{
+  content:""!important;
+  position:absolute!important;
+  inset:8px!important;
+  z-index:8!important;
+  pointer-events:none!important;
+  border:1px solid rgba(221,190,125,.72)!important;
+  border-radius:12px!important;
+  box-shadow:inset 0 0 0 1px rgba(255,239,196,.10),inset 0 0 28px rgba(201,164,92,.09)!important;
+}
+
+/* Inner precision line + four corner ornaments + top/bottom medallions */
+.bearnad-hero .bearnad-luxury-frame{
+  position:absolute;
+  inset:16px;
+  z-index:9;
+  pointer-events:none;
+  border:1px solid rgba(201,164,92,.42);
+  border-radius:8px;
+  box-shadow:inset 0 0 18px rgba(201,164,92,.055);
+}
+.bearnad-hero .bearnad-luxury-frame::before{
+  content:"✦";
+  position:absolute;
+  left:-11px; top:-15px;
+  font-size:22px;
+  line-height:1;
+  color:#d9bb7b;
+  text-shadow:0 0 10px rgba(217,187,123,.42);
+}
+.bearnad-hero .bearnad-luxury-frame::after{
+  content:"✦";
+  position:absolute;
+  right:-11px; top:-15px;
+  font-size:22px;
+  line-height:1;
+  color:#d9bb7b;
+  text-shadow:0 0 10px rgba(217,187,123,.42);
+}
+.bearnad-hero .bearnad-luxury-corner{
+  position:absolute;
+  width:54px; height:54px;
+  z-index:10;
+  pointer-events:none;
+}
+.bearnad-hero .bearnad-luxury-corner::before,
+.bearnad-hero .bearnad-luxury-corner::after{
+  content:"";
+  position:absolute;
+  width:34px; height:34px;
+  border-color:rgba(218,187,124,.82);
+  border-style:solid;
+}
+.bearnad-hero .bearnad-luxury-corner::before{
+  left:0; top:0;
+  border-width:2px 0 0 2px;
+  border-radius:8px 0 0 0;
+}
+.bearnad-hero .bearnad-luxury-corner::after{
+  right:0; bottom:0;
+  border-width:0 2px 2px 0;
+  border-radius:0 0 8px 0;
+}
+.bearnad-hero .bearnad-luxury-corner.tl{left:11px;top:11px}
+.bearnad-hero .bearnad-luxury-corner.tr{right:11px;top:11px;transform:scaleX(-1)}
+.bearnad-hero .bearnad-luxury-corner.bl{left:11px;bottom:11px;transform:scaleY(-1)}
+.bearnad-hero .bearnad-luxury-corner.br{right:11px;bottom:11px;transform:scale(-1)}
+
+.bearnad-hero .bearnad-luxury-ornament{
+  position:absolute;
+  left:50%; transform:translateX(-50%);
+  z-index:10;
+  color:#d9bb7b;
+  font:18px/1 Georgia,serif;
+  letter-spacing:6px;
+  text-shadow:0 0 12px rgba(217,187,123,.34);
+  pointer-events:none;
+}
+.bearnad-hero .bearnad-luxury-ornament.top{top:5px}
+.bearnad-hero .bearnad-luxury-ornament.bottom{bottom:5px}
+
+/* Welcome copy sits on the LEFT */
+.bearnad-hero-content{
+  position:relative!important;
+  z-index:11!important;
+  width:min(56%,680px)!important;
+  max-width:680px!important;
+  margin-left:0!important;
+  margin-right:auto!important;
+  padding:54px 24px 48px 48px!important;
+  text-align:left!important;
+}
+.bearnad-kicker,
+.bearnad-name,
+.bearnad-fullname,
+.bearnad-divider,
+.bearnad-desc,
+.bearnad-quote{
+  text-align:left!important;
+}
+.bearnad-name{
+  text-shadow:0 4px 28px rgba(0,0,0,.92)!important;
+}
+.bearnad-logo{
+  right:34px!important;
+  top:30px!important;
+  z-index:12!important;
+  filter:drop-shadow(0 0 18px rgba(201,164,92,.34))!important;
+}
+
+@media(max-width:820px){
+  .bearnad-hero{border-radius:15px!important}
+  .bearnad-hero::after{inset:6px!important;border-radius:10px!important}
+  .bearnad-hero .bearnad-luxury-frame{inset:12px}
+  .bearnad-hero .bearnad-luxury-corner{transform:scale(.82)}
+  .bearnad-hero .bearnad-luxury-corner.tr{transform:scaleX(-1) scale(.82)}
+  .bearnad-hero .bearnad-luxury-corner.bl{transform:scaleY(-1) scale(.82)}
+  .bearnad-hero .bearnad-luxury-corner.br{transform:scale(-1) scale(.82)}
+  .bearnad-hero-content{
+    width:66%!important;
+    padding:48px 18px 34px 28px!important;
+  }
+}
+@media(max-width:560px){
+  .bearnad-hero .bearnad-luxury-frame{inset:10px}
+  .bearnad-hero .bearnad-luxury-corner{transform:scale(.66)}
+  .bearnad-hero .bearnad-luxury-corner.tr{transform:scaleX(-1) scale(.66)}
+  .bearnad-hero .bearnad-luxury-corner.bl{transform:scaleY(-1) scale(.66)}
+  .bearnad-hero .bearnad-luxury-corner.br{transform:scale(-1) scale(.66)}
+  .bearnad-hero-content{
+    width:72%!important;
+    margin-left:0!important;
+    padding:126px 12px 24px 20px!important;
+  }
+  .bearnad-hero .bearnad-luxury-ornament{font-size:14px;letter-spacing:4px}
+  .bearnad-logo{right:14px!important;top:18px!important;width:64px!important;height:64px!important}
+}
+</style>
+
 </head>
 
 <body>
@@ -5754,7 +5911,7 @@ function loadDashboardPage() {
           style="--bearnad-welcome-bg:url('${BEARNAD_WELCOME}')"
         >
 <div class="bearnad-animated-aura" aria-hidden="true"></div><div class="bearnad-particles" aria-hidden="true"><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i></div>
-<div class="bearnad-hero-content">
+<div class="bearnad-hero-content"><div class="bearnad-luxury-frame" aria-hidden="true"></div><span class="bearnad-luxury-corner tl" aria-hidden="true"></span><span class="bearnad-luxury-corner tr" aria-hidden="true"></span><span class="bearnad-luxury-corner bl" aria-hidden="true"></span><span class="bearnad-luxury-corner br" aria-hidden="true"></span><span class="bearnad-luxury-ornament top" aria-hidden="true">◆ ✦ ◆</span><span class="bearnad-luxury-ornament bottom" aria-hidden="true">◆ ✦ ◆</span>
 
             <img
               class="bearnad-logo"
