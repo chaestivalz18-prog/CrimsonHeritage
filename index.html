@@ -5252,6 +5252,109 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 }
 </style>
 
+
+<style id="personal-profile-heroes-final">
+/* Bearnad / Helix / Jaene share the same hero design,
+   but each account supplies its own profile image. */
+.personal-dashboard-bearnad .bearnad-hero,
+.personal-dashboard-helix .bearnad-hero,
+.personal-dashboard-jaene .bearnad-hero{
+  background-image:none!important;
+  background-color:#050303!important;
+  overflow:hidden!important;
+}
+
+.personal-dashboard-bearnad .bearnad-profile-hero,
+.personal-dashboard-helix .bearnad-profile-hero,
+.personal-dashboard-jaene .bearnad-profile-hero{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:1!important;
+  display:block!important;
+  overflow:hidden!important;
+  opacity:1!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+}
+
+.personal-dashboard-bearnad .bearnad-profile-hero img,
+.personal-dashboard-helix .bearnad-profile-hero img,
+.personal-dashboard-jaene .bearnad-profile-hero img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  display:block!important;
+  filter:none!important;
+}
+
+.personal-dashboard-bearnad .bearnad-hero::before,
+.personal-dashboard-helix .bearnad-hero::before,
+.personal-dashboard-jaene .bearnad-hero::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  pointer-events:none!important;
+  background:
+    linear-gradient(90deg,
+      rgba(0,0,0,.92) 0%,
+      rgba(0,0,0,.72) 23%,
+      rgba(0,0,0,.34) 47%,
+      rgba(0,0,0,.08) 75%,
+      rgba(0,0,0,.24) 100%),
+    linear-gradient(180deg,
+      rgba(0,0,0,.08) 0%,
+      transparent 50%,
+      rgba(0,0,0,.48) 100%)!important;
+}
+
+.personal-dashboard-bearnad .bearnad-hero-content,
+.personal-dashboard-helix .bearnad-hero-content,
+.personal-dashboard-jaene .bearnad-hero-content{
+  position:relative!important;
+  z-index:10!important;
+  background:none!important;
+}
+
+.personal-dashboard-bearnad .bearnad-logo,
+.personal-dashboard-helix .bearnad-logo,
+.personal-dashboard-jaene .bearnad-logo,
+.personal-dashboard-bearnad .bearnad-luxury-frame,
+.personal-dashboard-helix .bearnad-luxury-frame,
+.personal-dashboard-jaene .bearnad-luxury-frame,
+.personal-dashboard-bearnad .bearnad-luxury-corner,
+.personal-dashboard-helix .bearnad-luxury-corner,
+.personal-dashboard-jaene .bearnad-luxury-corner,
+.personal-dashboard-bearnad .bearnad-luxury-ornament,
+.personal-dashboard-helix .bearnad-luxury-ornament,
+.personal-dashboard-jaene .bearnad-luxury-ornament,
+.personal-dashboard-bearnad .bearnad-particles,
+.personal-dashboard-helix .bearnad-particles,
+.personal-dashboard-jaene .bearnad-particles,
+.personal-dashboard-bearnad .bearnad-animated-aura,
+.personal-dashboard-helix .bearnad-animated-aura,
+.personal-dashboard-jaene .bearnad-animated-aura{
+  display:none!important;
+}
+
+.personal-dashboard-bearnad .bearnad-hero::after,
+.personal-dashboard-helix .bearnad-hero::after,
+.personal-dashboard-jaene .bearnad-hero::after{
+  display:none!important;
+}
+
+@media(max-width:820px){
+  .personal-dashboard-bearnad .bearnad-profile-hero img,
+  .personal-dashboard-helix .bearnad-profile-hero img,
+  .personal-dashboard-jaene .bearnad-profile-hero img{
+    object-position:center center!important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -6434,16 +6537,46 @@ function loadDashboardPageLegacy() {
 
 function loadDashboardPage() {
 
-  const isBearnad =
-    USER &&
-    (
-      /bearnad/i.test(String(USER.nama || '')) ||
-      /bearnad/i.test(String(USER.username || ''))
-    );
+  /* =====================================================
+     PERSONAL DASHBOARD
+     Bearnad / Helix / Jaene masing-masing memakai foto sendiri.
+     Semua akun lain tetap memakai dashboard lama.
+  ===================================================== */
+  const identity =
+    String((USER && USER.nama) || '') + ' ' +
+    String((USER && (USER.username || USER.user)) || '');
 
-  // Dashboard baru ini khusus akun Bearnad.
-  // Akun lain tetap memakai dashboard lama agar tidak mengubah alur mereka.
-  if (!isBearnad) {
+  let personal = null;
+
+  if (/bearnad/i.test(identity)) {
+    personal = {
+      key: 'bearnad',
+      name: 'Bearnad',
+      fullname: 'OSAZE N VERHOEVEN',
+      image: 'assets/bearnad.png',
+      quote: 'Met de deur in huis vallen'
+    };
+  } else if (/helix|elowyn/i.test(identity)) {
+    personal = {
+      key: 'helix',
+      name: 'Helix',
+      fullname: 'ELOWYN HELIXINE VERHOEVEN FM',
+      image: 'assets/helix.png',
+      quote: 'Met de deur in huis vallen'
+    };
+  } else if (/jaene/i.test(identity)) {
+    personal = {
+      key: 'jaene',
+      name: 'Jaene',
+      fullname: 'JAENE NYX FM',
+      image: 'assets/jaene.png',
+      quote: 'Met de deur in huis vallen'
+    };
+  }
+
+  /* Bearnad, Helix, Jaene = dashboard personal.
+     Akun lain tetap memakai dashboard lama. */
+  if (!personal) {
     loadDashboardPageLegacy();
     return;
   }
@@ -6454,7 +6587,7 @@ function loadDashboardPage() {
     runPromise('getItemsPublic', [TOKEN])
   ])
   .then(function(results) {
-      if (CURRENT_PAGE !== 'dashboard') return;
+    if (CURRENT_PAGE !== 'dashboard') return;
 
     const finance = results[0] || {
       saldo: 0,
@@ -6474,8 +6607,15 @@ function loadDashboardPage() {
     }
 
     if (!personalKasbon) {
+      const currentName = String((USER && USER.nama) || '').trim().toLowerCase();
+      const profileName = String(personal.name || '').trim().toLowerCase();
+
       personalKasbon = balances.find(function(row) {
-        return /bearnad/i.test(String(row.memberName || ''));
+        const memberName = String(row.memberName || '').trim().toLowerCase();
+        return (
+          (currentName && memberName === currentName) ||
+          (profileName && memberName.includes(profileName))
+        );
       });
     }
 
@@ -6484,10 +6624,6 @@ function loadDashboardPage() {
     const kasbonPribadi = personalKasbon
       ? Number(personalKasbon.remaining || 0)
       : 0;
-
-    const stockTotal = stockItems.reduce(function(total, item) {
-      return total + (Number(item.stock) || 0);
-    }, 0);
 
     const latestFinance = history.slice(0, 5);
 
@@ -6527,41 +6663,59 @@ function loadDashboardPage() {
     }
 
     document.getElementById('content').innerHTML = `
-      <div class="bearnad-dashboard">
+      <div class="bearnad-dashboard personal-dashboard-${personal.key}">
 
         <section
           class="bearnad-hero"
-          style="--bearnad-welcome-bg:url('${BEARNAD_WELCOME}')"
+          style="--bearnad-welcome-bg:none"
         >
-<div class="bearnad-profile-hero" aria-hidden="true">
-  <img
-    src="assets/bearnad.png"
-    alt=""
-    loading="eager"
-    decoding="async"
-  >
-</div>
-<div class="bearnad-animated-aura" aria-hidden="true"></div><div class="bearnad-particles" aria-hidden="true"><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i><i class="bearnad-particle"></i></div>
-<div class="bearnad-hero-content"><div class="bearnad-luxury-frame" aria-hidden="true"></div><span class="bearnad-luxury-corner tl" aria-hidden="true"></span><span class="bearnad-luxury-corner tr" aria-hidden="true"></span><span class="bearnad-luxury-corner bl" aria-hidden="true"></span><span class="bearnad-luxury-corner br" aria-hidden="true"></span><span class="bearnad-luxury-ornament top" aria-hidden="true">◆ ✦ ◆</span><span class="bearnad-luxury-ornament bottom" aria-hidden="true">◆ ✦ ◆</span>
 
-            
+          <!-- Personal profile photo: one image per account -->
+          <div class="bearnad-profile-hero" aria-hidden="true">
+            <img
+              src="${personal.image}"
+              alt=""
+              loading="eager"
+              decoding="async"
+            >
+          </div>
+
+          <div class="bearnad-animated-aura" aria-hidden="true"></div>
+          <div class="bearnad-particles" aria-hidden="true">
+            <i class="bearnad-particle"></i>
+            <i class="bearnad-particle"></i>
+            <i class="bearnad-particle"></i>
+            <i class="bearnad-particle"></i>
+            <i class="bearnad-particle"></i>
+            <i class="bearnad-particle"></i>
+          </div>
+
+          <div class="bearnad-hero-content">
+
+            <div class="bearnad-luxury-frame" aria-hidden="true"></div>
+            <span class="bearnad-luxury-corner tl" aria-hidden="true"></span>
+            <span class="bearnad-luxury-corner tr" aria-hidden="true"></span>
+            <span class="bearnad-luxury-corner bl" aria-hidden="true"></span>
+            <span class="bearnad-luxury-corner br" aria-hidden="true"></span>
+            <span class="bearnad-luxury-ornament top" aria-hidden="true">◆ ✦ ◆</span>
+            <span class="bearnad-luxury-ornament bottom" aria-hidden="true">◆ ✦ ◆</span>
 
             <div class="bearnad-kicker">
               ✦ SELAMAT DATANG
             </div>
 
             <div class="bearnad-name">
-              Bearnad
+              ${escapeHTML(personal.name)}
             </div>
 
             <div class="bearnad-fullname">
-              OSAZE N VERHOEVEN
+              ${escapeHTML(personal.fullname)}
             </div>
 
             <div class="bearnad-divider"></div>
 
             <div class="bearnad-desc">
-              Met de deur in huis vallen
+              ${escapeHTML(personal.quote)}
             </div>
 
           </div>
@@ -6581,12 +6735,12 @@ function loadDashboardPage() {
               <div class="bearnad-stat-label">
                 Laporan Keuangan
               </div>
-            <div class="bearnad-stat-value gold">
-              ${money(saldo)}
-            </div>
-            <div class="bearnad-stat-note">
-              Saldo saat ini
-            </div>
+              <div class="bearnad-stat-value gold">
+                ${money(saldo)}
+              </div>
+              <div class="bearnad-stat-note">
+                Saldo saat ini
+              </div>
             </div>
           </div>
 
@@ -6601,12 +6755,12 @@ function loadDashboardPage() {
               <div class="bearnad-stat-label">
                 Kasbon Pribadi
               </div>
-            <div class="bearnad-stat-value">
-              ${money(kasbonPribadi)}
-            </div>
-            <div class="bearnad-stat-note">
-              Sisa kasbon Bearnad
-            </div>
+              <div class="bearnad-stat-value">
+                ${money(kasbonPribadi)}
+              </div>
+              <div class="bearnad-stat-note">
+                Sisa kasbon ${escapeHTML(personal.name)}
+              </div>
             </div>
           </div>
 
@@ -6621,8 +6775,10 @@ function loadDashboardPage() {
               <div class="bearnad-stat-label">
                 Stock Brangkas
               </div>
-            <div class="bearnad-shortcut-label">Buka Stock Brangkas</div>
-</div>
+              <div class="bearnad-shortcut-label">
+                Buka Stock Brangkas
+              </div>
+            </div>
           </div>
 
         </section>
@@ -6653,10 +6809,8 @@ function loadDashboardPage() {
             ${financeRows}
 
           </div>
-</div>
 
         </section>
-
 
       </div>
     `;
