@@ -6277,10 +6277,19 @@ function loadPermissions() {
 
       buildNavigation();
 
-      if (
-        USER.role === 'MEMBER' ||
-        USER.role === 'MAGANG'
-      ) {
+      /*
+       * MAGANG sekarang masuk ke DASHBOARD terlebih dahulu,
+       * supaya welcome/dashboard khusus MAGANG tampil.
+       * Akses modul lain tetap mengikuti PERMISSIONS/backend.
+       */
+      if (USER && String(USER.role || '').toUpperCase() === 'MAGANG') {
+
+        showPage(
+          'dashboard',
+          'DASHBOARD'
+        );
+
+      } else if (USER && String(USER.role || '').toUpperCase() === 'MEMBER') {
 
         showPage(
           'pickup',
@@ -6516,7 +6525,15 @@ function showPage(page, title) {
   };
 
   const requiredPermission = protectedPermission[page];
-  if (requiredPermission && !PERMISSIONS[requiredPermission]) {
+
+  /* Dashboard MAGANG adalah halaman welcome internal.
+     Kartu di dalamnya tetap hanya dibuat dari PERMISSIONS. */
+  const isMagangDashboard =
+    page === 'dashboard' &&
+    USER &&
+    String(USER.role || '').toUpperCase() === 'MAGANG';
+
+  if (requiredPermission && !PERMISSIONS[requiredPermission] && !isMagangDashboard) {
     toast('Akses ke halaman ini tidak tersedia untuk role ' + (USER && USER.role ? USER.role : '') + '.', 'error');
     return;
   }
