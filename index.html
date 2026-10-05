@@ -4714,6 +4714,56 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 }
 </style>
 
+
+<style id="crimson-welcome-banner-border">
+/*
+  VISUAL ONLY
+  The existing .gs / JavaScript logic is untouched.
+  The welcome-card border now takes its visual texture from the
+  same banner image already used by the dashboard: bearnad.png.
+*/
+.welcome-card{
+  border:2px solid transparent !important;
+  border-radius:20px !important;
+  background:
+    linear-gradient(
+      115deg,
+      rgba(8,8,8,.94),
+      rgba(18,15,12,.88) 55%,
+      rgba(8,8,8,.94)
+    ) padding-box,
+    url("bearnad.png") center / cover border-box !important;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.42),
+    0 0 0 1px rgba(201,164,92,.08),
+    inset 0 0 35px rgba(0,0,0,.18) !important;
+}
+
+/* Remove the old straight red strip so the frame is driven by the banner. */
+.welcome-card::before{
+  display:none !important;
+}
+
+/* Remove the old CH watermark; the banner supplies the visual identity. */
+.welcome-card::after{
+  display:none !important;
+}
+
+/* Give the text a little more separation from the banner-derived frame. */
+.welcome-card > div{
+  position:relative;
+  z-index:2;
+  text-shadow:0 2px 14px rgba(0,0,0,.78);
+}
+
+@media(max-width:750px){
+  .welcome-card{
+    border-radius:16px !important;
+    border-width:2px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
