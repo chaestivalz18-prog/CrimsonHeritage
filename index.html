@@ -4777,6 +4777,27 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 }
 </style>
 
+
+<style id="bearnad-remove-welcome-frame">
+/* Remove ONLY the decorative welcome-frame/border.
+   Background, text, logo, animations, functions and data stay unchanged. */
+.bearnad-hero{
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:0 18px 48px rgba(0,0,0,.46), inset 0 0 50px rgba(0,0,0,.25) !important;
+}
+.bearnad-hero::after{
+  display:none !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+.bearnad-hero .bearnad-luxury-frame,
+.bearnad-hero .bearnad-luxury-corner,
+.bearnad-hero .bearnad-luxury-ornament{
+  display:none !important;
+}
+</style>
+
 </head>
 
 <body>
@@ -5228,7 +5249,7 @@ let CURRENT_USERS = [];
 const LOGO_1 = 'assets/logo.png';
 
 const BEARNAD_WELCOME =
-  'bearnad.png';
+  'assets/background.png';
 
 const LOGO_2 = LOGO_1;
 
