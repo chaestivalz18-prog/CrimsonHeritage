@@ -5355,6 +5355,236 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 }
 </style>
 
+
+<style id="magang-dashboard-style">
+/* =====================================================
+   MAGANG DASHBOARD
+   Visual only. Uses existing permissions and page functions.
+===================================================== */
+.magang-dashboard{
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+  padding:4px 0 28px;
+}
+
+.magang-hero{
+  position:relative;
+  min-height:330px;
+  overflow:hidden;
+  border:1px solid rgba(177,24,35,.30);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 78% 35%, rgba(145,12,25,.24), transparent 34%),
+    linear-gradient(135deg,#090606,#16090b 55%,#050303);
+  box-shadow:0 20px 50px rgba(0,0,0,.38);
+}
+
+.magang-hero-glow{
+  position:absolute;
+  width:420px;
+  height:420px;
+  right:-90px;
+  top:-110px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(177,24,35,.20),transparent 68%);
+  pointer-events:none;
+}
+
+.magang-hero-content{
+  position:relative;
+  z-index:3;
+  width:62%;
+  padding:62px 34px 52px 42px;
+}
+
+.magang-kicker{
+  font-size:11px;
+  letter-spacing:3px;
+  color:#c9a45b;
+  margin-bottom:18px;
+}
+
+.magang-title{
+  font-family:Georgia,serif;
+  font-size:34px;
+  font-weight:700;
+  color:#f5eee2;
+  letter-spacing:1px;
+}
+
+.magang-name{
+  margin-top:3px;
+  font-family:Georgia,serif;
+  font-size:54px;
+  line-height:1.02;
+  color:#fff7e8;
+  text-shadow:0 8px 30px rgba(0,0,0,.72);
+}
+
+.magang-role{
+  margin-top:14px;
+  font-size:11px;
+  letter-spacing:2.5px;
+  color:#c9a45b;
+  font-weight:700;
+}
+
+.magang-line{
+  width:150px;
+  height:1px;
+  margin:22px 0 17px;
+  background:linear-gradient(90deg,#b51927,transparent);
+}
+
+.magang-desc{
+  color:rgba(245,238,226,.70);
+  font-size:13px;
+}
+
+.magang-avatar{
+  position:absolute;
+  z-index:2;
+  right:4%;
+  bottom:0;
+  width:42%;
+  height:100%;
+  display:flex;
+  justify-content:flex-end;
+  align-items:flex-end;
+  pointer-events:none;
+}
+
+.magang-avatar::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,#090606 0%,transparent 42%);
+}
+
+.magang-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center bottom;
+  filter:drop-shadow(0 18px 30px rgba(0,0,0,.55));
+}
+
+.magang-section-label{
+  margin:28px 4px 13px;
+  font-size:10px;
+  letter-spacing:2.8px;
+  color:#a99a83;
+  font-weight:700;
+}
+
+.magang-card-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+
+.magang-dashboard-card{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-height:92px;
+  width:100%;
+  padding:17px 18px;
+  text-align:left;
+  color:#eee6d9;
+  background:linear-gradient(135deg,rgba(25,8,10,.96),rgba(7,5,5,.96));
+  border:1px solid rgba(171,25,36,.34);
+  border-radius:13px;
+  cursor:pointer;
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+
+.magang-dashboard-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(199,154,73,.60);
+  box-shadow:0 12px 28px rgba(0,0,0,.28);
+}
+
+.magang-card-icon{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(184,26,38,.55);
+  border-radius:50%;
+  color:#d6b56c;
+  font-size:17px;
+}
+
+.magang-card-copy{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  min-width:0;
+}
+
+.magang-card-copy strong{
+  font-family:Georgia,serif;
+  font-size:14px;
+  letter-spacing:.4px;
+}
+
+.magang-card-copy small{
+  color:rgba(238,230,217,.58);
+  font-size:10px;
+}
+
+.magang-card-arrow{
+  margin-left:auto;
+  color:#d6b56c;
+  font-size:25px;
+}
+
+@media(max-width:760px){
+  .magang-hero{
+    min-height:370px;
+  }
+
+  .magang-hero-content{
+    width:100%;
+    padding:42px 24px 28px;
+  }
+
+  .magang-name{
+    font-size:43px;
+  }
+
+  .magang-avatar{
+    right:-13%;
+    width:64%;
+    opacity:.48;
+  }
+
+  .magang-card-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:480px){
+  .magang-hero{
+    min-height:390px;
+  }
+
+  .magang-avatar{
+    right:-24%;
+    width:78%;
+    opacity:.35;
+  }
+
+  .magang-name{
+    font-size:37px;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -6536,6 +6766,129 @@ function loadDashboardPageLegacy() {
 
 
 function loadDashboardPage() {
+
+  /* =====================================================
+     DASHBOARD MAGANG
+     Hanya menampilkan menu yang memang tersedia untuk MAGANG.
+     Tidak mengubah permission/backend.
+  ===================================================== */
+  if (USER && String(USER.role || '').toUpperCase() === 'MAGANG') {
+
+    const magangActions = [];
+
+    if (PERMISSIONS.pickup) {
+      magangActions.push({
+        page: 'pickup',
+        icon: '↓',
+        title: 'PENGAMBILAN BARANG',
+        desc: 'Pengambilan barang dan penyerah'
+      });
+    }
+
+    if (PERMISSIONS.kasbon) {
+      magangActions.push({
+        page: 'kasbon',
+        icon: '◇',
+        title: 'KASBON SAYA',
+        desc: 'Lihat kasbon pribadi secara read-only'
+      });
+    }
+
+    /* PERATURAN memang tersedia untuk semua role. */
+    magangActions.push({
+      page: 'rules',
+      icon: '⚖',
+      title: 'PERATURAN',
+      desc: 'Lihat peraturan Crimson Heritage'
+    });
+
+    /* Profil/password adalah menu akun yang memang tersedia. */
+    magangActions.push({
+      page: 'profile',
+      icon: '●',
+      title: 'PROFIL & PASSWORD',
+      desc: 'Lihat profil dan ganti password'
+    });
+
+    let actionHTML = '';
+
+    magangActions.forEach(function(action) {
+      actionHTML += `
+        <button
+          class="magang-dashboard-card"
+          onclick="showPage('${action.page}', '${action.title}')"
+        >
+          <span class="magang-card-icon">${action.icon}</span>
+          <span class="magang-card-copy">
+            <strong>${escapeHTML(action.title)}</strong>
+            <small>${escapeHTML(action.desc)}</small>
+          </span>
+          <span class="magang-card-arrow">›</span>
+        </button>
+      `;
+    });
+
+    document.getElementById('content').innerHTML = `
+      <div class="magang-dashboard">
+
+        <section class="magang-hero">
+          <div class="magang-hero-glow"></div>
+
+          <div class="magang-hero-content">
+            <div class="magang-kicker">CRIMSON HERITAGE • MEMBER AREA</div>
+
+            <div class="magang-title">
+              SELAMAT DATANG
+            </div>
+
+            <div class="magang-name">
+              ${escapeHTML(USER.nama || 'MAGANG')}
+            </div>
+
+            <div class="magang-role">
+              MAGANG • AKSES TERBATAS
+            </div>
+
+            <div class="magang-line"></div>
+
+            <div class="magang-desc">
+              Gunakan menu yang tersedia untuk akun kamu.
+            </div>
+          </div>
+
+          <div class="magang-avatar">
+            <img
+              src="${escapeHTML(getUserAvatar_())}"
+              alt=""
+              loading="eager"
+              decoding="async"
+            >
+          </div>
+        </section>
+
+        <div class="magang-section-label">
+          MENU YANG TERSEDIA
+        </div>
+
+        <section class="magang-card-grid">
+          ${actionHTML || `
+            <div class="card">
+              <div class="empty">Tidak ada menu yang tersedia.</div>
+            </div>
+          `}
+        </section>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  /* =====================================================
+     PERSONAL DASHBOARD
+     Bearnad / Helix / Jaene masing-masing memakai foto sendiri.
+  ===================================================== */
+
 
   /* =====================================================
      PERSONAL DASHBOARD
