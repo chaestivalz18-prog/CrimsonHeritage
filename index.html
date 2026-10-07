@@ -5869,6 +5869,68 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfLsX57pvrv66kKt6WZFzbQDj4NeWdwAFNPkz8n2-r70mop/exec';
 
 (function () {
+  /*
+   * CRIMSON HERITAGE — FAST API BRIDGE
+   * - Deduplicates identical requests already in flight.
+   * - Short browser cache for read-only data.
+   * - Automatically invalidates read cache after write operations.
+   * - Keeps the existing google.script.run syntax unchanged.
+   */
+  var READ_CACHE_TTL = 5000;
+  var readCache = Object.create(null);
+  var pending = Object.create(null);
+
+  var READ_METHODS = {
+    getMyProfile: 1,
+    getPermissions: 1,
+    getItemsPublic: 1,
+    getPickupHistory: 1,
+    getMyPickups: 1,
+    getActiveStaff: 1,
+    getKasbonData: 1,
+    getKasbonHistory: 1,
+    getKeuanganReport: 1,
+    getKeuanganDuplicateCandidates: 1,
+    getKeuanganHistory: 1,
+    getFinanceSummaryClient: 1,
+    getFinanceHistory: 1,
+    getHistory: 1,
+    getMembers: 1,
+    getUsers: 1,
+    getDashboard: 1,
+    getMemberDetail: 1,
+    getMyData: 1,
+    getPartyHistory: 1,
+    getPartners: 1,
+    getPartnershipPurchases: 1,
+    getKerjaSamaHistory: 1
+  };
+
+  function isReadMethod(method) {
+    return !!READ_METHODS[method];
+  }
+
+  function requestKey(method, args) {
+    try {
+      return method + '|' + JSON.stringify(args || []);
+    } catch (e) {
+      return method;
+    }
+  }
+
+  function clearReadCache() {
+    readCache = Object.create(null);
+  }
+
+  function deliver(handler, value, error) {
+    if (error) {
+      if (typeof handler.failure === 'function') handler.failure(error);
+      else console.error(error);
+      return;
+    }
+    if (typeof handler.success === 'function') handler.success(value);
+  }
+
   function makeRunner(successHandler, failureHandler) {
     return new Proxy({}, {
       get: function (target, prop) {
@@ -5901,14 +5963,49 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
         return function () {
           var args = Array.prototype.slice.call(arguments);
           var method = String(prop);
+          var cacheable = isReadMethod(method);
+          var key = cacheable ? requestKey(method, args) : '';
 
           if (!API_URL || API_URL.indexOf('PASTE_APPS_SCRIPT') !== -1) {
-            var err = new Error(
+            var badUrl = new Error(
               'URL Web App Apps Script belum diisi di index.html.'
             );
-            if (typeof failureHandler === 'function') failureHandler(err);
-            else console.error(err);
+            deliver(
+              {success: successHandler, failure: failureHandler},
+              null,
+              badUrl
+            );
             return;
+          }
+
+          /* Fresh cached result: return on the next microtask so the
+             caller still behaves asynchronously like google.script.run. */
+          if (cacheable && readCache[key] &&
+              (Date.now() - readCache[key].time) < READ_CACHE_TTL) {
+            var cachedValue = readCache[key].value;
+            Promise.resolve().then(function () {
+              if (typeof successHandler === 'function') {
+                successHandler(cachedValue);
+              }
+            });
+            return;
+          }
+
+          /* Same request already running: attach to it instead of opening
+             another <script> request to Apps Script. */
+          if (cacheable && pending[key]) {
+            pending[key].push({
+              success: successHandler,
+              failure: failureHandler
+            });
+            return;
+          }
+
+          if (cacheable) {
+            pending[key] = [{
+              success: successHandler,
+              failure: failureHandler
+            }];
           }
 
           var callbackName =
@@ -5926,49 +6023,66 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
             try { delete window[callbackName]; } catch (e) {}
           }
 
-          window[callbackName] = function (payload) {
+          function finish(value, error) {
             if (finished) return;
             finished = true;
             cleanup();
 
+            if (cacheable) {
+              var handlers = pending[key] || [];
+              delete pending[key];
+
+              if (!error) {
+                readCache[key] = {
+                  time: Date.now(),
+                  value: value
+                };
+              }
+
+              handlers.forEach(function (handler) {
+                deliver(handler, value, error);
+              });
+              return;
+            }
+
+            deliver(
+              {success: successHandler, failure: failureHandler},
+              value,
+              error
+            );
+          }
+
+          window[callbackName] = function (payload) {
             if (payload && payload.ok) {
-              if (typeof successHandler === 'function') {
-                successHandler(payload.result);
-              }
+              finish(payload.result, null);
             } else {
-              var err = new Error(
-                payload && payload.error
-                  ? payload.error
-                  : 'Terjadi kesalahan pada server.'
+              finish(
+                null,
+                new Error(
+                  payload && payload.error
+                    ? payload.error
+                    : 'Terjadi kesalahan pada server.'
+                )
               );
-              if (typeof failureHandler === 'function') {
-                failureHandler(err);
-              } else {
-                console.error(err);
-              }
             }
           };
 
           script.onerror = function () {
-            if (finished) return;
-            finished = true;
-            cleanup();
-            var err = new Error(
-              'Gagal terhubung ke Apps Script. Pastikan Web App sudah di-deploy dan aksesnya dapat digunakan.'
+            finish(
+              null,
+              new Error(
+                'Gagal terhubung ke Apps Script. Pastikan Web App sudah di-deploy dan aksesnya dapat digunakan.'
+              )
             );
-            if (typeof failureHandler === 'function') failureHandler(err);
-            else console.error(err);
           };
 
           timer = setTimeout(function () {
-            if (finished) return;
-            finished = true;
-            cleanup();
-            var err = new Error(
-              'Koneksi ke Apps Script timeout. Cek URL Web App dan deployment.'
+            finish(
+              null,
+              new Error(
+                'Koneksi ke Apps Script timeout. Cek URL Web App dan deployment.'
+              )
             );
-            if (typeof failureHandler === 'function') failureHandler(err);
-            else console.error(err);
           }, 30000);
 
           var rpcId =
@@ -5985,6 +6099,14 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
             '&_=' + Date.now();
 
           document.head.appendChild(script);
+
+          /*
+           * Any write can change one or more read datasets. Clearing the
+           * short cache is safer than trying to guess which dataset changed.
+           */
+          if (!cacheable) {
+            clearReadCache();
+          }
         };
       }
     });
@@ -5993,6 +6115,9 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
   window.google = window.google || {};
   window.google.script = window.google.script || {};
   window.google.script.run = makeRunner(null, null);
+
+  /* Optional manual hook for UI code after known mutations. */
+  window.__CH_CLEAR_READ_CACHE = clearReadCache;
 })();
 </script>
 
@@ -6048,14 +6173,15 @@ const BEARNAD_AVATAR = 'assets/bearnad.png';
 
 window.addEventListener('load', function() {
 
-  setTimeout(function() {
+  var startupLoader = document.getElementById('loader');
+  var startupFallback = setTimeout(function() {
+    if (startupLoader) startupLoader.classList.add('hidden');
+  }, 250);
 
-    document
-      .getElementById('loader')
-      .classList.add('hidden');
-
-  }, 700);
-
+  function finishStartup_() {
+    clearTimeout(startupFallback);
+    if (startupLoader) startupLoader.classList.add('hidden');
+  }
 
   if (TOKEN) {
 
@@ -6063,7 +6189,7 @@ window.addEventListener('load', function() {
       .withSuccessHandler(function(profile) {
 
         USER = profile;
-
+        finishStartup_();
         openApp();
 
       })
@@ -6090,6 +6216,7 @@ window.addEventListener('load', function() {
 
   } else {
 
+    finishStartup_();
     showLogin();
 
   }
@@ -6153,6 +6280,9 @@ function handleLogin(event) {
 
       USER =
         result.user;
+
+      var loginLoader = document.getElementById('loader');
+      if (loginLoader) loginLoader.classList.add('hidden');
 
       storageSet_(
         'CH_TOKEN',
@@ -6431,10 +6561,16 @@ function navButton(
    - Keeps a small HTML cache for instant revisits.
 ===================================================== */
 const PAGE_CACHE = Object.create(null);
-const PAGE_CACHE_TTL = 8000;
+const PAGE_CACHE_TTL = 5000;
+
+/* Cache the visual shell for all read-heavy pages. The normal loader still
+   runs after the cached HTML is restored, so data is refreshed in the background. */
 const PAGE_CACHEABLE = new Set([
-  'dashboard', 'stock', 'finance', 'members', 'history', 'rules'
+  'dashboard', 'stock', 'stockin', 'pickup', 'party',
+  'kerjasama', 'kasbon', 'finance', 'members', 'history',
+  'accounts', 'rules', 'profile'
 ]);
+
 let CURRENT_PAGE = '';
 let PAGE_NAV_SEQ = 0;
 let PAGE_LOADING = false;
@@ -6445,17 +6581,21 @@ function pageCacheGet(page) {
   if (!PAGE_CACHEABLE.has(page)) return null;
   const item = PAGE_CACHE[page];
   if (!item) return null;
+
   if (Date.now() - item.time > PAGE_CACHE_TTL) {
     delete PAGE_CACHE[page];
     return null;
   }
+
   return item.html;
 }
 
 function pageCacheSave(page) {
   if (!PAGE_CACHEABLE.has(page)) return;
+
   const content = document.getElementById('content');
   if (!content || !content.innerHTML.trim()) return;
+
   PAGE_CACHE[page] = {
     html: content.innerHTML,
     time: Date.now()
@@ -6474,17 +6614,17 @@ function pageCacheClearPages() {
   });
 }
 
-function setPageBusy_(busy) {
-  PAGE_LOADING = !!busy;
-  const content = document.getElementById('content');
-  if (content) content.classList.toggle('page-loading', !!busy);
-}
-
+/*
+ * Only observe direct changes to #content.
+ * The previous subtree observer reacted to typing/DOM changes deep inside
+ * forms and tables, which created unnecessary browser work.
+ */
 function watchPageCache_(page) {
   if (PAGE_CACHE_OBSERVER) {
     PAGE_CACHE_OBSERVER.disconnect();
     PAGE_CACHE_OBSERVER = null;
   }
+
   clearTimeout(PAGE_CACHE_SAVE_TIMER);
   PAGE_CACHE_SAVE_TIMER = null;
 
@@ -6495,15 +6635,25 @@ function watchPageCache_(page) {
 
   PAGE_CACHE_OBSERVER = new MutationObserver(function() {
     clearTimeout(PAGE_CACHE_SAVE_TIMER);
+
     PAGE_CACHE_SAVE_TIMER = setTimeout(function() {
       if (CURRENT_PAGE === page) pageCacheSave(page);
-    }, 120);
+    }, 80);
   });
 
   PAGE_CACHE_OBSERVER.observe(content, {
-    childList: true,
-    subtree: true
+    childList: true
   });
+}
+
+function setPageBusy_(busy) {
+  PAGE_LOADING = !!busy;
+  const content = document.getElementById('content');
+
+  if (content) {
+    /* Do not animate the whole page while data is loading. */
+    content.classList.toggle('page-loading', !!busy);
+  }
 }
 
 function showPage(page, title) {
@@ -6623,11 +6773,13 @@ function showPage(page, title) {
       break;
   }
 
-  // If a loader is synchronous, clear the busy state on the next frame.
-  // Async loaders that finish later will simply leave the visual content intact.
+  /*
+   * The direct-child MutationObserver above turns off the busy state after
+   * the loader replaces #content. If a route renders synchronously, do it
+   * on the next frame without replacing the user's visible content.
+   */
   requestAnimationFrame(function() {
     if (navSeq === PAGE_NAV_SEQ && content && content.innerHTML.trim()) {
-      pageCacheSave(page);
       safeDone();
     }
   });
