@@ -2943,7 +2943,7 @@ function navButton(
    - Keeps a small HTML cache for instant revisits.
 ===================================================== */
 const PAGE_CACHE = Object.create(null);
-const PAGE_CACHE_TTL = 8000;
+const PAGE_CACHE_TTL = 60000;
 const PAGE_CACHEABLE = new Set([
   'dashboard', 'stock', 'finance', 'members', 'history', 'rules'
 ]);
@@ -3081,15 +3081,20 @@ function showPage(page, title) {
     content.innerHTML = loadingHTML();
   }
 
-  setPageBusy_(true);
+  const hasCachedPage = !!cached;
+
+  setPageBusy_(!hasCachedPage);
 
   function safeDone() {
     if (navSeq === PAGE_NAV_SEQ) setPageBusy_(false);
   }
 
-  // Route-specific loaders. The existing functions remain untouched.
-  // A loader response is responsible for rendering its page as before.
-  switch(page) {
+  function runRouteLoader_() {
+    if (navSeq !== PAGE_NAV_SEQ || CURRENT_PAGE !== page) return;
+
+    // Route-specific loaders. The existing functions remain untouched.
+    // A loader response is responsible for rendering its page as before.
+    switch(page) {
     case 'dashboard':
       loadDashboardPage();
       break;
@@ -3130,19 +3135,32 @@ function showPage(page, title) {
     case 'profile':
       loadProfilePage();
       break;
-    default:
-      loadDashboardPage();
-      break;
+      default:
+        loadDashboardPage();
+        break;
+    }
   }
 
-  // If a loader is synchronous, clear the busy state on the next frame.
-  // Async loaders that finish later will simply leave the visual content intact.
-  requestAnimationFrame(function() {
-    if (navSeq === PAGE_NAV_SEQ && content && content.innerHTML.trim()) {
-      pageCacheSave(page);
+  // Cached pages are painted first. The server refresh starts only after
+  // the browser gets a paint opportunity, making menu revisits feel instant.
+  if (hasCachedPage) {
+    requestAnimationFrame(function() {
+      if (navSeq !== PAGE_NAV_SEQ || CURRENT_PAGE !== page) return;
       safeDone();
-    }
-  });
+      setTimeout(runRouteLoader_, 0);
+    });
+  } else {
+    runRouteLoader_();
+
+    // If a loader is synchronous, clear the busy state on the next frame.
+    // Async loaders that finish later will simply leave the visual content intact.
+    requestAnimationFrame(function() {
+      if (navSeq === PAGE_NAV_SEQ && content && content.innerHTML.trim()) {
+        pageCacheSave(page);
+        safeDone();
+      }
+    });
+  }
 }
 
 
