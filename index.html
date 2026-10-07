@@ -2381,6 +2381,38 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfLsX57pvrv66kKt6WZFzbQDj4NeWdwAFNPkz8n2-r70mop/exec';
 
 (function () {
+  /* =====================================================
+     SAFE SMART API CACHE
+     - Based on the known-working ULTRA LIGHT + INSTANT MENU bridge.
+     - No preload burst: avoids simultaneous Apps Script/Spreadsheet load.
+     - Read-only results are cached briefly.
+     - Identical in-flight reads are deduplicated.
+     - Any successful write clears the read cache.
+  ===================================================== */
+  var API_CACHE_TTL = 10000;
+  var apiReadCache = Object.create(null);
+  var apiPending = Object.create(null);
+
+  var READ_METHODS = {
+    getMyProfile:1, getPermissions:1, getItemsPublic:1,
+    getPickupHistory:1, getMyPickups:1, getActiveStaff:1,
+    getKasbonData:1, getKasbonHistory:1,
+    getKeuanganReport:1, getKeuanganDuplicateCandidates:1,
+    getFinanceSummaryClient:1, getFinanceHistory:1, getHistory:1,
+    getMembers:1, getUsers:1, getDashboard:1, getMemberDetail:1,
+    getMyData:1, getPartyHistory:1, getPartners:1,
+    getPartnershipPurchases:1, getKerjaSamaHistory:1
+  };
+
+  function clearApiReadCache_() {
+    apiReadCache = Object.create(null);
+  }
+
+  function apiKey_(method, args) {
+    try { return method + '|' + JSON.stringify(args || []); }
+    catch (e) { return method; }
+  }
+
   function makeRunner(successHandler, failureHandler) {
     return new Proxy({}, {
       get: function (target, prop) {
@@ -2413,14 +2445,47 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
         return function () {
           var args = Array.prototype.slice.call(arguments);
           var method = String(prop);
+          var isRead = !!READ_METHODS[method];
+          var cacheKey = isRead ? apiKey_(method, args) : '';
 
-          if (!API_URL || API_URL.indexOf('PASTE_APPS_SCRIPT') !== -1) {
-            var err = new Error(
-              'URL Web App Apps Script belum diisi di index.html.'
-            );
+          function fail(err) {
             if (typeof failureHandler === 'function') failureHandler(err);
             else console.error(err);
+          }
+
+          if (!API_URL || API_URL.indexOf('PASTE_APPS_SCRIPT') !== -1) {
+            fail(new Error('URL Web App Apps Script belum diisi di index.html.'));
             return;
+          }
+
+          if (isRead) {
+            var cached = apiReadCache[cacheKey];
+            if (cached && (Date.now() - cached.time) < API_CACHE_TTL) {
+              if (typeof successHandler === 'function') {
+                setTimeout(function () { successHandler(cached.value); }, 0);
+              }
+              return;
+            }
+
+            if (apiPending[cacheKey]) {
+              apiPending[cacheKey].push({ success: successHandler, failure: failureHandler });
+              return;
+            }
+            apiPending[cacheKey] = [{ success: successHandler, failure: failureHandler }];
+          }
+
+          function finishRead_(ok, value) {
+            if (!isRead) return;
+            if (ok) apiReadCache[cacheKey] = { value: value, time: Date.now() };
+            var waiters = apiPending[cacheKey] || [];
+            delete apiPending[cacheKey];
+            waiters.forEach(function (w) {
+              if (ok) {
+                if (typeof w.success === 'function') w.success(value);
+              } else if (typeof w.failure === 'function') {
+                w.failure(value);
+              }
+            });
           }
 
           var callbackName =
@@ -2444,8 +2509,11 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
             cleanup();
 
             if (payload && payload.ok) {
-              if (typeof successHandler === 'function') {
-                successHandler(payload.result);
+              if (isRead) {
+                finishRead_(true, payload.result);
+              } else {
+                clearApiReadCache_();
+                if (typeof successHandler === 'function') successHandler(payload.result);
               }
             } else {
               var err = new Error(
@@ -2453,11 +2521,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
                   ? payload.error
                   : 'Terjadi kesalahan pada server.'
               );
-              if (typeof failureHandler === 'function') {
-                failureHandler(err);
-              } else {
-                console.error(err);
-              }
+              if (isRead) finishRead_(false, err);
+              else fail(err);
             }
           };
 
@@ -2468,8 +2533,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
             var err = new Error(
               'Gagal terhubung ke Apps Script. Pastikan Web App sudah di-deploy dan aksesnya dapat digunakan.'
             );
-            if (typeof failureHandler === 'function') failureHandler(err);
-            else console.error(err);
+            if (isRead) finishRead_(false, err);
+            else fail(err);
           };
 
           timer = setTimeout(function () {
@@ -2479,8 +2544,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzzKo6Wy1IRmFWtjcGR6WfL
             var err = new Error(
               'Koneksi ke Apps Script timeout. Cek URL Web App dan deployment.'
             );
-            if (typeof failureHandler === 'function') failureHandler(err);
-            else console.error(err);
+            if (isRead) finishRead_(false, err);
+            else fail(err);
           }, 30000);
 
           var rpcId =
@@ -2943,7 +3008,7 @@ function navButton(
    - Keeps a small HTML cache for instant revisits.
 ===================================================== */
 const PAGE_CACHE = Object.create(null);
-const PAGE_CACHE_TTL = 8000;
+const PAGE_CACHE_TTL = 60000;
 const PAGE_CACHEABLE = new Set([
   'dashboard', 'stock', 'finance', 'members', 'history', 'rules'
 ]);
@@ -3081,15 +3146,20 @@ function showPage(page, title) {
     content.innerHTML = loadingHTML();
   }
 
-  setPageBusy_(true);
+  const hasCachedPage = !!cached;
+
+  setPageBusy_(!hasCachedPage);
 
   function safeDone() {
     if (navSeq === PAGE_NAV_SEQ) setPageBusy_(false);
   }
 
-  // Route-specific loaders. The existing functions remain untouched.
-  // A loader response is responsible for rendering its page as before.
-  switch(page) {
+  function runRouteLoader_() {
+    if (navSeq !== PAGE_NAV_SEQ || CURRENT_PAGE !== page) return;
+
+    // Route-specific loaders. The existing functions remain untouched.
+    // A loader response is responsible for rendering its page as before.
+    switch(page) {
     case 'dashboard':
       loadDashboardPage();
       break;
@@ -3130,19 +3200,32 @@ function showPage(page, title) {
     case 'profile':
       loadProfilePage();
       break;
-    default:
-      loadDashboardPage();
-      break;
+      default:
+        loadDashboardPage();
+        break;
+    }
   }
 
-  // If a loader is synchronous, clear the busy state on the next frame.
-  // Async loaders that finish later will simply leave the visual content intact.
-  requestAnimationFrame(function() {
-    if (navSeq === PAGE_NAV_SEQ && content && content.innerHTML.trim()) {
-      pageCacheSave(page);
+  // Cached pages are painted first. The server refresh starts only after
+  // the browser gets a paint opportunity, making menu revisits feel instant.
+  if (hasCachedPage) {
+    requestAnimationFrame(function() {
+      if (navSeq !== PAGE_NAV_SEQ || CURRENT_PAGE !== page) return;
       safeDone();
-    }
-  });
+      setTimeout(runRouteLoader_, 0);
+    });
+  } else {
+    runRouteLoader_();
+
+    // If a loader is synchronous, clear the busy state on the next frame.
+    // Async loaders that finish later will simply leave the visual content intact.
+    requestAnimationFrame(function() {
+      if (navSeq === PAGE_NAV_SEQ && content && content.innerHTML.trim()) {
+        pageCacheSave(page);
+        safeDone();
+      }
+    });
+  }
 }
 
 
