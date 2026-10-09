@@ -2388,6 +2388,134 @@ input,select,textarea{max-width:100%;}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
 
 </style>
+
+<style id="ch-imperial-luxury-motion">
+:root{
+  --ch-imperial-gold:#d8b56a;
+  --ch-imperial-gold-bright:#f4dfa0;
+  --ch-imperial-gold-dim:rgba(216,181,106,.24);
+  --ch-imperial-crimson:#a80f1b;
+  --ch-imperial-glow:rgba(191,26,40,.22);
+}
+/* A subtle animated luxury light, never blocks interaction */
+body::after{
+  background:
+    radial-gradient(ellipse at 12% 8%,rgba(155,18,30,.13),transparent 34%),
+    radial-gradient(ellipse at 88% 82%,rgba(201,164,92,.055),transparent 32%),
+    linear-gradient(135deg,rgba(0,0,0,.30),rgba(0,0,0,.72));
+}
+#loginPage{position:relative;isolation:isolate}
+.login-card{
+  position:relative;
+  border:1px solid rgba(216,181,106,.42)!important;
+  background:linear-gradient(145deg,rgba(17,15,13,.94),rgba(5,5,5,.92))!important;
+  box-shadow:0 28px 90px rgba(0,0,0,.72),0 0 34px rgba(181,18,27,.11),inset 0 1px 0 rgba(255,255,255,.055)!important;
+  overflow:hidden;
+}
+.login-card::before{
+  content:"";position:absolute;inset:7px;border:1px solid rgba(216,181,106,.16);
+  border-radius:inherit;pointer-events:none;
+}
+.login-card::after{
+  content:"";position:absolute;top:-40%;left:-70%;width:42%;height:180%;
+  transform:rotate(24deg);pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(244,223,160,.08),rgba(244,223,160,.20),transparent);
+  animation:chGoldSweep 8s ease-in-out infinite;
+}
+.login-logo{filter:drop-shadow(0 0 12px rgba(201,164,92,.18)) drop-shadow(0 0 25px rgba(181,18,27,.22))}
+.login-title{text-shadow:0 0 26px rgba(216,181,106,.10)}
+.field input,.field select,.field textarea,.stock-search,.quick-stock-qty{
+  border-color:rgba(216,181,106,.14)!important;
+  transition:border-color .22s ease,box-shadow .22s ease,background .22s ease!important;
+}
+.field input:focus,.field select:focus,.field textarea:focus,.stock-search:focus,.quick-stock-qty:focus{
+  border-color:rgba(216,181,106,.7)!important;
+  box-shadow:0 0 0 3px rgba(216,181,106,.08),0 0 20px rgba(181,18,27,.10)!important;
+}
+.btn,.quick-card,.item-card,.card,.partner-card,.bearnad-stat,.bearnad-panel,.kasbon-person-card{
+  transition:transform .22s ease,border-color .25s ease,box-shadow .25s ease,filter .25s ease!important;
+}
+.btn-primary,.btn-red,.btn-gold{
+  position:relative;overflow:hidden;
+}
+.btn-primary::after,.btn-red::after,.btn-gold::after{
+  content:"";position:absolute;top:-80%;left:-65%;width:35%;height:260%;
+  transform:rotate(24deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.20),transparent);
+  transition:left .65s ease;pointer-events:none;
+}
+.btn-primary:hover::after,.btn-red:hover::after,.btn-gold:hover::after{left:140%}
+.btn-gold{border:1px solid rgba(244,223,160,.25)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 6px 20px rgba(0,0,0,.20)}
+/* Double-line imperial frame on hero sections */
+.bearnad-hero,.bearnad-brand-panel,.welcome-card,.keuangan-balance{
+  border-color:rgba(216,181,106,.50)!important;
+  box-shadow:0 20px 58px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.025),0 0 28px rgba(181,18,27,.055)!important;
+}
+.bearnad-hero::after,.bearnad-brand-panel::before{
+  border-color:rgba(216,181,106,.34)!important;
+  box-shadow:inset 0 0 28px rgba(181,18,27,.12),0 0 20px rgba(216,181,106,.035)!important;
+}
+.bearnad-hero::before{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.18) 34%,rgba(0,0,0,.68) 60%,rgba(0,0,0,.86) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.42))!important;
+}
+.bearnad-kicker,.bearnad-stat-label,.bearnad-panel-title,.keuangan-balance-label{
+  text-shadow:0 0 18px rgba(216,181,106,.12);
+}
+.bearnad-stat,.card,.item-card,.quick-card,.partner-card,.kasbon-person-card{
+  border-color:rgba(216,181,106,.17)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 12px 34px rgba(0,0,0,.22)!important;
+}
+.bearnad-stat:hover,.card:hover,.item-card:hover,.quick-card:hover,.partner-card:hover,.kasbon-person-card:hover{
+  border-color:rgba(216,181,106,.43)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 16px 40px rgba(0,0,0,.32),0 0 24px rgba(181,18,27,.07)!important;
+}
+.quick-card::before,.item-card::before{
+  background:linear-gradient(90deg,transparent,var(--ch-imperial-crimson),var(--ch-imperial-gold),transparent)!important;
+  background-size:200% 100%!important;
+  animation:chBorderGleam 7s linear infinite;
+}
+.nav-item.active{
+  border-left-color:var(--ch-imperial-gold-bright)!important;
+  box-shadow:inset 0 0 22px rgba(181,18,27,.07),inset 1px 0 0 rgba(244,223,160,.15);
+}
+.nav-item:hover{color:var(--ch-imperial-gold-bright)!important}
+.topbar::after{
+  background:linear-gradient(90deg,var(--ch-imperial-crimson),rgba(216,181,106,.48),transparent 84%)!important;
+  background-size:200% 100%!important;
+  animation:chBorderGleam 9s linear infinite;
+}
+.modal-box{
+  border-color:rgba(216,181,106,.32)!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.7),0 0 30px rgba(181,18,27,.09)!important;
+}
+.table-wrap,.kasbon-table-wrap{border-color:rgba(216,181,106,.16)!important}
+th{color:rgba(216,181,106,.78)!important}
+#toast{border-color:rgba(216,181,106,.24)!important;box-shadow:0 16px 48px rgba(0,0,0,.5),0 0 22px rgba(181,18,27,.08)!important}
+@keyframes chGoldSweep{
+  0%,65%{left:-75%;opacity:0}
+  72%{opacity:1}
+  90%,100%{left:145%;opacity:0}
+}
+@keyframes chBorderGleam{
+  0%{background-position:100% 0}
+  100%{background-position:-100% 0}
+}
+/* On touch devices, use restrained motion and prevent hover-lift from feeling jumpy */
+@media(hover:none){
+  .btn:hover,.quick-card:hover,.item-card:hover,.card:hover,.partner-card:hover,.bearnad-stat:hover{transform:none!important}
+}
+@media(max-width:750px){
+  .login-card{box-shadow:0 18px 52px rgba(0,0,0,.64),0 0 20px rgba(181,18,27,.08),inset 0 1px 0 rgba(255,255,255,.04)!important}
+  .bearnad-hero,.bearnad-brand-panel{box-shadow:0 12px 32px rgba(0,0,0,.40),inset 0 0 0 1px rgba(255,255,255,.025)!important}
+  .quick-card::before,.item-card::before,.topbar::after{animation-duration:10s}
+}
+@media(prefers-reduced-motion:reduce){
+  .login-card::after,.quick-card::before,.item-card::before,.topbar::after{animation:none!important}
+  .btn,.quick-card,.item-card,.card,.partner-card,.bearnad-stat,.bearnad-panel,.kasbon-person-card{transition:none!important}
+}
+</style>
+
 </head>
 
 <body>
