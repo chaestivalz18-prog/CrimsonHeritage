@@ -2206,6 +2206,59 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.nav-item,.btn,.quick-card,.item-card{transition:none!important;}}
   </style>
   <!-- END MINIMAL PREMIUM THEME -->
+
+  <!-- CRIMSON HERITAGE — PREMIUM MOTION LAYER (CSS ONLY) -->
+  <style id="crimson-premium-motion">
+    :root{--ch-gold-glow:rgba(201,164,92,.24);--ch-crimson-glow:rgba(181,18,27,.16)}
+    /* Slow ambient light: subtle enough for desktop and mobile */
+    body::after{background-size:175% 175%,100% 100%;animation:chAmbientDrift 24s ease-in-out infinite alternate;}
+    @keyframes chAmbientDrift{0%{background-position:0% 20%,center}50%{background-position:100% 65%,center}100%{background-position:45% 100%,center}}
+    /* The emblem breathes gently, without moving layout */
+    .brand img{animation:chEmblemGlow 6s ease-in-out infinite;transform-origin:center;}
+    @keyframes chEmblemGlow{0%,100%{filter:drop-shadow(0 0 2px rgba(201,164,92,.08))}50%{filter:drop-shadow(0 0 9px rgba(201,164,92,.24))}}
+    /* Elegant gold sweep on premium panels */
+    .welcome-card,.keuangan-balance,.bearnad-hero,.bearnad-brand-panel{position:relative;isolation:isolate;overflow:hidden;}
+    .welcome-card::before,.keuangan-balance::after,.bearnad-hero::after,.bearnad-brand-panel::after{content:"";position:absolute;inset:-45% auto -45% -65%;width:34%;pointer-events:none;z-index:0;background:linear-gradient(105deg,transparent,rgba(255,231,168,.09),rgba(201,164,92,.17),transparent);transform:skewX(-18deg);animation:chGoldSweep 11s ease-in-out infinite;}
+    .welcome-card>* ,.keuangan-balance>* ,.bearnad-hero>* ,.bearnad-brand-panel>*{position:relative;z-index:1;}
+    @keyframes chGoldSweep{0%,58%{left:-65%;opacity:0}66%{opacity:.9}84%{left:135%;opacity:.55}100%{left:135%;opacity:0}}
+    /* Fine animated border glint */
+    .welcome-card,.keuangan-balance,.bearnad-panel,.bearnad-stat{transition:border-color .28s ease,box-shadow .28s ease,background-color .28s ease;}
+    .welcome-card:hover,.keuangan-balance:hover,.bearnad-panel:hover,.bearnad-stat:hover{border-color:rgba(201,164,92,.42)!important;box-shadow:0 8px 28px rgba(0,0,0,.22),0 0 0 1px rgba(201,164,92,.035),0 0 22px rgba(201,164,92,.035)!important;}
+    /* Quick links and item cards: tiny lift + gold edge */
+    .quick-card,.item-card{position:relative;overflow:hidden;transition:transform .22s ease,border-color .22s ease,background .22s ease,box-shadow .22s ease!important;}
+    .quick-card::after,.item-card::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.025) 42%,rgba(201,164,92,.055) 50%,transparent 62%);transform:translateX(-120%);transition:transform .65s ease;}
+    .quick-card:hover::after,.item-card:hover::after{transform:translateX(120%);}
+    .quick-card:hover,.item-card:hover{transform:translateY(-2px)!important;box-shadow:0 9px 22px rgba(0,0,0,.22),0 0 16px rgba(201,164,92,.045)!important;}
+    /* Navigation responds without heavy animation */
+    .nav-item{position:relative;transition:color .18s ease,background .18s ease,border-color .18s ease,padding-left .18s ease;}
+    .nav-item:hover{padding-left:15px;}
+    .nav-item.active{box-shadow:inset 0 0 18px rgba(181,18,27,.055);}
+    .nav-item.active::after{content:"";position:absolute;left:0;top:24%;height:52%;width:2px;background:linear-gradient(180deg,transparent,#e2c47a,transparent);filter:drop-shadow(0 0 4px rgba(201,164,92,.5));}
+    /* Buttons: short metallic highlight on hover/focus */
+    .btn,button{transition:transform .16s ease,border-color .2s ease,background-color .2s ease,box-shadow .2s ease;}
+    .btn:hover,button:hover{box-shadow:0 4px 16px rgba(0,0,0,.16);}
+    .btn:active,button:active{transform:scale(.985);}
+    :is(button,.btn,input,select,textarea,a):focus-visible{outline:2px solid rgba(201,164,92,.62);outline-offset:3px;}
+    /* Small gold status glimmer; no continuous layout work */
+    .brand-role{ text-shadow:0 0 12px rgba(201,164,92,.12); }
+    .page-title{animation:chTitleReveal .55s cubic-bezier(.2,.75,.25,1) both;}
+    @keyframes chTitleReveal{from{opacity:0;transform:translateY(7px);filter:blur(2px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+    /* Keep modal entry polished and quick */
+    .modal-box{animation:chModalReveal .2s ease-out both;}
+    @keyframes chModalReveal{from{opacity:0;transform:translateY(7px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @media(max-width:750px){
+      body::after{animation-duration:34s;}
+      .brand img{animation-duration:8s;}
+      .quick-card:hover,.item-card:hover{transform:none!important;}
+      .nav-item:hover{padding-left:12px;}
+      .welcome-card::before,.keuangan-balance::after,.bearnad-hero::after,.bearnad-brand-panel::after{animation-duration:15s;}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;}
+    }
+  </style>
+  <!-- END PREMIUM MOTION LAYER -->
+
 </head>
 
 <body>
