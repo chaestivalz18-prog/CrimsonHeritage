@@ -2259,6 +2259,35 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
   </style>
   <!-- END PREMIUM MOTION LAYER -->
 
+<style id="crimson-ultimate-login-motion">
+/* CRIMSON HERITAGE — cinematic login polish; CSS-only, preserves existing auth */
+#loginPage{position:relative!important;isolation:isolate;overflow:hidden;min-height:100svh!important;background:radial-gradient(ellipse at 50% 45%,rgba(151,18,28,.18),transparent 35%),radial-gradient(ellipse at 15% 15%,rgba(217,179,106,.10),transparent 28%),linear-gradient(135deg,#030303 0%,#100807 48%,#030303 100%)!important}
+#loginPage::before{content:"";position:absolute;inset:-35%;z-index:-1;pointer-events:none;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(217,179,106,.045) 32deg,transparent 75deg,rgba(181,18,27,.07) 145deg,transparent 205deg,rgba(217,179,106,.035) 270deg,transparent 360deg);animation:chLoginOrbit 34s linear infinite}
+#loginPage::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.28;background:linear-gradient(115deg,transparent 0%,rgba(244,214,155,.05) 48%,transparent 54%);background-size:220% 100%;animation:chLoginSweep 10s ease-in-out infinite}
+.login-card{position:relative!important;isolation:isolate;overflow:hidden;width:min(450px,100%)!important;padding:clamp(28px,5vw,44px)!important;border-radius:22px!important;border:1px solid rgba(244,214,155,.48)!important;background:linear-gradient(145deg,rgba(22,18,14,.96),rgba(5,5,5,.97) 65%)!important;box-shadow:0 35px 110px rgba(0,0,0,.78),0 0 65px rgba(181,18,27,.12),0 0 34px rgba(217,179,106,.07),inset 0 1px 0 rgba(255,249,237,.10),inset 0 0 0 6px rgba(217,179,106,.025)!important;animation:chLoginEntrance .85s cubic-bezier(.2,.75,.2,1) both;transform-origin:50% 55%}
+.login-card::before{content:"✦  ◆  ✦"!important;top:15px!important;left:50%!important;transform:translateX(-50%);width:max-content;color:#f0d49b!important;font-size:10px;letter-spacing:7px;opacity:.9!important;text-shadow:0 0 14px rgba(244,214,155,.45);animation:chLoginSigil 5s ease-in-out infinite}
+.login-card::after{content:""!important;position:absolute;inset:7px!important;top:7px!important;right:7px!important;left:7px!important;bottom:7px!important;border:1px solid rgba(217,179,106,.10);border-radius:16px;pointer-events:none;opacity:1!important;background:linear-gradient(110deg,transparent 20%,rgba(244,214,155,.035) 48%,transparent 58%);background-size:220% 100%;animation:chLoginSweep 9s ease-in-out infinite}
+.login-logo{position:relative;z-index:1;width:112px!important;height:112px!important;margin:0 auto 20px!important;filter:drop-shadow(0 0 14px rgba(181,18,27,.30)) drop-shadow(0 0 22px rgba(217,179,106,.15));animation:chLoginLogo 5s ease-in-out infinite}
+.login-title{position:relative;z-index:1;font-size:clamp(21px,5vw,27px)!important;letter-spacing:clamp(2px,1vw,5px)!important;color:#fff8e9!important;text-shadow:0 0 24px rgba(217,179,106,.17)!important}
+.login-subtitle{position:relative;z-index:1;margin-top:9px!important;font-size:10px!important;letter-spacing:clamp(2px,.8vw,4px)!important;color:#e4bd78!important}
+.login-form{position:relative;z-index:1;margin-top:32px!important}
+.login-form .field{margin-bottom:19px!important}
+.login-form .field label{color:#c8b99e!important;font-size:10px!important;letter-spacing:1.7px!important}
+.login-form .field input{min-height:48px!important;padding:14px 15px!important;border-radius:12px!important;border:1px solid rgba(217,179,106,.22)!important;background:linear-gradient(120deg,rgba(255,255,255,.045),rgba(0,0,0,.30))!important;transition:border-color .25s ease,box-shadow .25s ease,background .25s ease!important}
+.login-form .field input:hover{border-color:rgba(217,179,106,.43)!important}
+.login-form .field input:focus{border-color:rgba(244,214,155,.8)!important;box-shadow:0 0 0 3px rgba(217,179,106,.08),0 0 24px rgba(217,179,106,.10),inset 0 0 16px rgba(0,0,0,.35)!important;background:rgba(217,179,106,.035)!important}
+.login-form .btn-primary{position:relative;overflow:hidden;min-height:49px!important;margin-top:3px;border-radius:12px!important;background:linear-gradient(110deg,#76502a 0%,#c0924e 28%,#f3d79b 50%,#b88748 72%,#694522 100%)!important;background-size:200% 100%!important;color:#171006!important;font-weight:900!important;letter-spacing:2px!important;border:1px solid rgba(255,230,181,.58)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 28px rgba(0,0,0,.35),0 0 24px rgba(217,179,106,.10)!important;transition:background-position .5s ease,transform .25s ease,box-shadow .25s ease!important;animation:chLoginGold 7s ease-in-out infinite}
+.login-form .btn-primary:hover{transform:translateY(-2px)!important;background-position:100% 0!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 14px 32px rgba(0,0,0,.42),0 0 28px rgba(217,179,106,.20)!important}
+.login-error{position:relative;z-index:2}
+@keyframes chLoginEntrance{from{opacity:0;transform:translateY(18px) scale(.985);filter:blur(5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@keyframes chLoginOrbit{to{transform:rotate(360deg)}}
+@keyframes chLoginSweep{0%,100%{background-position:130% 0}50%{background-position:-30% 0}}
+@keyframes chLoginSigil{0%,100%{opacity:.62;text-shadow:0 0 8px rgba(244,214,155,.20)}50%{opacity:1;text-shadow:0 0 18px rgba(244,214,155,.60)}}
+@keyframes chLoginLogo{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.025)}}
+@keyframes chLoginGold{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@media(max-width:560px){#loginPage{padding:18px!important}.login-card{padding:34px 23px!important;border-radius:19px!important}.login-logo{width:94px!important;height:94px!important}.login-form{margin-top:27px!important}}
+@media(prefers-reduced-motion:reduce){#loginPage::before,#loginPage::after,.login-card,.login-card::before,.login-card::after,.login-logo,.login-form .btn-primary{animation:none!important;transition:none!important}}
+</style>
 </head>
 
 <body>
