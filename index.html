@@ -2533,6 +2533,20 @@ th{color:rgba(216,181,106,.78)!important}
 @media(prefers-reduced-motion:reduce){#chImperialFx .ch-spark,#chImperialFx .ch-light-sweep,.card,.quick-card,.bearnad-stat,.bearnad-panel,.bearnad-brand-panel,.keuangan-balance,.kasbon-person-card,.partner-card{animation:none!important}}
 
 </style>
+
+<style id="ch-cinematic-royal-audio-ui">
+#chRoyalAudioControl{position:fixed;z-index:99999;right:20px;bottom:20px;display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid rgba(232,200,121,.55);border-radius:999px;background:linear-gradient(135deg,rgba(15,10,10,.94),rgba(48,12,16,.92));color:#f6e3b0;box-shadow:0 8px 28px rgba(0,0,0,.42),0 0 24px rgba(201,164,92,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font:600 11px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.12em}
+#chRoyalAudioControl button{appearance:none;border:1px solid rgba(232,200,121,.32);background:rgba(255,255,255,.035);color:inherit;border-radius:999px;min-width:34px;height:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .25s,border-color .25s,box-shadow .25s}
+#chRoyalAudioControl button:hover{background:rgba(201,164,92,.16);border-color:rgba(232,200,121,.75);box-shadow:0 0 14px rgba(201,164,92,.16)}
+#chRoyalAudioControl button:focus-visible{outline:2px solid #f0d28a;outline-offset:3px}
+#chRoyalAudioControl .ch-audio-dot{width:6px;height:6px;border-radius:50%;background:#9b7b46;box-shadow:0 0 0 rgba(232,200,121,0);transition:all .25s}
+#chRoyalAudioControl.is-playing .ch-audio-dot{background:#e8c879;box-shadow:0 0 10px rgba(232,200,121,.9);animation:chAudioDotPulse 2.8s ease-in-out infinite}
+#chRoyalAudioControl .ch-audio-label{white-space:nowrap}
+@keyframes chAudioDotPulse{0%,100%{opacity:.55}50%{opacity:1}}
+@media(max-width:600px){#chRoyalAudioControl{right:12px;bottom:12px;padding:7px;gap:5px}#chRoyalAudioControl .ch-audio-label{display:none}#chRoyalAudioControl button{min-width:36px;height:36px;padding:0 9px}}
+@media(prefers-reduced-motion:reduce){#chRoyalAudioControl .ch-audio-dot{animation:none!important}#chRoyalAudioControl button{transition:none!important}}
+</style>
+
 </head>
 
 <body>
@@ -8985,6 +8999,68 @@ tbody tr:hover td{
   }
 }
 </style>
+
+
+<!-- Crimson Heritage original royalty-free synthesized cinematic royal ambience.
+     Keep crimson-cinematic-royal.wav in the same folder as this HTML. -->
+<div id="chRoyalAudioControl" role="group" aria-label="Kontrol musik Crimson Heritage">
+  <span class="ch-audio-dot" aria-hidden="true"></span>
+  <span class="ch-audio-label">ROYAL AMBIENCE</span>
+  <button type="button" id="chRoyalPlayPause" aria-label="Putar musik" title="Putar / jeda musik">▶</button>
+  <button type="button" id="chRoyalMute" aria-label="Matikan suara" aria-pressed="false" title="Mute / unmute">♫</button>
+</div>
+<audio id="chRoyalAudio" preload="none" loop playsinline>
+  <source src="assets/crimson-dark-mafia-lounge.wav" type="audio/wav">
+</audio>
+<script id="ch-cinematic-royal-audio-script">
+(function(){
+  'use strict';
+  var audio=document.getElementById('chRoyalAudio');
+  var control=document.getElementById('chRoyalAudioControl');
+  var playButton=document.getElementById('chRoyalPlayPause');
+  var muteButton=document.getElementById('chRoyalMute');
+  if(!audio||!control||!playButton||!muteButton) return;
+  var started=false;
+  var muted=false;
+  audio.volume=0.35;
+  audio.loop=true;
+  function sync(){
+    var playing=!audio.paused&&!audio.ended;
+    control.classList.toggle('is-playing',playing);
+    playButton.textContent=playing?'Ⅱ':'▶';
+    playButton.setAttribute('aria-label',playing?'Jeda musik':'Putar musik');
+    playButton.title=playing?'Jeda musik':'Putar musik';
+    muteButton.textContent=muted?'×':'♫';
+    muteButton.setAttribute('aria-pressed',String(muted));
+    muteButton.setAttribute('aria-label',muted?'Nyalakan suara':'Matikan suara');
+    muteButton.title=muted?'Nyalakan suara':'Matikan suara';
+  }
+  function startAudio(){
+    audio.volume=0.35;
+    var p=audio.play();
+    if(p&&typeof p.then==='function'){
+      p.then(function(){started=true;sync();}).catch(function(){
+        sync();
+        control.setAttribute('title','Browser memerlukan klik untuk memulai musik.');
+      });
+    }else{started=true;sync();}
+  }
+  playButton.addEventListener('click',function(){
+    if(audio.paused){startAudio();}
+    else{audio.pause();sync();}
+  });
+  muteButton.addEventListener('click',function(){
+    muted=!muted;
+    audio.muted=muted;
+    sync();
+  });
+  audio.addEventListener('play',sync);
+  audio.addEventListener('pause',sync);
+  audio.addEventListener('ended',sync);
+  // No autoplay: playback starts only after the visitor presses Play.
+  sync();
+})();
+</script>
 
 </body>
 <style id="crimson-ultra-light-perf">@media(max-width:700px){.card,.login-card,.modal-box,.stock-toolbar,.sidebar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.item-card{box-shadow:0 8px 22px rgba(0,0,0,.16)!important}.item-card:hover{transform:none!important;box-shadow:0 8px 22px rgba(0,0,0,.16)!important}.loader-logo{animation:none!important}.loader-line::after{animation:none!important}.btn:hover{transform:none!important}.personal-dashboard-bearnad .bearnad-hero,.personal-dashboard-helix .bearnad-hero,.personal-dashboard-jaene .bearnad-hero{background-attachment:scroll!important}}</style>
