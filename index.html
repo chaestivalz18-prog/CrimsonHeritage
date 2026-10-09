@@ -9140,3 +9140,56 @@ tbody tr:hover td{
   }
 }
 </style>
+
+<style id="crimson-heritage-visible-luxury-fix">
+/* FINAL VISUAL OVERRIDE — deliberately last so older CSS cannot cancel it. */
+:root{--ch-motion-gold:#e8c879;--ch-motion-red:#b5121b;}
+@keyframes chGoldSweep{0%{background-position:0% 50%;}100%{background-position:220% 50%;}}
+@keyframes chBorderGlow{0%,100%{box-shadow:0 0 0 rgba(201,164,92,0),inset 0 0 0 rgba(201,164,92,0)}50%{box-shadow:0 0 20px rgba(201,164,92,.12),inset 0 0 18px rgba(181,18,27,.07)}}
+@keyframes chSheen{0%{transform:translateX(-160%) skewX(-18deg);opacity:0}12%{opacity:.5}38%{opacity:0}100%{transform:translateX(260%) skewX(-18deg);opacity:0}}
+/* Hero frame: visible gold/red double line with a slow moving highlight. */
+.personal-dashboard-bearnad .bearnad-hero,
+.personal-dashboard-helix .bearnad-hero,
+.personal-dashboard-jaene .bearnad-hero,
+.bearnad-hero{
+  border:1px solid rgba(201,164,92,.72)!important;
+  border-radius:16px!important;
+  box-shadow:0 18px 52px rgba(0,0,0,.48),0 0 24px rgba(181,18,27,.09)!important;
+  animation:chBorderGlow 5s ease-in-out infinite!important;
+}
+.personal-dashboard-bearnad .bearnad-hero::after,
+.personal-dashboard-helix .bearnad-hero::after,
+.personal-dashboard-jaene .bearnad-hero::after,
+.bearnad-hero::after{
+  content:""!important;display:block!important;position:absolute!important;inset:8px!important;
+  border:1px solid transparent!important;border-radius:10px!important;pointer-events:none!important;z-index:4!important;
+  background:linear-gradient(110deg,rgba(201,164,92,.08),rgba(232,200,121,.65),rgba(181,18,27,.20),rgba(201,164,92,.08)) border-box!important;
+  -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0)!important;
+  -webkit-mask-composite:xor!important;mask-composite:exclude!important;
+}
+/* Dashboard summary cards, including the cards visible in the screenshot. */
+.bearnad-stat,.bearnad-panel,.bearnad-brand-panel,.keuangan-balance,.kasbon-person-card,.quick-card,.card{
+  border-color:rgba(201,164,92,.30)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.24),inset 0 0 0 1px rgba(201,164,92,.025)!important;
+}
+.bearnad-stat,.bearnad-panel,.bearnad-brand-panel,.keuangan-balance,.quick-card{
+  position:relative!important;overflow:hidden!important;
+}
+.bearnad-stat::before,.bearnad-panel::before,.bearnad-brand-panel::after,.keuangan-balance::after,.quick-card::before{
+  background:linear-gradient(90deg,transparent 0%,rgba(201,164,92,.12) 22%,rgba(232,200,121,.78) 50%,rgba(181,18,27,.45) 65%,transparent 100%)!important;
+  background-size:220% 100%!important;animation:chGoldSweep 6s linear infinite!important;
+}
+.bearnad-stat:hover,.quick-card:hover,.card:hover{
+  border-color:rgba(232,200,121,.62)!important;
+  box-shadow:0 14px 38px rgba(0,0,0,.32),0 0 20px rgba(181,18,27,.10)!important;
+}
+.topbar{border-bottom:1px solid transparent!important;border-image:linear-gradient(90deg,rgba(181,18,27,.8),rgba(201,164,92,.62),transparent 90%) 1!important;}
+/* Respect reduced-motion preferences and keep the page lightweight. */
+@media(prefers-reduced-motion:reduce){
+ .personal-dashboard-bearnad .bearnad-hero,.personal-dashboard-helix .bearnad-hero,.personal-dashboard-jaene .bearnad-hero,.bearnad-hero,
+ .bearnad-stat::before,.bearnad-panel::before,.bearnad-brand-panel::after,.keuangan-balance::after,.quick-card::before{animation:none!important}
+}
+@media(max-width:750px){
+ .personal-dashboard-bearnad .bearnad-hero,.personal-dashboard-helix .bearnad-hero,.personal-dashboard-jaene .bearnad-hero,.bearnad-hero{border-radius:12px!important}
+}
+</style>
