@@ -1562,7 +1562,7 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 <style id="bearnad-clean-background">
 /* BEARNAD CLEAN HERO
    The old background.png is removed from the Bearnad hero.
-   assets/bearnad.gif is the ONLY hero image. */
+   assets/bearnad.png is the ONLY hero image. */
 .bearnad-hero{
   background-image:none!important;
   background-color:#050303!important;
@@ -2742,7 +2742,7 @@ const BEARNAD_WELCOME =
 
 const LOGO_2 = LOGO_1;
 
-const BEARNAD_AVATAR = 'assets/bearnad.gif';
+const BEARNAD_AVATAR = 'assets/bearnad.png';
 
 
 
@@ -2898,7 +2898,7 @@ function getUserAvatar_() {
 
   const identity = name + ' ' + username;
 
-  if (identity.includes('bearnad')) return 'assets/bearnad.gif';
+  if (identity.includes('bearnad')) return 'assets/bearnad.png';
   if (identity.includes('helix')) return 'assets/helix.png';
   if (identity.includes('jaene')) return 'assets/jaene.png';
 
@@ -3620,7 +3620,7 @@ function loadDashboardPage() {
       key: 'bearnad',
       name: 'Bearnad',
       fullname: 'OSAZE N VERHOEVEN',
-      image: 'assets/bearnad.gif',
+      image: 'assets/bearnad.png',
       quote: 'Met de deur in huis vallen'
     };
   } else if (/helix|elowyn/i.test(identity)) {
