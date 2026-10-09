@@ -6537,6 +6537,10 @@ function cancelPickup(id) {
 
 function loadAccountsPage() {
 
+  const currentRole = String((USER && USER.role) || '').toUpperCase();
+  const isAdmin = currentRole === 'ADMIN';
+  const canManageMagangOnly = ['MANAGER', 'STAFF'].includes(currentRole);
+
   google.script.run
 
     .withSuccessHandler(function(users) {
@@ -6590,13 +6594,15 @@ function loadAccountsPage() {
                 PASSWORD
               </button>
 
-              <button
-                class="btn btn-danger"
-                style="padding:7px 9px;font-size:9px"
-                onclick="deleteUserConfirm('${escapeAttr(user.id)}')"
-              >
-                HAPUS
-              </button>
+              ${isAdmin ? `
+                <button
+                  class="btn btn-danger"
+                  style="padding:7px 9px;font-size:9px"
+                  onclick="deleteUserConfirm('${escapeAttr(user.id)}')"
+                >
+                  HAPUS
+                </button>
+              ` : ''}
 
             </td>
 
@@ -6611,9 +6617,18 @@ function loadAccountsPage() {
 
         <div style="
           display:flex;
-          justify-content:flex-end;
+          justify-content:space-between;
+          align-items:center;
+          gap:12px;
+          flex-wrap:wrap;
           margin-bottom:15px;
         ">
+
+          <div style="font-size:12px;opacity:.78;max-width:620px;line-height:1.6">
+            ${isAdmin
+              ? 'ADMIN dapat mengelola semua akun dan role.'
+              : 'MANAGER/STAFF hanya dapat membuat, mengedit, dan reset password akun MAGANG. Penghapusan akun hanya dapat dilakukan ADMIN.'}
+          </div>
 
           <button
             class="btn btn-red"
@@ -7405,27 +7420,12 @@ function openAddUserModal() {
         <label>Role</label>
 
         <select id="modalUserRole">
-
-          <option value="MANAGER">
-            MANAGER
-          </option>
-
-          <option value="MANAGER">
-            MANAGER
-          </option>
-
-          <option value="STAFF">
-            STAFF
-          </option>
-
-          <option value="MAGANG">
-            MAGANG
-          </option>
-
-          <option value="ADMIN">
-            ADMIN
-          </option>
-
+          ${(String((USER && USER.role) || '').toUpperCase() === 'ADMIN'
+            ? ['ADMIN', 'MANAGER', 'STAFF', 'MAGANG']
+            : ['MAGANG'])
+            .map(function(role) {
+              return `<option value="${role}">${role}</option>`;
+            }).join('')}
         </select>
 
       </div>
@@ -7503,6 +7503,11 @@ function saveNewUser() {
 
 function openEditUserModal(user) {
 
+  if (String((USER && USER.role) || '').toUpperCase() !== 'ADMIN' && String((user && user.role) || '').toUpperCase() !== 'MAGANG') {
+    showToast('MANAGER/STAFF hanya boleh mengedit akun MAGANG.', 'error');
+    return;
+  }
+
   const memberOptions =
     CURRENT_MEMBERS
       .map(function(member) {
@@ -7551,13 +7556,9 @@ function openEditUserModal(user) {
 
         <select id="editUserRole">
 
-          ${[
-            'ADMIN',
-            'MANAGER',
-            'STAFF',
-            ...(String(user.role || '').toUpperCase() === 'MEMBER' ? ['MEMBER'] : []),
-            'MAGANG'
-          ].map(function(role) {
+          ${(String((USER && USER.role) || '').toUpperCase() === 'ADMIN'
+            ? ['ADMIN', 'MANAGER', 'STAFF', ...(String(user.role || '').toUpperCase() === 'MEMBER' ? ['MEMBER'] : []), 'MAGANG']
+            : ['MAGANG']).map(function(role) {
 
             return `
               <option
