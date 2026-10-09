@@ -2099,6 +2099,113 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
   *, *::before, *::after { animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
 }
 </style>
+
+  <!-- CRIMSON HERITAGE | MINIMAL PREMIUM EXECUTIVE GOLD THEME -->
+  <style id="ch-minimal-premium-theme">
+    :root{
+      --bg:#090909;
+      --panel:rgba(18,18,18,.96);
+      --panel2:rgba(25,25,25,.94);
+      --red:#8f1821;
+      --red2:#b92330;
+      --gold:#c9a45c;
+      --text:#f3f0e9;
+      --muted:#9a968e;
+      --border:rgba(201,164,92,.15);
+      --sidebar:232px;
+    }
+    html{scroll-behavior:smooth;}
+    body{background:#090909;color:var(--text);}
+    body::before{opacity:.10;filter:none;mix-blend-mode:normal;background-size:min(500px,48vw) auto;}
+    body::after{background:linear-gradient(180deg,rgba(0,0,0,.70),rgba(0,0,0,.88));}
+    #loader{background:linear-gradient(rgba(0,0,0,.92),rgba(0,0,0,.97)),url("assets/crimson-watermark.webp") center/300px auto no-repeat;transition:opacity .24s ease;}
+    .loader-logo{animation:none;filter:drop-shadow(0 0 14px rgba(201,164,92,.18));}
+    .loader-line::after{background:var(--gold);}
+    .sidebar{background:#0b0b0b;border-right:1px solid rgba(201,164,92,.17);backdrop-filter:none;box-shadow:8px 0 30px rgba(0,0,0,.16);}
+    .brand{padding:19px 17px;border-bottom:1px solid var(--border);}
+    .brand img{width:45px;height:45px;margin-bottom:9px;}
+    .brand-name{font-family:var(--ch-display-font,Georgia,serif);font-size:13px;letter-spacing:1.5px;color:#f2e8d3;}
+    .brand-role{color:var(--gold);letter-spacing:1.2px;}
+    .nav{padding:12px 9px;}
+    .nav-section{color:#746d60;letter-spacing:1.5px;margin:15px 10px 6px;}
+    .nav-item{border:1px solid transparent;border-left:2px solid transparent;border-radius:8px;padding:10px 11px;color:#aaa69d;transition:background .16s ease,color .16s ease,border-color .16s ease;}
+    .nav-item:hover{background:rgba(201,164,92,.055);color:#fff;border-color:rgba(201,164,92,.07);}
+    .nav-item.active{color:#f7e8c6;background:linear-gradient(90deg,rgba(201,164,92,.12),rgba(201,164,92,.025));border-left-color:var(--gold);}
+    .profile-mini{background:#111;border:1px solid rgba(255,255,255,.045);}
+    .profile-mini-role{color:var(--gold);}
+    .logout{background:rgba(143,24,33,.10);border-color:rgba(201,164,92,.16);color:#e4a0a2;}
+    .main{background:transparent;padding:23px 27px 38px;}
+    .topbar{padding-bottom:16px;margin-bottom:22px!important;}
+    .topbar::after{background:linear-gradient(90deg,rgba(201,164,92,.42),rgba(201,164,92,.10),transparent 78%);}
+    .page-title{font-family:var(--ch-display-font,Georgia,serif)!important;font-size:23px;letter-spacing:.15px;color:#f4eddf;}
+    .page-subtitle{color:#918b80;letter-spacing:.7px!important;}
+    .card,.stock-toolbar,.table-wrap,.modal-box,.partnership-direction{background:rgba(17,17,17,.96);border-color:rgba(201,164,92,.13);box-shadow:0 8px 24px rgba(0,0,0,.16);backdrop-filter:none;}
+    .card{border-radius:13px;padding:17px;}
+    .section-title{font-family:var(--ch-display-font,Georgia,serif)!important;font-size:13px;color:#e5d2a7;letter-spacing:.3px;}
+    .stat-label{color:#9a9284;letter-spacing:1.1px;}
+    .stat-gold{color:#d5b56e;}
+    .btn{border-radius:9px;transition:background .16s ease,border-color .16s ease,filter .16s ease;}
+    .btn:hover{transform:none;filter:brightness(1.08);}
+    .btn-primary{background:linear-gradient(135deg,#9b2029,#68131a);box-shadow:none;}
+    .btn-gold{background:#765c2c;color:#fff3d5;}
+    .field input,.field select,.field textarea,.stock-search,.quick-stock-qty{border-color:rgba(201,164,92,.16);background:#101010;border-radius:9px;}
+    .field input:focus,.field select:focus,.field textarea:focus,.stock-search:focus{border-color:rgba(201,164,92,.62);box-shadow:0 0 0 3px rgba(201,164,92,.07);}
+    .welcome-card{border-color:rgba(201,164,92,.20)!important;border-radius:13px!important;background:linear-gradient(110deg,rgba(201,164,92,.055),rgba(255,255,255,.012) 58%,rgba(143,24,33,.06))!important;box-shadow:none!important;}
+    .welcome-card::before{background:linear-gradient(180deg,var(--gold),rgba(143,24,33,.8),transparent);box-shadow:none;}
+    .welcome-card::after{color:rgba(201,164,92,.035);}
+    .welcome-label{color:var(--gold)!important;letter-spacing:2px!important;}
+    .welcome-title{font-family:var(--ch-display-font,Georgia,serif)!important;font-size:25px!important;}
+    .quick-title{color:#d9c99f!important;letter-spacing:1.2px!important;}
+    .quick-title::after{background:linear-gradient(90deg,rgba(201,164,92,.32),transparent);}
+    .quick-card{min-height:88px!important;border-radius:11px!important;border-color:rgba(201,164,92,.13)!important;background:#111!important;box-shadow:none!important;transition:border-color .16s ease,background .16s ease!important;}
+    .quick-card::before{background:linear-gradient(90deg,var(--gold),rgba(143,24,33,.75),transparent);opacity:.55;}
+    .quick-card::after{display:none;}
+    .quick-card:hover{transform:none!important;border-color:rgba(201,164,92,.36)!important;background:#151311!important;box-shadow:none!important;}
+    .quick-icon{background:rgba(201,164,92,.075)!important;border-color:rgba(201,164,92,.17)!important;color:#d8b96f!important;box-shadow:none!important;}
+    .quick-card:hover .quick-icon{border-color:rgba(201,164,92,.35)!important;color:#f1d89d!important;}
+    .quick-arrow{color:#81745a!important;}
+    .item-card{border-radius:12px;background:linear-gradient(145deg,#151515,#101010)!important;box-shadow:none;transition:border-color .16s ease,background .16s ease!important;}
+    .item-card::before{height:2px;background:linear-gradient(90deg,var(--gold),rgba(143,24,33,.75),transparent);}
+    .item-card::after{display:none;}
+    .item-card:hover{transform:none;border-color:rgba(201,164,92,.32);background:#171615!important;box-shadow:0 8px 22px rgba(0,0,0,.20);}
+    .item-icon{background:rgba(201,164,92,.07);border-color:rgba(201,164,92,.14);color:#d6b568;}
+    .item-name{color:#eee8dc;}
+    .table-wrap{border-radius:11px;}
+    th{background:#151411;color:#a99a78;}
+    td{border-top-color:rgba(201,164,92,.08);}
+    tr:hover td{background:rgba(201,164,92,.025);}
+    .modal{backdrop-filter:none;background:rgba(0,0,0,.78);}
+    .modal-box{border-radius:14px;}
+    #toast{border-color:rgba(201,164,92,.18);background:#141311;}
+    .credit-watermark{opacity:.25;}
+    .bearnad-hero,.bearnad-brand-panel,.bearnad-stat,.bearnad-panel{box-shadow:none;}
+    .bearnad-stat:hover{transform:none;}
+    .bearnad-stat{border-color:rgba(201,164,92,.24);}
+    .bearnad-panel{border-color:rgba(201,164,92,.20);}
+    .kasbon-person-card{border-color:rgba(201,164,92,.17);background:linear-gradient(145deg,#141313,#0d0c0c);box-shadow:none;}
+    .kasbon-person-card::before{background:linear-gradient(180deg,var(--gold),rgba(143,24,33,.65),transparent);}
+    .kasbon-person-avatar{border-color:rgba(201,164,92,.23);background:linear-gradient(145deg,rgba(201,164,92,.12),#171311);}
+    .kasbon-mini-btn:hover{transform:none;}
+    .rule-card{border-color:rgba(201,164,92,.10);border-radius:8px;}
+    .rule-number{background:rgba(201,164,92,.08);border-color:rgba(201,164,92,.14);color:#e0c47f;}
+    .rules-kicker{color:var(--gold);}
+    .keuangan-balance{border-color:rgba(201,164,92,.22);border-radius:14px;box-shadow:none;}
+    .keuangan-balance:before{background:linear-gradient(180deg,var(--gold),rgba(143,24,33,.8),transparent);}
+    .partnership-direction{border-radius:12px;}
+    @media(max-width:900px){.main{padding:19px 20px 32px;}}
+    @media(max-width:750px){
+      .sidebar{background:#090909;box-shadow:14px 0 35px rgba(0,0,0,.38);}
+      .main{padding:15px 14px 30px;}
+      .page-title{font-size:20px;}
+      .welcome-card{padding:20px!important;}
+      .welcome-title{font-size:22px!important;}
+      .quick-grid{gap:9px!important;}
+      .quick-card{min-height:72px!important;padding:12px!important;}
+      .item-card:hover{transform:none;}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.nav-item,.btn,.quick-card,.item-card{transition:none!important;}}
+  </style>
+  <!-- END MINIMAL PREMIUM THEME -->
 </head>
 
 <body>
