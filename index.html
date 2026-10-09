@@ -2288,6 +2288,106 @@ th{color:#efd39b!important;letter-spacing:.7px!important}
 @media(max-width:560px){#loginPage{padding:18px!important}.login-card{padding:34px 23px!important;border-radius:19px!important}.login-logo{width:94px!important;height:94px!important}.login-form{margin-top:27px!important}}
 @media(prefers-reduced-motion:reduce){#loginPage::before,#loginPage::after,.login-card,.login-card::before,.login-card::after,.login-logo,.login-form .btn-primary{animation:none!important;transition:none!important}}
 </style>
+
+<style id="crimson-mobile-responsive-fix">
+
+/* CRIMSON HERITAGE — MOBILE RESPONSIVE PATCH (CSS only) */
+*,*::before,*::after{box-sizing:border-box}
+html{width:100%;max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%;}
+body{width:100%;max-width:100%;overflow-x:clip;}
+#app,#loginPage,#content,.main,.topbar,.grid,.card,.table-wrap,.stock-toolbar,.finance-toolbar,.partnership-toolbar{min-width:0;max-width:100%;}
+img,video,canvas,svg{max-width:100%;}
+input,select,textarea{max-width:100%;}
+.table-wrap,.kasbon-table-wrap,.party-table-wrap{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+@media(max-width:750px){
+  html,body{overflow-x:clip!important;width:100%!important;}
+  #app{width:100%!important;min-width:0!important;min-height:100dvh!important;}
+  .sidebar{position:fixed!important;top:0!important;bottom:0!important;left:0!important;width:min(290px,86vw)!important;max-width:86vw!important;z-index:1000!important;transform:translateX(-105%);transition:transform .22s ease!important;overflow-y:auto!important;overscroll-behavior:contain;background:rgba(8,8,8,.98)!important;}
+  .sidebar.open{transform:translateX(0)!important;}
+  .main{margin:0!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:100dvh!important;padding:14px 12px 28px!important;}
+  .topbar{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important;margin-bottom:17px!important;padding-bottom:12px!important;}
+  .topbar>div:first-child{flex:1 1 150px;min-width:0;}
+  .page-title{font-size:clamp(17px,5vw,22px)!important;line-height:1.25!important;overflow-wrap:anywhere;}
+  .page-subtitle{font-size:10px!important;line-height:1.5!important;letter-spacing:.5px!important;overflow-wrap:anywhere;}
+  .mobile-menu{display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;}
+  .grid,.grid-2,.grid-3,.grid-4{grid-template-columns:minmax(0,1fr)!important;width:100%!important;gap:10px!important;}
+  .card{padding:14px!important;border-radius:13px!important;}
+  .stat-value{font-size:clamp(21px,6vw,28px)!important;overflow-wrap:anywhere;}
+  .welcome-card{align-items:flex-start!important;padding:18px 16px!important;gap:10px!important;min-width:0!important;}
+  .welcome-title{font-size:clamp(19px,5.5vw,25px)!important;line-height:1.25!important;overflow-wrap:anywhere;}
+  .welcome-desc{font-size:11px!important;line-height:1.55!important;}
+  .welcome-card::after{right:10px!important;font-size:55px!important;}
+  .quick-grid{grid-template-columns:minmax(0,1fr)!important;gap:9px!important;}
+  .quick-card{width:100%!important;min-width:0!important;min-height:72px!important;padding:13px!important;}
+  .quick-text{min-width:0!important;overflow-wrap:anywhere;}
+  .quick-text strong,.quick-text small{overflow-wrap:anywhere;}
+  .item-card{min-width:0!important;min-height:0!important;padding:15px!important;}
+  .item-name{font-size:13px!important;padding-right:68px!important;overflow-wrap:anywhere;}
+  .item-stock{font-size:28px!important;}
+  .item-footer,.item-quick-stock{flex-wrap:wrap!important;}
+  .item-edit{min-width:0!important;}
+  .stock-toolbar{display:flex!important;flex-wrap:wrap!important;align-items:stretch!important;padding:10px!important;gap:8px!important;}
+  .stock-search-wrap{flex:1 1 100%!important;min-width:0!important;width:100%!important;}
+  .stock-toolbar>.btn{flex:1 1 auto!important;min-width:0!important;}
+  .stock-toolbar-info{white-space:normal!important;}
+  .finance-filter,.finance-tools,.keuangan-tools,.partnership-toolbar{display:flex!important;flex-wrap:wrap!important;gap:8px!important;}
+  .finance-filter>*{flex:1 1 130px;min-width:0!important;}
+  .btn{max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+  .table-wrap table,.kasbon-table-wrap table{min-width:650px!important;}
+  .party-table{min-width:720px!important;}
+  .modal{padding:8px!important;align-items:flex-end!important;}
+  .modal-box{width:100%!important;max-width:100%!important;max-height:90dvh!important;padding:16px!important;border-radius:16px 16px 10px 10px!important;overflow-x:hidden!important;}
+  .modal-actions{flex-wrap:wrap!important;}
+  .modal-actions .btn{flex:1 1 100px;}
+  .credit-watermark{position:static!important;width:100%!important;margin:18px auto 0!important;padding:8px 10px!important;opacity:.5!important;}
+  .credit-watermark span{line-height:1.5!important;overflow-wrap:anywhere;}
+  .bearnad-dashboard{width:100%!important;min-width:0!important;gap:12px!important;}
+  .bearnad-hero{width:100%!important;min-width:0!important;height:auto!important;min-height:360px!important;max-height:none!important;background-size:cover!important;background-position:center top!important;border-radius:12px!important;}
+  .bearnad-hero::before{background:linear-gradient(180deg,rgba(0,0,0,.04) 0%,rgba(0,0,0,.12) 30%,rgba(0,0,0,.88) 100%)!important;}
+  .bearnad-hero-content{width:100%!important;max-width:none!important;min-height:360px!important;margin:0!important;padding:150px 16px 22px!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;overflow-wrap:anywhere;}
+  .bearnad-name{font-size:clamp(30px,9vw,42px)!important;line-height:1.02!important;overflow-wrap:anywhere;}
+  .bearnad-fullname{font-size:9px!important;letter-spacing:1.5px!important;line-height:1.5!important;overflow-wrap:anywhere;}
+  .bearnad-kicker{font-size:12px!important;letter-spacing:1px!important;}
+  .bearnad-desc{font-size:12px!important;line-height:1.6!important;}
+  .bearnad-logo{width:48px!important;height:48px!important;right:14px!important;top:14px!important;}
+  .bearnad-stat-grid{grid-template-columns:minmax(0,1fr)!important;gap:9px!important;}
+  .bearnad-stat{min-height:110px!important;padding:18px 42px 18px 76px!important;}
+  .bearnad-stat-icon{left:13px!important;top:25px!important;width:48px!important;height:48px!important;font-size:22px!important;}
+  .bearnad-stat-arrow{right:12px!important;top:38px!important;}
+  .bearnad-stat-label{font-size:14px!important;}
+  .bearnad-stat-value{font-size:24px!important;overflow-wrap:anywhere;}
+  .bearnad-lower{grid-template-columns:minmax(0,1fr)!important;gap:12px!important;}
+  .bearnad-finance-row{grid-template-columns:minmax(0,1fr) auto!important;gap:6px 10px!important;padding:12px!important;}
+  .bearnad-finance-date{grid-column:1;grid-row:1;}
+  .bearnad-finance-type{grid-column:1;grid-row:2;}
+  .bearnad-finance-amount{grid-column:2;grid-row:1/3;white-space:normal;overflow-wrap:anywhere;}
+  .bearnad-finance-note{grid-column:1/-1!important;grid-row:3!important;white-space:normal!important;overflow-wrap:anywhere;}
+  .bearnad-brand-panel{min-height:220px!important;}
+  .kasbon-page-head,.kasbon-list-head{flex-direction:column!important;align-items:stretch!important;gap:10px!important;}
+  .kasbon-person-count{width:100%!important;}
+  .kasbon-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:10px!important;gap:8px!important;}
+  .kasbon-summary{padding:10px!important;}
+  .kasbon-summary strong{font-size:12px!important;overflow-wrap:anywhere;}
+  .kasbon-person-head{flex-direction:column!important;align-items:stretch!important;padding:14px!important;}
+  .kasbon-person-actions{display:flex!important;flex-wrap:wrap!important;width:100%!important;}
+  .kasbon-mini-btn{flex:1 1 90px!important;min-width:0!important;}
+  .duplicate-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;}
+  .duplicate-row button{grid-column:1/-1!important;width:100%!important;}
+  .rules-page{width:100%!important;}
+  #toast{left:12px!important;right:12px!important;bottom:12px!important;width:auto!important;max-width:none!important;}
+}
+@media(max-width:380px){
+  .main{padding:11px 9px 24px!important;}
+  .card{padding:11px!important;}
+  .bearnad-hero,.bearnad-hero-content{min-height:330px!important;}
+  .bearnad-hero-content{padding:130px 13px 18px!important;}
+  .bearnad-stat{padding-left:68px!important;padding-right:30px!important;}
+  .bearnad-stat-icon{left:10px!important;width:43px!important;height:43px!important;}
+  .kasbon-summary-grid{grid-template-columns:minmax(0,1fr)!important;}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
+
+</style>
 </head>
 
 <body>
