@@ -8987,7 +8987,70 @@ tbody tr:hover td{
 </style>
 
 </body>
-<style id="crimson-ultra-light-perf">@media(max-width:700px){.card,.login-card,.modal-box,.stock-toolbar,.sidebar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.item-card{box-shadow:0 8px 22px rgba(0,0,0,.16)!important}.item-card:hover{transform:none!important;box-shadow:0 8px 22px rgba(0,0,0,.16)!important}.loader-logo{animation:none!important}.loader-line::after{animation:none!important}.btn:hover{transform:none!important}.personal-dashboard-bearnad .bearnad-hero,.personal-dashboard-helix .bearnad-hero,.personal-dashboard-jaene .bearnad-hero{background-attachment:scroll!important}}</style></html>
+<style id="crimson-ultra-light-perf">@media(max-width:700px){.card,.login-card,.modal-box,.stock-toolbar,.sidebar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.item-card{box-shadow:0 8px 22px rgba(0,0,0,.16)!important}.item-card:hover{transform:none!important;box-shadow:0 8px 22px rgba(0,0,0,.16)!important}.loader-logo{animation:none!important}.loader-line::after{animation:none!important}.btn:hover{transform:none!important}.personal-dashboard-bearnad .bearnad-hero,.personal-dashboard-helix .bearnad-hero,.personal-dashboard-jaene .bearnad-hero{background-attachment:scroll!important}}</style>
+<style id="ch-imperial-deluxe-motion">
+/* DELUXE IMPERIAL MOTION — richer login arrival, restrained light choreography, CSS-only */
+#loginPage{position:relative;isolation:isolate}
+#loginPage .login-card{
+  animation:chDeluxeCardArrive 1.25s cubic-bezier(.18,.78,.22,1) both,
+             chDeluxeCardBreath 9s ease-in-out 1.25s infinite!important;
+  outline:1px solid rgba(245,218,157,.10);
+  outline-offset:5px;
+}
+#loginPage .login-card::before{
+  text-shadow:0 0 7px rgba(255,232,177,.82),0 0 18px rgba(232,190,99,.62),0 0 34px rgba(181,18,27,.38)!important;
+  animation:chLoginSigil 3.8s ease-in-out infinite,chDeluxeSigilShimmer 7s linear infinite!important;
+}
+#loginPage .login-card::after{
+  background:
+    linear-gradient(110deg,transparent 16%,rgba(255,236,184,.025) 35%,rgba(255,236,184,.18) 49%,transparent 62%),
+    linear-gradient(135deg,rgba(232,190,99,.04),transparent 30%,transparent 72%,rgba(181,18,27,.07))!important;
+  background-size:240% 100%,100% 100%!important;
+  animation:chLoginSweep 7.5s ease-in-out infinite!important;
+}
+#loginPage .login-logo{
+  animation:chDeluxeLogoFloat 6s ease-in-out infinite!important;
+  filter:drop-shadow(0 0 12px rgba(181,18,27,.55)) drop-shadow(0 0 25px rgba(217,179,106,.35))!important;
+}
+#loginPage .login-title{
+  background:linear-gradient(100deg,#f7f0dc 8%,#d7b66e 28%,#fff4cf 45%,#c9a45c 60%,#f7f0dc 78%);
+  background-size:220% 100%;background-clip:text;-webkit-background-clip:text;color:transparent!important;
+  animation:chDeluxeTitleGlint 9s ease-in-out infinite;
+  filter:drop-shadow(0 0 12px rgba(217,179,106,.12));
+}
+#loginPage .login-subtitle{ text-shadow:0 0 12px rgba(217,179,106,.28); }
+#loginPage .login-form .field{animation:chDeluxeFieldRise .75s both;}
+#loginPage .login-form .field:nth-child(1){animation-delay:.20s}
+#loginPage .login-form .field:nth-child(2){animation-delay:.32s}
+#loginPage .login-form .field:nth-child(3){animation-delay:.44s}
+#loginPage .login-form .btn-primary{
+  background:linear-gradient(110deg,#65070d 0%,#a80e18 27%,#d1a85f 50%,#a80e18 72%,#65070d 100%)!important;
+  background-size:230% 100%!important;
+  animation:chDeluxeButtonGold 10s ease-in-out infinite;
+}
+#loginPage .login-form .field input:focus{border-color:rgba(232,200,121,.8)!important;box-shadow:0 0 0 3px rgba(201,164,92,.09),0 0 22px rgba(201,164,92,.10)!important}
+/* Thin animated corner glints: avoids extra DOM and heavy particle canvases. */
+#loginPage .login-card{background-clip:padding-box;}
+#loginPage .login-card{box-shadow:0 35px 110px rgba(0,0,0,.82),0 0 70px rgba(181,18,27,.17),0 0 46px rgba(217,179,106,.14),inset 0 1px 0 rgba(255,249,237,.13),inset 0 0 0 1px rgba(217,179,106,.10)!important}
+@keyframes chDeluxeCardArrive{0%{opacity:0;transform:translateY(20px) scale(.975);filter:brightness(.72)}70%{opacity:1;transform:translateY(-2px) scale(1.004);filter:brightness(1.08)}100%{opacity:1;transform:translateY(0) scale(1);filter:brightness(1)}}
+@keyframes chDeluxeCardBreath{0%,100%{box-shadow:0 35px 110px rgba(0,0,0,.82),0 0 56px rgba(181,18,27,.13),0 0 32px rgba(217,179,106,.08),inset 0 1px 0 rgba(255,249,237,.13),inset 0 0 0 1px rgba(217,179,106,.10)}50%{box-shadow:0 35px 110px rgba(0,0,0,.82),0 0 76px rgba(181,18,27,.20),0 0 48px rgba(217,179,106,.16),inset 0 1px 0 rgba(255,249,237,.15),inset 0 0 0 1px rgba(217,179,106,.16)}}
+@keyframes chDeluxeLogoFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-4px) scale(1.025)}}
+@keyframes chDeluxeTitleGlint{0%,48%{background-position:100% 0}72%,100%{background-position:0 0}}
+@keyframes chDeluxeSigilShimmer{0%,100%{letter-spacing:7px}50%{letter-spacing:8px}}
+@keyframes chDeluxeFieldRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes chDeluxeButtonGold{0%,100%{background-position:100% 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 28px rgba(0,0,0,.38),0 0 24px rgba(217,179,106,.12)}50%{background-position:0 0;box-shadow:inset 0 1px 0 rgba(255,255,255,.34),0 10px 30px rgba(0,0,0,.38),0 0 34px rgba(217,179,106,.24)}}
+@media(max-width:700px){
+ #loginPage .login-card{animation:chDeluxeCardArrive .85s cubic-bezier(.18,.78,.22,1) both!important;outline-offset:3px}
+ #loginPage .login-logo{animation:chDeluxeLogoFloat 7s ease-in-out infinite!important}
+ #loginPage .login-card::after{animation-duration:10s!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #loginPage .login-card,#loginPage .login-card::before,#loginPage .login-card::after,#loginPage .login-logo,#loginPage .login-title,#loginPage .login-form .field,#loginPage .login-form .btn-primary{animation:none!important;transition:none!important}
+ #loginPage .login-title{background:none!important;color:#f5dda2!important}
+}
+</style>
+
+</html>
 
 <style id="personal-heroes-same-as-helix">
 /* =========================================================
