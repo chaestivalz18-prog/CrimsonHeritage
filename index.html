@@ -4341,6 +4341,10 @@ function quickAddStock(itemId) {
     return;
   }
 
+  const note = window.prompt('Wajib isi keterangan penambahan stok ' + qty + ' unit untuk ' + (CURRENT_ITEMS.find(function(x){return String(x.id)===String(itemId);}) || {}).name + ':', '');
+  if (note === null) return;
+  if (!String(note).trim()) { toast('Keterangan wajib diisi untuk penambahan stok.', 'error'); return; }
+
   const buttons = document.querySelectorAll('.quick-stock-btn');
   buttons.forEach(function(btn) { btn.disabled = true; });
 
@@ -4356,7 +4360,7 @@ function quickAddStock(itemId) {
       buttons.forEach(function(btn) { btn.disabled = false; });
       handleServerError(error);
     })
-    .quickStockIn(TOKEN, itemId, qty);
+    .quickStockIn(TOKEN, itemId, qty, String(note).trim());
 }
 
 
@@ -4374,6 +4378,11 @@ function quickStockOut(itemId) {
     return;
   }
 
+  const itemName = (CURRENT_ITEMS.find(function(x){return String(x.id)===String(itemId);}) || {}).name || 'barang ini';
+  const note = window.prompt('Wajib isi alasan pengurangan stok ' + qty + ' unit untuk ' + itemName + ':', '');
+  if (note === null) return;
+  if (!String(note).trim()) { toast('Keterangan wajib diisi untuk pengurangan stok.', 'error'); return; }
+
   const buttons = document.querySelectorAll('.quick-stock-btn');
   buttons.forEach(function(btn) { btn.disabled = true; });
 
@@ -4389,7 +4398,7 @@ function quickStockOut(itemId) {
       buttons.forEach(function(btn) { btn.disabled = false; });
       handleServerError(error);
     })
-    .quickStockOut(TOKEN, itemId, qty);
+    .quickStockOut(TOKEN, itemId, qty, String(note).trim());
 }
 
 
@@ -4483,11 +4492,12 @@ function loadStockInPage() {
 
           <div class="field">
 
-            <label>Keterangan</label>
+            <label>Keterangan <span style="color:#ef4d5a">* WAJIB</span></label>
 
             <textarea
               id="inNote"
-              placeholder="Keterangan..."
+              required
+              placeholder="Contoh: pembelian barang / stok dari Partnership..."
             ></textarea>
 
           </div>
@@ -4528,6 +4538,10 @@ function submitStockIn() {
 
   const note =
     document.getElementById('inNote').value;
+
+  if (!String(note || '').trim()) { toast('Keterangan wajib diisi untuk penambahan stok.', 'error'); document.getElementById('inNote').focus(); return; }
+  if (!item) { toast('Pilih barang terlebih dahulu.', 'error'); return; }
+  if (!qty || !Number.isInteger(Number(qty)) || Number(qty) <= 0) { toast('Jumlah harus berupa angka bulat lebih dari 0.', 'error'); return; }
 
   google.script.run
 
@@ -4746,6 +4760,11 @@ function submitPickup() {
 
   if (!staff) {
     toast('Pilih ADMIN / MANAGER / STAFF sebagai penyerah.', 'error');
+    return;
+  }
+  if (!String(note || '').trim()) {
+    toast('Keterangan wajib diisi untuk setiap pengambilan barang.', 'error');
+    document.getElementById('pickupNote').focus();
     return;
   }
 
@@ -6001,8 +6020,8 @@ function renderKeuanganPage(report) {
         </div>
 
         <div class="field">
-          <label>KETERANGAN</label>
-          <textarea id="financeNote" placeholder="Masukkan keterangan transaksi..."></textarea>
+          <label>KETERANGAN <span style="color:#ef4d5a">* WAJIB</span></label>
+          <textarea id="financeNote" required placeholder="Jelaskan tujuan pengeluaran / sumber pemasukan..."></textarea>
         </div>
 
         <button class="btn btn-red" onclick="submitKeuangan()">
