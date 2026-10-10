@@ -2535,16 +2535,19 @@ th{color:rgba(216,181,106,.78)!important}
 </style>
 
 <style id="ch-cinematic-royal-audio-ui">
-#chRoyalAudioControl{position:fixed;z-index:99999;right:20px;bottom:20px;display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid rgba(232,200,121,.55);border-radius:999px;background:linear-gradient(135deg,rgba(15,10,10,.94),rgba(48,12,16,.92));color:#f6e3b0;box-shadow:0 8px 28px rgba(0,0,0,.42),0 0 24px rgba(201,164,92,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font:600 11px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.12em}
-#chRoyalAudioControl button{appearance:none;border:1px solid rgba(232,200,121,.32);background:rgba(255,255,255,.035);color:inherit;border-radius:999px;min-width:34px;height:34px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .25s,border-color .25s,box-shadow .25s}
-#chRoyalAudioControl button:hover{background:rgba(201,164,92,.16);border-color:rgba(232,200,121,.75);box-shadow:0 0 14px rgba(201,164,92,.16)}
+#chRoyalAudioControl{position:fixed;z-index:99999;right:18px;bottom:18px;display:flex;align-items:center;gap:7px;padding:6px;border:1px solid rgba(232,200,121,.48);border-radius:999px;background:linear-gradient(135deg,rgba(15,10,10,.95),rgba(48,12,16,.94));color:#f6e3b0;box-shadow:0 5px 18px rgba(0,0,0,.32);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font:600 11px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.08em;touch-action:none;user-select:none;-webkit-user-select:none}
+#chRoyalAudioControl button{appearance:none;border:1px solid rgba(232,200,121,.30);background:rgba(255,255,255,.035);color:inherit;border-radius:999px;min-width:32px;height:32px;padding:0 9px;display:inline-flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:background .18s,border-color .18s;touch-action:manipulation}
+#chRoyalAudioControl button:hover{background:rgba(201,164,92,.16);border-color:rgba(232,200,121,.7)}
 #chRoyalAudioControl button:focus-visible{outline:2px solid #f0d28a;outline-offset:3px}
-#chRoyalAudioControl .ch-audio-dot{width:6px;height:6px;border-radius:50%;background:#9b7b46;box-shadow:0 0 0 rgba(232,200,121,0);transition:all .25s}
-#chRoyalAudioControl.is-playing .ch-audio-dot{background:#e8c879;box-shadow:0 0 10px rgba(232,200,121,.9);animation:chAudioDotPulse 2.8s ease-in-out infinite}
+#chRoyalAudioControl #chRoyalToggle{width:36px;min-width:36px;height:36px;padding:0;font-size:17px;cursor:grab}
+#chRoyalAudioControl .ch-audio-dot{width:5px;height:5px;border-radius:50%;background:#9b7b46;flex:0 0 auto}
+#chRoyalAudioControl.is-playing .ch-audio-dot{background:#e8c879;box-shadow:0 0 7px rgba(232,200,121,.7)}
 #chRoyalAudioControl .ch-audio-label{white-space:nowrap}
-@keyframes chAudioDotPulse{0%,100%{opacity:.55}50%{opacity:1}}
-@media(max-width:600px){#chRoyalAudioControl{right:12px;bottom:12px;padding:7px;gap:5px}#chRoyalAudioControl .ch-audio-label{display:none}#chRoyalAudioControl button{min-width:36px;height:36px;padding:0 9px}}
-@media(prefers-reduced-motion:reduce){#chRoyalAudioControl .ch-audio-dot{animation:none!important}#chRoyalAudioControl button{transition:none!important}}
+#chRoyalAudioControl.is-collapsed{gap:0;padding:3px}
+#chRoyalAudioControl.is-collapsed .ch-audio-label,#chRoyalAudioControl.is-collapsed .ch-audio-dot,#chRoyalAudioControl.is-collapsed #chRoyalPlayPause,#chRoyalAudioControl.is-collapsed #chRoyalMute{display:none}
+#chRoyalAudioControl.is-collapsed #chRoyalToggle{border-color:transparent;background:transparent}
+@media(max-width:600px){#chRoyalAudioControl{right:12px;bottom:12px;padding:3px;gap:5px}#chRoyalAudioControl:not(.is-collapsed){max-width:calc(100vw - 24px)}#chRoyalAudioControl .ch-audio-label{display:none}#chRoyalAudioControl button{min-width:34px;height:34px;padding:0 8px}#chRoyalAudioControl #chRoyalToggle{width:36px;min-width:36px;height:36px}}
+@media(prefers-reduced-motion:reduce){#chRoyalAudioControl button{transition:none!important}}
 </style>
 
 </head>
@@ -8001,9 +8004,35 @@ function refreshPartnerPurchases_() {
 
 function purchaseHistoryHTML_(rows, emptyText) {
   if (!rows.length) return `<div style="font-size:9px;color:#666;padding:10px 0">${emptyText}</div>`;
-  return `<div class="table-wrap"><table style="min-width:720px"><thead><tr><th>Item</th><th>Qty</th><th>Harga Satuan</th><th>Total</th><th>Tanggal</th><th>Keterangan</th></tr></thead><tbody>` +
-    rows.map(function(r) { return `<tr><td>${escapeHTML(r.itemName)}</td><td>${number(r.qty)}</td><td>Rp ${number(r.unitPrice)}</td><td><strong>Rp ${number(r.totalAmount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(r.note || '-')}</td></tr>`; }).join('') +
+  const admin = USER && String(USER.role || '').toUpperCase() === 'ADMIN';
+  return `<div class="table-wrap"><table style="min-width:${admin ? '850px' : '720px'}"><thead><tr><th>Item</th><th>Qty</th><th>Harga Satuan</th><th>Total</th><th>Tanggal</th><th>Keterangan</th>${admin ? '<th>Aksi Admin</th>' : ''}</tr></thead><tbody>` +
+    rows.map(function(r) { return `<tr><td>${escapeHTML(r.itemName)}</td><td>${number(r.qty)}</td><td>Rp ${number(r.unitPrice)}</td><td><strong>Rp ${number(r.totalAmount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(r.note || '-')}</td>${admin ? `<td><button class="btn btn-muted" style="padding:5px 8px;font-size:9px" onclick="editPartnershipAmount('${escapeAttr(r.id)}',${Number(r.totalAmount)||0},'${escapeAttr(r.note||'')}')">EDIT NOMINAL</button> <button class="btn btn-danger" style="padding:5px 8px;font-size:9px" onclick="deletePartnershipPurchase('${escapeAttr(r.id)}')">HAPUS</button></td>` : ''}</tr>`; }).join('') +
     `</tbody></table></div>`;
+}
+
+function editPartnershipAmount(id, currentAmount, note) {
+  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  openModal('EDIT NOMINAL PARTNERSHIP', `<div class="field"><label>Nominal total baru (Rp)</label><input id="partnershipEditAmount" type="number" min="1" value="${Number(currentAmount)||0}" required></div><div class="field"><label>Keterangan</label><input id="partnershipEditNote" value="${escapeAttr(note||'')}"></div><div style="font-size:10px;color:#888;margin:8px 0">Perubahan nominal akan langsung disinkronkan ke histori Keuangan utama. Qty dan stock tidak berubah.</div><div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipAmount('${escapeAttr(id)}')">SIMPAN</button></div>`);
+}
+function savePartnershipAmount(id) {
+  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  const amount = Number(document.getElementById('partnershipEditAmount')?.value || 0);
+  const note = document.getElementById('partnershipEditNote')?.value || '';
+  if (!Number.isFinite(amount) || amount <= 0) { toast('Nominal harus lebih dari 0.', 'error'); return; }
+  google.script.run.withSuccessHandler(function(result) {
+    closeModal(); toast(result.message || 'Nominal diperbarui.', 'success');
+    if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','finance','dashboard','history']);
+    refreshPartnerPurchases_();
+  }).withFailureHandler(handleServerError).updatePartnershipPurchase(TOKEN, id, amount, note);
+}
+function deletePartnershipPurchase(id) {
+  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  if (!confirm('Hapus transaksi Partnership ini? Nominal terkait akan dihapus dari Keuangan utama dan stock akan disesuaikan. Tindakan ini tidak bisa dibatalkan.')) return;
+  google.script.run.withSuccessHandler(function(result) {
+    toast(result.message || 'Transaksi Partnership dihapus.', 'success');
+    if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','stock','finance','dashboard','history']);
+    refreshPartnerPurchases_();
+  }).withFailureHandler(handleServerError).deletePartnershipPurchase(TOKEN, id);
 }
 
 function partnershipMoney_(value) {
@@ -9022,7 +9051,8 @@ tbody tr:hover td{
 
 <!-- Crimson Heritage original royalty-free synthesized cinematic royal ambience.
      Keep crimson-cinematic-royal.wav in the same folder as this HTML. -->
-<div id="chRoyalAudioControl" role="group" aria-label="Kontrol musik Crimson Heritage">
+<div id="chRoyalAudioControl" class="is-collapsed" role="group" aria-label="Kontrol musik Crimson Heritage">
+  <button type="button" id="chRoyalToggle" aria-label="Buka kontrol musik; geser untuk memindahkan" title="Kontrol musik — geser untuk memindahkan">♫</button>
   <span class="ch-audio-dot" aria-hidden="true"></span>
   <span class="ch-audio-label">ROYAL AMBIENCE</span>
   <button type="button" id="chRoyalPlayPause" aria-label="Putar musik" title="Putar / jeda musik">▶</button>
@@ -9038,14 +9068,56 @@ tbody tr:hover td{
   var control=document.getElementById('chRoyalAudioControl');
   var playButton=document.getElementById('chRoyalPlayPause');
   var muteButton=document.getElementById('chRoyalMute');
-  if(!audio||!control||!playButton||!muteButton) return;
-  var started=false;
+  var toggleButton=document.getElementById('chRoyalToggle');
+  if(!audio||!control||!playButton||!muteButton||!toggleButton) return;
   var muted=false;
+  var dragState=null;
+  var suppressToggle=false;
   audio.volume=0.35;
   audio.loop=true;
+  try{
+    var saved=JSON.parse(localStorage.getItem('chRoyalAudioPosition')||'null');
+    if(saved&&Number.isFinite(saved.left)&&Number.isFinite(saved.top)){
+      control.style.left=Math.max(4,Math.min(window.innerWidth-44,saved.left))+'px';
+      control.style.top=Math.max(4,Math.min(window.innerHeight-44,saved.top))+'px';
+      control.style.right='auto';control.style.bottom='auto';
+    }
+  }catch(e){}
+  toggleButton.addEventListener('click',function(){
+    if(suppressToggle){suppressToggle=false;return;}
+    var collapsed=control.classList.toggle('is-collapsed');
+    toggleButton.setAttribute('aria-label',collapsed?'Buka kontrol musik; geser untuk memindahkan':'Tutup kontrol musik; geser untuk memindahkan');
+    toggleButton.title=collapsed?'Buka kontrol musik — geser untuk memindahkan':'Tutup kontrol musik — geser untuk memindahkan';
+  });
+  toggleButton.addEventListener('pointerdown',function(e){
+    if(e.button!==undefined&&e.button!==0)return;
+    var rect=control.getBoundingClientRect();
+    dragState={id:e.pointerId,startX:e.clientX,startY:e.clientY,left:rect.left,top:rect.top,moved:false};
+    try{toggleButton.setPointerCapture(e.pointerId);}catch(err){}
+  });
+  toggleButton.addEventListener('pointermove',function(e){
+    if(!dragState||dragState.id!==e.pointerId)return;
+    var dx=e.clientX-dragState.startX,dy=e.clientY-dragState.startY;
+    if(!dragState.moved&&Math.hypot(dx,dy)<6)return;
+    dragState.moved=true;suppressToggle=true;
+    var left=Math.max(4,Math.min(window.innerWidth-control.offsetWidth-4,dragState.left+dx));
+    var top=Math.max(4,Math.min(window.innerHeight-control.offsetHeight-4,dragState.top+dy));
+    control.style.left=left+'px';control.style.top=top+'px';control.style.right='auto';control.style.bottom='auto';
+  });
+  function finishDrag(e){
+    if(!dragState||dragState.id!==e.pointerId)return;
+    var moved=dragState.moved;dragState=null;
+    if(moved){try{localStorage.setItem('chRoyalAudioPosition',JSON.stringify({left:control.getBoundingClientRect().left,top:control.getBoundingClientRect().top}));}catch(err){}setTimeout(function(){suppressToggle=false;},0);}
+  }
+  toggleButton.addEventListener('pointerup',finishDrag);
+  toggleButton.addEventListener('pointercancel',finishDrag);
+  window.addEventListener('resize',function(){
+    if(control.style.left){var r=control.getBoundingClientRect();control.style.left=Math.max(4,Math.min(window.innerWidth-control.offsetWidth-4,r.left))+'px';control.style.top=Math.max(4,Math.min(window.innerHeight-control.offsetHeight-4,r.top))+'px';}
+  });
   function sync(){
     var playing=!audio.paused&&!audio.ended;
     control.classList.toggle('is-playing',playing);
+    toggleButton.textContent=playing?'♫':'♪';
     playButton.textContent=playing?'Ⅱ':'▶';
     playButton.setAttribute('aria-label',playing?'Jeda musik':'Putar musik');
     playButton.title=playing?'Jeda musik':'Putar musik';
