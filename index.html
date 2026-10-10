@@ -8044,7 +8044,7 @@ function purchaseHistoryHTML_(rows, emptyText, isSell) {
       const invoiceButton = isSell
         ? `<button class="btn btn-gold" style="padding:7px 9px;font-size:9px" onclick="openPartnershipInvoice_('${escapeAttr(r.id)}','${escapeAttr(r.partnerName || (CURRENT_PARTNER && CURRENT_PARTNER.name) || '')}','${escapeAttr(r.itemName)}',${Number(r.qty)||0},${Number(r.unitPrice)||0},${Number(r.totalAmount)||0},'${escapeAttr(r.date)}','${paymentStatus}','${escapeAttr(cleanNote)}')">LIHAT INVOICE</button><div style="font-size:8px;color:${paymentStatus==='PAID'?'#37c978':paymentStatus==='UNPAID'?'#e5b94d':'#aaa'};margin-top:5px">${paymentStatus==='PAID'?'LUNAS':paymentStatus==='UNPAID'?'BELUM DIBAYAR':'STATUS BELUM DIATUR'}</div>`
         : '<span style="color:#666">—</span>';
-      return `<tr><td>${invoiceButton}</td><td>${escapeHTML(r.itemName)}</td><td>${number(r.qty)}</td><td>Rp ${number(r.unitPrice)}</td><td><strong>Rp ${number(r.totalAmount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(cleanNote || '-')}</td>${admin ? `<td><button class="btn btn-muted" style="padding:5px 8px;font-size:9px" onclick="editPartnershipAmount('${escapeAttr(r.id)}',${Number(r.totalAmount)||0},'${escapeAttr(cleanNote)}')">EDIT NOMINAL</button> <button class="btn btn-danger" style="padding:5px 8px;font-size:9px" onclick="deletePartnershipPurchase('${escapeAttr(r.id)}')">HAPUS</button></td>` : ''}</tr>`;
+      return `<tr><td>${invoiceButton}</td><td>${escapeHTML(r.itemName)}</td><td>${number(r.qty)}</td><td>Rp ${number(r.unitPrice)}</td><td><strong>Rp ${number(r.totalAmount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(cleanNote || '-')}</td>${admin ? `<td><button class="btn btn-muted" style="padding:5px 8px;font-size:9px" onclick="editPartnershipAmount('${escapeAttr(r.id)}',${Number(r.totalAmount)||0},'${escapeAttr(cleanNote)}','${paymentStatus}')">EDIT NOMINAL</button> <button class="btn btn-danger" style="padding:5px 8px;font-size:9px" onclick="deletePartnershipPurchase('${escapeAttr(r.id)}')">HAPUS</button></td>` : ''}</tr>`;
     }).join('') +
     `</tbody></table></div>`;
 }
@@ -8081,17 +8081,21 @@ function updatePartnershipInvoiceStatus_(id, status, amount, cleanNote, invoiceW
   }).withFailureHandler(handleServerError).updatePartnershipPurchase(TOKEN, id, Number(amount) || 0, note);
 }
 
-function editPartnershipAmount(id, currentAmount, note) {
+function editPartnershipAmount(id, currentAmount, note, paymentStatus) {
   if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
-  openModal('EDIT NOMINAL PARTNERSHIP', `<div class="field"><label>Nominal total baru (Rp)</label><input id="partnershipEditAmount" type="number" min="0" step="1" value="${Number(currentAmount)||0}" required></div><div class="field"><label>Keterangan</label><input id="partnershipEditNote" value="${escapeAttr(note||'')}"></div><div style="font-size:10px;color:#888;margin:8px 0">Nominal boleh Rp0 dan akan langsung disinkronkan ke histori Keuangan utama. Qty dan stock tidak berubah.</div><div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipAmount('${escapeAttr(id)}')">SIMPAN</button></div>`);
+  const currentStatus = ['PAID','UNPAID'].includes(String(paymentStatus || '').toUpperCase()) ? String(paymentStatus).toUpperCase() : 'UNKNOWN';
+  openModal('EDIT NOMINAL & STATUS PEMBAYARAN', `<div class="field"><label>Nominal total (Rp)</label><input id="partnershipEditAmount" type="number" min="0" step="1" value="${Number(currentAmount)||0}" required></div><div class="field"><label>Status pembayaran invoice</label><select id="partnershipEditPaymentStatus"><option value="UNKNOWN" ${currentStatus==='UNKNOWN'?'selected':''}>Belum diatur</option><option value="UNPAID" ${currentStatus==='UNPAID'?'selected':''}>Belum dibayar</option><option value="PAID" ${currentStatus==='PAID'?'selected':''}>Lunas</option></select></div><div class="field"><label>Keterangan</label><input id="partnershipEditNote" value="${escapeAttr(note||'')}"></div><div style="font-size:10px;color:#888;margin:8px 0">Nominal disinkronkan ke histori Keuangan utama. Status pembayaran akan ikut tampil saat invoice dibuka atau dicetak. Qty dan stock tidak berubah.</div><div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipAmount('${escapeAttr(id)}')">SIMPAN PERUBAHAN</button></div>`);
 }
 function savePartnershipAmount(id) {
   if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
   const amount = Number(document.getElementById('partnershipEditAmount')?.value || 0);
-  const note = document.getElementById('partnershipEditNote')?.value || '';
+  let note = document.getElementById('partnershipEditNote')?.value || '';
+  const paymentStatus = document.getElementById('partnershipEditPaymentStatus')?.value || 'UNKNOWN';
   if (!Number.isFinite(amount) || amount < 0) { toast('Nominal tidak boleh kurang dari 0.', 'error'); return; }
+  note = String(note).replace(/\s*\[\[CH_INVOICE_STATUS:(?:PAID|UNPAID)\]\]/ig, '').trim();
+  if (paymentStatus === 'PAID' || paymentStatus === 'UNPAID') note = (note ? note + ' ' : '') + '[[CH_INVOICE_STATUS:' + paymentStatus + ']]';
   google.script.run.withSuccessHandler(function(result) {
-    closeModal(); toast(result.message || 'Nominal diperbarui.', 'success');
+    closeModal(); toast(result.message || 'Nominal dan status pembayaran diperbarui.', 'success');
     if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','finance','dashboard','history']);
     refreshPartnerPurchases_();
   }).withFailureHandler(handleServerError).updatePartnershipPurchase(TOKEN, id, amount, note);
