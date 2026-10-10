@@ -8012,13 +8012,13 @@ function purchaseHistoryHTML_(rows, emptyText) {
 
 function editPartnershipAmount(id, currentAmount, note) {
   if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
-  openModal('EDIT NOMINAL PARTNERSHIP', `<div class="field"><label>Nominal total baru (Rp)</label><input id="partnershipEditAmount" type="number" min="1" value="${Number(currentAmount)||0}" required></div><div class="field"><label>Keterangan</label><input id="partnershipEditNote" value="${escapeAttr(note||'')}"></div><div style="font-size:10px;color:#888;margin:8px 0">Perubahan nominal akan langsung disinkronkan ke histori Keuangan utama. Qty dan stock tidak berubah.</div><div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipAmount('${escapeAttr(id)}')">SIMPAN</button></div>`);
+  openModal('EDIT NOMINAL PARTNERSHIP', `<div class="field"><label>Nominal total baru (Rp)</label><input id="partnershipEditAmount" type="number" min="0" step="1" value="${Number(currentAmount)||0}" required></div><div class="field"><label>Keterangan</label><input id="partnershipEditNote" value="${escapeAttr(note||'')}"></div><div style="font-size:10px;color:#888;margin:8px 0">Nominal boleh Rp0 dan akan langsung disinkronkan ke histori Keuangan utama. Qty dan stock tidak berubah.</div><div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipAmount('${escapeAttr(id)}')">SIMPAN</button></div>`);
 }
 function savePartnershipAmount(id) {
   if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
   const amount = Number(document.getElementById('partnershipEditAmount')?.value || 0);
   const note = document.getElementById('partnershipEditNote')?.value || '';
-  if (!Number.isFinite(amount) || amount <= 0) { toast('Nominal harus lebih dari 0.', 'error'); return; }
+  if (!Number.isFinite(amount) || amount < 0) { toast('Nominal tidak boleh kurang dari 0.', 'error'); return; }
   google.script.run.withSuccessHandler(function(result) {
     closeModal(); toast(result.message || 'Nominal diperbarui.', 'success');
     if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','finance','dashboard','history']);
