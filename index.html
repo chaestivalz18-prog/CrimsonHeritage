@@ -6381,13 +6381,15 @@ function loadHistoryPage() {
 
   Promise.all([
     getHistoryPromise(),
-    getPickupHistoryPromise()
+    getPickupHistoryPromise(),
+    runPromise('getAuditHistory', [TOKEN])
   ])
   .then(function(results) {
       if (CURRENT_PAGE !== 'history') return;
 
     const transactions = results[0];
-    const pickups = results[1];
+    const pickups = results[1] || [];
+    const auditRows = results[2] || [];
 
     let rows = '';
 
@@ -6461,6 +6463,33 @@ function loadHistoryPage() {
 
       </div>
 
+
+      <div class="section-title">
+        AUDIT HISTORY — SEMUA AKTIVITAS
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Waktu</th><th>Pengguna</th><th>Role</th><th>Aktivitas</th><th>Detail perubahan</th><th>ID Log</th></tr></thead>
+          <tbody>
+            ${auditRows.map(function(row) {
+              let detail = row.details || '-';
+              try {
+                const parsed = JSON.parse(detail);
+                detail = (parsed.table || '') + ' · ' + (parsed.operation || '') +
+                  (parsed.old && parsed.new ? ' · data sebelum/sesudah tersedia' : '');
+              } catch (e) {}
+              return `<tr>
+                <td>${escapeHTML(row.timestamp || '-')}</td>
+                <td>${escapeHTML(row.username || row.userId || 'Sistem')}</td>
+                <td>${escapeHTML(row.role || '-')}</td>
+                <td>${escapeHTML(row.action || '-')}</td>
+                <td style="max-width:420px;white-space:normal;word-break:break-word">${escapeHTML(detail)}</td>
+                <td>${escapeHTML(row.id || '-')}</td>
+              </tr>`;
+            }).join('') || `<tr><td colspan="6"><div class="empty">Belum ada aktivitas tercatat. Aktivitas baru akan masuk setelah patch Supabase dipasang.</div></td></tr>`}
+          </tbody>
+        </table>
+      </div>
 
       <div class="section-title">
         PICKUP / PENGAMBILAN
