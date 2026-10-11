@@ -53,6 +53,25 @@
 .partnership-direction .btn{min-height:40px!important;border-radius:9px!important;font-size:10px!important;letter-spacing:.5px!important;}
 .partnership-direction .table-wrap{max-width:100%!important;}
 @media(max-width:600px){.partnership-direction{padding:13px!important}.partnership-direction-banner{gap:8px!important;padding-bottom:11px!important}.partnership-direction-banner strong{font-size:11px!important}.partnership-direction-banner small{font-size:8px!important}.partnership-direction-tag{font-size:7px!important;padding:6px!important}.partnership-direction-icon{width:30px!important;height:30px!important;flex-basis:30px!important}}
+
+/* CRIMSON HERITAGE — EASY PARTNERSHIP MODE: short, clear, low-scroll */
+.partnership-quick-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:15px;}
+.partnership-switch-btn{display:flex;align-items:center;gap:10px;text-align:left;min-width:0;width:100%;padding:12px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.025);color:#f4f4f4;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+.partnership-switch-btn .switch-symbol{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.06);font-size:17px;}
+.partnership-switch-btn strong{display:block;font-size:11px;letter-spacing:.15px;}
+.partnership-switch-btn small{display:block;margin-top:4px;color:#969696;font-size:9px;line-height:1.3;}
+.partnership-switch-btn[data-direction="buy"].is-active{border-color:rgba(225,78,88,.65);background:rgba(181,18,27,.12);}
+.partnership-switch-btn[data-direction="buy"].is-active .switch-symbol{color:#ff9298;background:rgba(181,18,27,.2);}
+.partnership-switch-btn[data-direction="sell"].is-active{border-color:rgba(67,196,133,.65);background:rgba(55,201,120,.10);}
+.partnership-switch-btn[data-direction="sell"].is-active .switch-symbol{color:#83e7ad;background:rgba(55,201,120,.14);}
+.partnership-directions-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;min-width:0!important;}
+.partnership-directions-grid .partnership-direction-sell{display:none!important;}
+.partnership-directions-grid.show-sell .partnership-direction-buy{display:none!important;}
+.partnership-directions-grid.show-sell .partnership-direction-sell{display:block!important;}
+.partnership-legacy-heading{display:none!important;}
+.partnership-direction{min-width:0!important;}
+.partnership-direction-banner{margin-bottom:12px!important;}
+@media(max-width:480px){.partnership-quick-switch{gap:7px}.partnership-switch-btn{padding:10px 8px;gap:7px}.partnership-switch-btn .switch-symbol{width:28px;height:28px;flex-basis:28px;font-size:15px}.partnership-switch-btn strong{font-size:10px}.partnership-switch-btn small{font-size:8px}}
 </style>
 
 <style id="bearnad-contained-character-final">
@@ -8083,7 +8102,11 @@ function partnershipDetailHTML_(partner) {
     </div>
 
     <div id="partnerFinanceSummary" style="margin-top:15px"></div>
-    <div class="grid partnership-directions-grid" style="margin-top:15px">
+    <div class="partnership-quick-switch" role="group" aria-label="Pilih jenis transaksi">
+      <button type="button" class="partnership-switch-btn is-active" data-direction="buy" onclick="switchPartnershipDirection('buy')"><span class="switch-symbol">↙</span><span><strong>Pembelian Kita</strong><small>Kita beli dari partner</small></span></button>
+      <button type="button" class="partnership-switch-btn" data-direction="sell" onclick="switchPartnershipDirection('sell')"><span class="switch-symbol">↗</span><span><strong>Pembelian Mereka</strong><small>Partner beli dari kita</small></span></button>
+    </div>
+    <div class="grid partnership-directions-grid" style="margin-top:10px">
       <div class="partnership-direction partnership-direction-buy">
         <div class="partnership-direction-banner"><span class="partnership-direction-icon">↙</span><div><strong>PEMBELIAN KITA</strong><small>KITA MEMBELI BARANG DARI PARTNER</small></div><span class="partnership-direction-tag">UANG KELUAR</span></div>
         <h3 class="partnership-legacy-heading">📦 PEMBELIAN KITA <span style="color:#777;font-weight:400">— barang dari partner</span></h3>
@@ -8116,6 +8139,18 @@ function partnershipDetailHTML_(partner) {
         <div id="partnerSellHistory" style="margin-top:14px"></div>
       </div>
     </div>`;
+}
+
+function switchPartnershipDirection(direction) {
+  const grid = document.querySelector('.partnership-directions-grid');
+  if (!grid) return;
+  const showSell = direction === 'sell';
+  grid.classList.toggle('show-sell', showSell);
+  document.querySelectorAll('.partnership-switch-btn').forEach(function(btn) {
+    const active = btn.dataset.direction === (showSell ? 'sell' : 'buy');
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
 }
 
 function refreshPartnerPurchases_() {
