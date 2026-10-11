@@ -8199,7 +8199,9 @@ function refreshPartnerPurchases_() {
 
 function purchaseHistoryHTML_(rows, emptyText, isSell) {
   if (!rows.length) return `<div style="font-size:9px;color:#666;padding:10px 0">${emptyText}</div>`;
-  const admin = USER && String(USER.role || '').toUpperCase() === 'ADMIN';
+  const role = String((USER && USER.role) || '').toUpperCase();
+  const admin = role === 'ADMIN';
+  const canEdit = admin || role === 'MANAGER';
   const direction = isSell ? 'SELL' : 'BUY';
   const groups = new Map();
   rows.forEach(function(r) {
@@ -8225,7 +8227,7 @@ function purchaseHistoryHTML_(rows, emptyText, isSell) {
     const handler = partnershipInvoiceMeta_(rawNotes[0], 'HANDLER');
     return {key:key, lines:lines, first:first, amount:amount, qty:qty, names:names, status:status, cleanNote:cleanNote, recipient:recipient, handler:handler};
   });
-  return `<div class="table-wrap"><table style="min-width:${admin ? '980px' : '850px'}"><thead><tr><th>Invoice</th><th>Daftar Barang</th><th>Total Qty</th><th>Total Invoice</th><th>Tanggal</th><th>Keterangan</th>${admin ? '<th>Aksi Admin</th>' : ''}</tr></thead><tbody>` +
+  return `<div class="table-wrap"><table style="min-width:${canEdit ? '980px' : '850px'}"><thead><tr><th>Invoice</th><th>Daftar Barang</th><th>Total Qty</th><th>Total Invoice</th><th>Tanggal</th><th>Keterangan</th>${canEdit ? '<th>Aksi</th>' : ''}</tr></thead><tbody>` +
     grouped.map(function(g) {
       const r = g.first;
       const statusLabel = g.status==='PAID'?'LUNAS':g.status==='UNPAID'?'BELUM LUNAS':'STATUS BELUM DIATUR';
@@ -8241,12 +8243,12 @@ function purchaseHistoryHTML_(rows, emptyText, isSell) {
         lines: g.lines
       }));
       const invoiceButton = `<button class="btn btn-gold" style="padding:7px 9px;font-size:9px" onclick="openPartnershipInvoiceGroupPayload_('${invoicePayload}')">LIHAT NOTA INVOICE (${g.lines.length} BARANG)</button><div style="font-size:8px;color:${g.status==='PAID'?'#37c978':g.status==='UNPAID'?'#e5b94d':'#aaa'};margin-top:5px">${statusLabel}</div>`;
-      // Admin actions are invoice-level: one edit and one delete for the whole grouped invoice.
-      const adminActions = admin ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      // ADMIN and MANAGER can edit the invoice; only ADMIN can delete it.
+      const invoiceActions = canEdit ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-muted" style="padding:7px 9px;font-size:9px" onclick="editPartnershipInvoiceGroup_('${escapeAttr(encodeURIComponent(JSON.stringify({id:g.key,partnerId:r.partnerId||'',partnerName:r.partnerName||'',date:r.date||'',status:g.status,note:g.cleanNote||'',recipient:g.recipient||'',handler:g.handler||'',direction:direction,lines:g.lines})))}')">EDIT INVOICE</button>
-        <button class="btn btn-danger" style="padding:7px 9px;font-size:9px" onclick="deletePartnershipInvoiceGroup_('${escapeAttr(g.key)}','${direction}')">HAPUS INVOICE</button>
+        ${admin ? `<button class="btn btn-danger" style="padding:7px 9px;font-size:9px" onclick="deletePartnershipInvoiceGroup_('${escapeAttr(g.key)}','${direction}')">HAPUS INVOICE</button>` : ''}
       </div>` : '';
-      return `<tr><td>${invoiceButton}</td><td>${itemSummary}</td><td>${number(g.qty)}</td><td><strong>Rp ${number(g.amount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(g.cleanNote || '-')}</td>${admin ? `<td>${adminActions}</td>` : ''}</tr>`;
+      return `<tr><td>${invoiceButton}</td><td>${itemSummary}</td><td>${number(g.qty)}</td><td><strong>Rp ${number(g.amount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(g.cleanNote || '-')}</td>${canEdit ? `<td>${invoiceActions}</td>` : ''}</tr>`;
     }).join('') +
     `</tbody></table></div>`;
 }
@@ -8321,7 +8323,7 @@ function openPartnershipInvoice_(id, partnerName, itemName, qty, unitPrice, tota
 
 // Dipanggil dari jendela invoice agar status pembayaran bisa diubah dan disimpan ke riwayat.
 function updatePartnershipInvoiceStatus_(id, status, amount, cleanNote, invoiceWin) {
-  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Perubahan status invoice khusus ADMIN.', 'error'); return; }
+  if (!USER || !['ADMIN','MANAGER'].includes(String(USER.role || '').toUpperCase())) { toast('Perubahan status invoice khusus ADMIN atau MANAGER.', 'error'); return; }
   status = status === 'PAID' ? 'PAID' : 'UNPAID';
   const note = (String(cleanNote || '').replace(/\s*\[\[CH_INVOICE_STATUS:(?:PAID|UNPAID)\]\]/ig, '').trim() + ' [[CH_INVOICE_STATUS:' + status + ']]').trim();
   google.script.run.withSuccessHandler(function(result) {
@@ -8344,7 +8346,7 @@ function updatePartnershipInvoiceStatus_(id, status, amount, cleanNote, invoiceW
 
 
 function editPartnershipInvoiceGroup_(payload) {
-  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  if (!USER || !['ADMIN','MANAGER'].includes(String(USER.role || '').toUpperCase())) { toast('Edit invoice khusus ADMIN atau MANAGER.', 'error'); return; }
   let inv;
   try { inv = JSON.parse(decodeURIComponent(payload)); } catch (_) { toast('Data invoice tidak valid.', 'error'); return; }
   const total = (inv.lines || []).reduce((s,l)=>s+(Number(l.totalAmount)||0),0);
@@ -8361,7 +8363,7 @@ function editPartnershipInvoiceGroup_(payload) {
     <div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipInvoiceGroup_('${escapeAttr(encodeURIComponent(JSON.stringify(inv)))}')">SIMPAN INVOICE</button></div>`);
 }
 function savePartnershipInvoiceGroup_(payload) {
-  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  if (!USER || !['ADMIN','MANAGER'].includes(String(USER.role || '').toUpperCase())) { toast('Edit invoice khusus ADMIN atau MANAGER.', 'error'); return; }
   let inv; try { inv=JSON.parse(decodeURIComponent(payload)); } catch (_) { toast('Data invoice tidak valid.','error'); return; }
   const amount=Number(document.getElementById('partnershipGroupAmount')?.value||0);
   const status=document.getElementById('partnershipGroupStatus')?.value||'UNKNOWN';
@@ -8386,12 +8388,12 @@ function deletePartnershipInvoiceGroup_(invoiceId, direction) {
 }
 
 function editPartnershipAmount(id, currentAmount, note, paymentStatus) {
-  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  if (!USER || !['ADMIN','MANAGER'].includes(String(USER.role || '').toUpperCase())) { toast('Edit Partnership khusus ADMIN atau MANAGER.', 'error'); return; }
   const currentStatus = ['PAID','UNPAID'].includes(String(paymentStatus || '').toUpperCase()) ? String(paymentStatus).toUpperCase() : 'UNKNOWN';
   openModal('EDIT NOMINAL & STATUS PEMBAYARAN', `<div class="field"><label>Nominal total (Rp)</label><input id="partnershipEditAmount" type="number" min="0" step="1" value="${Number(currentAmount)||0}" required></div><div class="field"><label>Status pembayaran invoice</label><select id="partnershipEditPaymentStatus"><option value="UNKNOWN" ${currentStatus==='UNKNOWN'?'selected':''}>Belum diatur</option><option value="UNPAID" ${currentStatus==='UNPAID'?'selected':''}>Belum dibayar</option><option value="PAID" ${currentStatus==='PAID'?'selected':''}>Lunas</option></select></div><div class="field"><label>Keterangan</label><input id="partnershipEditNote" value="${escapeAttr(note||'')}"></div><div style="font-size:10px;color:#888;margin:8px 0">Nominal disinkronkan ke histori Keuangan utama. Status pembayaran akan ikut tampil saat invoice dibuka atau dicetak. Qty dan stock tidak berubah.</div><div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipAmount('${escapeAttr(id)}')">SIMPAN PERUBAHAN</button></div>`);
 }
 function savePartnershipAmount(id) {
-  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  if (!USER || !['ADMIN','MANAGER'].includes(String(USER.role || '').toUpperCase())) { toast('Edit Partnership khusus ADMIN atau MANAGER.', 'error'); return; }
   const amount = Number(document.getElementById('partnershipEditAmount')?.value || 0);
   let note = document.getElementById('partnershipEditNote')?.value || '';
   const paymentStatus = document.getElementById('partnershipEditPaymentStatus')?.value || 'UNKNOWN';
