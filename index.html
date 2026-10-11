@@ -8032,6 +8032,7 @@ function refreshPartnerPurchases_() {
 function purchaseHistoryHTML_(rows, emptyText, isSell) {
   if (!rows.length) return `<div style="font-size:9px;color:#666;padding:10px 0">${emptyText}</div>`;
   const admin = USER && String(USER.role || '').toUpperCase() === 'ADMIN';
+  const direction = isSell ? 'SELL' : 'BUY';
   const groups = new Map();
   rows.forEach(function(r) {
     const rawNote = String(r.note || '');
