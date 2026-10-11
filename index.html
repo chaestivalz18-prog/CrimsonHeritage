@@ -9857,4 +9857,80 @@ tbody tr:hover td{
   #loginPage .login-card,#loginPage .login-card::before,#loginPage .login-card::after,
   #loginPage .login-form .btn-primary::after{animation:none!important}
 }
+
+/* CRIMSON HERITAGE — Bold, unmistakable transaction selector */
+.partnership-quick-switch{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin:16px 0 12px!important;
+}
+.partnership-switch-btn{
+  position:relative!important;
+  min-height:84px!important;
+  padding:16px!important;
+  gap:12px!important;
+  border-radius:14px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:linear-gradient(145deg,rgba(25,25,25,.98),rgba(10,10,10,.98))!important;
+  box-shadow:0 5px 16px rgba(0,0,0,.16)!important;
+}
+.partnership-switch-btn::after{
+  content:"PILIH TRANSAKSI";
+  display:block;
+  margin-left:auto;
+  padding:6px 8px;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,.13);
+  color:#aaa;
+  font-size:8px;
+  line-height:1;
+  font-weight:800;
+  letter-spacing:.7px;
+  white-space:nowrap;
+}
+.partnership-switch-btn .switch-symbol{
+  width:42px!important;height:42px!important;flex-basis:42px!important;
+  border-radius:11px!important;font-size:23px!important;font-weight:900!important;
+}
+.partnership-switch-btn strong{
+  font-size:15px!important;font-weight:900!important;letter-spacing:.15px!important;
+  color:#fff!important;line-height:1.2!important;
+}
+.partnership-switch-btn small{
+  margin-top:6px!important;font-size:11px!important;color:#c2c2c2!important;
+}
+.partnership-switch-btn[data-direction="buy"]{border-bottom:3px solid rgba(225,78,88,.55)!important;}
+.partnership-switch-btn[data-direction="buy"] .switch-symbol{color:#ff9298!important;background:rgba(181,18,27,.18)!important;}
+.partnership-switch-btn[data-direction="sell"]{border-bottom:3px solid rgba(67,196,133,.5)!important;}
+.partnership-switch-btn[data-direction="sell"] .switch-symbol{color:#83e7ad!important;background:rgba(55,201,120,.14)!important;}
+.partnership-switch-btn[data-direction="buy"].is-active{
+  border:1px solid #f05b67!important;border-bottom:3px solid #f05b67!important;
+  background:linear-gradient(120deg,rgba(126,18,27,.42),rgba(25,12,13,.98))!important;
+  box-shadow:0 0 0 1px rgba(240,91,103,.13),0 8px 22px rgba(150,20,30,.13)!important;
+}
+.partnership-switch-btn[data-direction="buy"].is-active::after{
+  content:"SEDANG DIPILIH";color:#ffb3b8;border-color:rgba(240,91,103,.35);background:rgba(181,18,27,.2);
+}
+.partnership-switch-btn[data-direction="sell"].is-active{
+  border:1px solid #45d38b!important;border-bottom:3px solid #45d38b!important;
+  background:linear-gradient(120deg,rgba(15,93,56,.38),rgba(10,22,16,.98))!important;
+  box-shadow:0 0 0 1px rgba(69,211,139,.12),0 8px 22px rgba(20,130,75,.12)!important;
+}
+.partnership-switch-btn[data-direction="sell"].is-active::after{
+  content:"SEDANG DIPILIH";color:#a3f0c4;border-color:rgba(69,211,139,.35);background:rgba(55,201,120,.13);
+}
+.partnership-switch-btn:focus-visible{outline:2px solid #d6b16b!important;outline-offset:3px!important;}
+.partnership-direction-banner strong{font-size:15px!important;letter-spacing:.8px!important;}
+.partnership-direction-banner small{font-size:10px!important;font-weight:700!important;}
+.partnership-direction-tag{font-size:9px!important;padding:8px 10px!important;}
+@media(max-width:700px){
+ .partnership-quick-switch{grid-template-columns:1fr!important;gap:9px!important;}
+ .partnership-switch-btn{min-height:76px!important;padding:13px!important;}
+ .partnership-switch-btn strong{font-size:14px!important;}
+ .partnership-switch-btn small{font-size:10px!important;}
+ .partnership-switch-btn::after{font-size:7px;padding:6px;}
+}
+@media(prefers-reduced-motion:reduce){.partnership-switch-btn{transition:none!important;}}
+
 </style>
