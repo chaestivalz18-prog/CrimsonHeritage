@@ -25,6 +25,34 @@
 @media(max-width:1100px){.partnership-directions-grid{grid-template-columns:minmax(0,1fr)!important;}.partnership-direction{width:100%;}}
 @media(max-width:600px){.main{padding:14px!important}.partnership-directions-grid{gap:12px}.partnership-direction .grid{grid-template-columns:minmax(0,1fr)!important}.partnership-direction{padding:13px!important}.partnership-direction .btn{font-size:12px;line-height:1.35}.partnership-toolbar>button{width:100%}}
 
+
+/* Partner entry guard: make transaction direction and selected partner unmistakable */
+.partner-entry-context{display:flex;flex-wrap:wrap;align-items:center;gap:7px 10px;margin:10px 0 14px;padding:11px 12px;border-radius:10px;font-size:10px;font-weight:800;letter-spacing:.35px;line-height:1.45}
+.partner-entry-context strong{font-size:12px;color:#fff;overflow-wrap:anywhere}
+.partner-entry-context span{flex-basis:100%;font-size:9px;letter-spacing:.8px}
+.partner-entry-buy{border:1px solid rgba(239,77,90,.38);background:linear-gradient(100deg,rgba(181,18,27,.18),rgba(20,10,10,.55));color:#ff8a91}
+.partner-entry-buy span{color:#ff8a91}
+.partner-entry-sell{border:1px solid rgba(55,201,120,.34);background:linear-gradient(100deg,rgba(25,115,68,.18),rgba(8,20,13,.55));color:#77e3a5}
+.partner-entry-sell span{color:#77e3a5}
+@media(max-width:750px){.partner-entry-context{font-size:9px;padding:10px}.partner-entry-context span{font-size:8px}}
+
+/* CRIMSON HERITAGE — Partnership Simple Premium */
+.partnership-direction{position:relative!important;padding:18px!important;border-radius:15px!important;background:linear-gradient(145deg,rgba(16,16,16,.96),rgba(8,8,8,.92))!important;box-shadow:0 12px 30px rgba(0,0,0,.18)!important;min-width:0!important;}
+.partnership-direction-buy{border:1px solid rgba(225,78,88,.28)!important;border-top:2px solid #c94450!important;}
+.partnership-direction-sell{border:1px solid rgba(67,196,133,.28)!important;border-top:2px solid #37c978!important;}
+.partnership-direction-banner{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:nowrap!important;margin:0 0 16px!important;padding:10px 0 14px!important;border:0!important;border-radius:0!important;border-bottom:1px solid rgba(255,255,255,.08)!important;background:transparent!important;}
+.partnership-direction-icon{width:34px!important;height:34px!important;flex:0 0 34px!important;display:grid!important;place-items:center!important;border-radius:10px!important;font-size:18px!important;background:rgba(255,255,255,.045)!important;}
+.partnership-direction-buy .partnership-direction-icon{color:#ff858e!important;background:rgba(181,18,27,.13)!important;}
+.partnership-direction-sell .partnership-direction-icon{color:#75e1a5!important;background:rgba(55,201,120,.12)!important;}
+.partnership-direction-banner strong{font-size:12px!important;letter-spacing:1px!important;}
+.partnership-direction-banner small{font-size:9px!important;letter-spacing:.2px!important;}
+.partnership-direction-tag{white-space:nowrap!important;border-radius:7px!important;padding:6px 9px!important;font-size:8px!important;font-weight:800!important;letter-spacing:.5px!important;}
+.partnership-direction .field{margin-bottom:12px!important;}
+.partnership-direction .field label{font-size:9px!important;letter-spacing:.8px!important;}
+.partnership-direction input,.partnership-direction select,.partnership-direction textarea{min-width:0!important;width:100%!important;max-width:100%!important;border-radius:9px!important;}
+.partnership-direction .btn{min-height:40px!important;border-radius:9px!important;font-size:10px!important;letter-spacing:.5px!important;}
+.partnership-direction .table-wrap{max-width:100%!important;}
+@media(max-width:600px){.partnership-direction{padding:13px!important}.partnership-direction-banner{gap:8px!important;padding-bottom:11px!important}.partnership-direction-banner strong{font-size:11px!important}.partnership-direction-banner small{font-size:8px!important}.partnership-direction-tag{font-size:7px!important;padding:6px!important}.partnership-direction-icon{width:30px!important;height:30px!important;flex-basis:30px!important}}
 </style>
 
 <style id="bearnad-contained-character-final">
@@ -2641,6 +2669,31 @@ th{color:rgba(216,181,106,.78)!important}
 }
 </style>
 
+<style id="partnership-visual-distinction-fix">
+/* Partnership: clear visual separation between buy and sell directions */
+.partnership-directions-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:20px!important;align-items:stretch!important;}
+.partnership-direction{min-width:0;max-width:100%;overflow:hidden;position:relative;padding:20px!important;border-radius:17px!important;background:linear-gradient(145deg,rgba(17,17,17,.98),rgba(8,8,8,.96))!important;}
+.partnership-direction-buy{border:1px solid rgba(225,78,88,.55)!important;box-shadow:inset 4px 0 0 rgba(225,78,88,.85),0 12px 32px rgba(0,0,0,.22)!important;}
+.partnership-direction-sell{border:1px solid rgba(67,196,133,.48)!important;box-shadow:inset 4px 0 0 rgba(67,196,133,.82),0 12px 32px rgba(0,0,0,.22)!important;}
+.partnership-direction-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-2px 0 18px;padding:14px;border-radius:12px;min-width:0;}
+.partnership-direction-buy .partnership-direction-banner{background:linear-gradient(100deg,rgba(181,18,27,.19),rgba(181,18,27,.035));border:1px solid rgba(225,78,88,.22);}
+.partnership-direction-sell .partnership-direction-banner{background:linear-gradient(100deg,rgba(55,201,120,.14),rgba(55,201,120,.025));border:1px solid rgba(67,196,133,.22);}
+.partnership-direction-icon{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:10px;font-size:23px;font-weight:900;}
+.partnership-direction-buy .partnership-direction-icon{background:rgba(225,78,88,.13);color:#ff7b85;}
+.partnership-direction-sell .partnership-direction-icon{background:rgba(67,196,133,.12);color:#6ee0a1;}
+.partnership-direction-banner>div{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1;}
+.partnership-direction-banner strong{font-family:var(--ch-display-font,Georgia,serif);font-size:14px;letter-spacing:.7px;color:#f4f1eb;}
+.partnership-direction-banner small{font-size:9px;letter-spacing:.7px;color:#999;line-height:1.5;}
+.partnership-direction-tag{padding:7px 10px;border-radius:999px;font-size:9px;font-weight:900;letter-spacing:.8px;white-space:nowrap;}
+.partnership-direction-buy .partnership-direction-tag{background:rgba(225,78,88,.12);border:1px solid rgba(225,78,88,.28);color:#ff858e;}
+.partnership-direction-sell .partnership-direction-tag{background:rgba(67,196,133,.10);border:1px solid rgba(67,196,133,.28);color:#75e1a5;}
+.partnership-legacy-heading{display:none!important;}
+.partnership-direction .btn{max-width:100%;white-space:normal;line-height:1.35;}
+.partnership-direction .field input{min-width:0;max-width:100%;}
+.partnership-direction-buy #pbTotal{border-color:rgba(225,78,88,.28)!important;}
+.partnership-direction-sell #psTotal{border-color:rgba(67,196,133,.28)!important;}
+@media(max-width:600px){.partnership-direction{padding:13px!important}.partnership-direction-banner{padding:11px;gap:9px}.partnership-direction-banner strong{font-size:12px}.partnership-direction-banner small{font-size:8px}.partnership-direction-tag{font-size:8px;padding:6px 8px}}
+</style>
 </head>
 
 <body>
@@ -8031,8 +8084,10 @@ function partnershipDetailHTML_(partner) {
 
     <div id="partnerFinanceSummary" style="margin-top:15px"></div>
     <div class="grid partnership-directions-grid" style="margin-top:15px">
-      <div class="partnership-direction">
-        <h3>📦 PEMBELIAN KITA <span style="color:#777;font-weight:400">— barang dari partner</span></h3>
+      <div class="partnership-direction partnership-direction-buy">
+        <div class="partnership-direction-banner"><span class="partnership-direction-icon">↙</span><div><strong>PEMBELIAN KITA</strong><small>KITA MEMBELI BARANG DARI PARTNER</small></div><span class="partnership-direction-tag">UANG KELUAR</span></div>
+        <h3 class="partnership-legacy-heading">📦 PEMBELIAN KITA <span style="color:#777;font-weight:400">— barang dari partner</span></h3>
+        <div class="partner-entry-context partner-entry-buy">PARTNER: <strong>${escapeHTML(partner.name)}</strong><span>KITA MEMBELI → STOK + • UANG KELUAR</span></div>
         <div id="pbLines"></div>
         <button type="button" class="btn btn-muted" onclick="addPartnershipLine_('pb')" ${disabled}>+ TAMBAH BARANG</button>
         <div class="field" style="margin-top:10px"><label>Total Invoice</label><input id="pbTotal" type="text" value="Rp 0" readonly></div>
@@ -8045,8 +8100,10 @@ function partnershipDetailHTML_(partner) {
         <div id="partnerBuyHistory" style="margin-top:14px"></div>
       </div>
 
-      <div class="partnership-direction">
-        <h3>🛒 PEMBELIAN MEREKA <span style="color:#777;font-weight:400">— barang dari Crimson Heritage</span></h3>
+      <div class="partnership-direction partnership-direction-sell">
+        <div class="partnership-direction-banner"><span class="partnership-direction-icon">↗</span><div><strong>PEMBELIAN MEREKA</strong><small>PARTNER MEMBELI BARANG DARI KITA</small></div><span class="partnership-direction-tag">UANG MASUK</span></div>
+        <h3 class="partnership-legacy-heading">🛒 PEMBELIAN MEREKA <span style="color:#777;font-weight:400">— barang dari Crimson Heritage</span></h3>
+        <div class="partner-entry-context partner-entry-sell">PARTNER: <strong>${escapeHTML(partner.name)}</strong><span>MEREKA MEMBELI → STOK − • UANG MASUK</span></div>
         <div id="psLines"></div>
         <button type="button" class="btn btn-muted" onclick="addPartnershipLine_('ps')" ${disabled}>+ TAMBAH BARANG</button>
         <div class="field" style="margin-top:10px"><label>Total Invoice</label><input id="psTotal" type="text" value="Rp 0" readonly></div>
@@ -8311,6 +8368,11 @@ function savePartnerPurchase(direction) {
   }
   const groupId = 'INV-' + Date.now().toString(36).toUpperCase();
   const total = lines.reduce(function(a,x){return a+x.qty*x.price;},0);
+  const isBuy = direction === 'BUY';
+  const actionTitle = isBuy ? 'PEMBELIAN KITA' : 'PEMBELIAN MEREKA';
+  const impact = isBuy ? 'Stok akan BERTAMBAH dan keuangan tercatat sebagai UANG KELUAR.' : 'Stok akan BERKURANG dan keuangan tercatat sebagai UANG MASUK.';
+  const confirmation = 'KONFIRMASI ' + actionTitle + '\n\nPartner: ' + CURRENT_PARTNER.name + '\nTotal invoice: ' + partnershipMoney_(total) + '\n\n' + impact + '\n\nPastikan jenis transaksi dan nama partner sudah benar. Lanjut simpan?';
+  if (!window.confirm(confirmation)) return;
   // One RPC call: backend validates and commits every line atomically. Do not retry on failure without checking history.
   google.script.run.withSuccessHandler(function(result){
     toast((result && result.message) || ('Invoice ' + groupId + ' berhasil disimpan.'), 'success');
