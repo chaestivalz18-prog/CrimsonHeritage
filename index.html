@@ -8068,10 +8068,11 @@ function purchaseHistoryHTML_(rows, emptyText, isSell) {
         lines: g.lines
       }));
       const invoiceButton = `<button class="btn btn-gold" style="padding:7px 9px;font-size:9px" onclick="openPartnershipInvoiceGroupPayload_('${invoicePayload}')">LIHAT NOTA INVOICE (${g.lines.length} BARANG)</button><div style="font-size:8px;color:${g.status==='PAID'?'#37c978':g.status==='UNPAID'?'#e5b94d':'#aaa'};margin-top:5px">${statusLabel}</div>`;
-      // Preserve the existing admin edit/delete controls per stored line to avoid changing backend behavior.
-      const adminActions = admin ? g.lines.map(function(line){
-        return `<div style="white-space:nowrap;margin:3px 0">${escapeHTML(line.itemName)} <button class="btn btn-muted" style="padding:5px 8px;font-size:9px" onclick="editPartnershipAmount('${escapeAttr(line.id)}',${Number(line.totalAmount)||0},'${escapeAttr(String(line.note||'').replace(/\s*\[\[CH_INVOICE_GROUP:[^\]]+\]\]/ig,'').replace(/\s*\[\[CH_INVOICE_STATUS:(?:PAID|UNPAID)\]\]/ig,'').trim())}','${g.status}')">EDIT</button> <button class="btn btn-danger" style="padding:5px 8px;font-size:9px" onclick="deletePartnershipPurchase('${escapeAttr(line.id)}')">HAPUS</button></div>`;
-      }).join('') : '';
+      // Admin actions are invoice-level: one edit and one delete for the whole grouped invoice.
+      const adminActions = admin ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-muted" style="padding:7px 9px;font-size:9px" onclick="editPartnershipInvoiceGroup_('${escapeAttr(encodeURIComponent(JSON.stringify({id:g.key,partnerId:r.partnerId||'',partnerName:r.partnerName||'',date:r.date||'',status:g.status,note:g.cleanNote||'',direction:direction,lines:g.lines})))}')">EDIT INVOICE</button>
+        <button class="btn btn-danger" style="padding:7px 9px;font-size:9px" onclick="deletePartnershipInvoiceGroup_('${escapeAttr(g.key)}','${direction}')">HAPUS INVOICE</button>
+      </div>` : '';
       return `<tr><td>${invoiceButton}</td><td>${itemSummary}</td><td>${number(g.qty)}</td><td><strong>Rp ${number(g.amount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(g.cleanNote || '-')}</td>${admin ? `<td>${adminActions}</td>` : ''}</tr>`;
     }).join('') +
     `</tbody></table></div>`;
@@ -8131,6 +8132,41 @@ function updatePartnershipInvoiceStatus_(id, status, amount, cleanNote, invoiceW
     if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','finance','dashboard','history']);
     refreshPartnerPurchases_();
   }).withFailureHandler(handleServerError).updatePartnershipPurchase(TOKEN, id, Number(amount) || 0, note);
+}
+
+
+function editPartnershipInvoiceGroup_(payload) {
+  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  let inv;
+  try { inv = JSON.parse(decodeURIComponent(payload)); } catch (_) { toast('Data invoice tidak valid.', 'error'); return; }
+  const total = (inv.lines || []).reduce((s,l)=>s+(Number(l.totalAmount)||0),0);
+  const rows = (inv.lines || []).map(l=>`<div style="display:grid;grid-template-columns:minmax(0,1fr) 70px 110px;gap:8px;padding:8px 0;border-bottom:1px solid #292929;font-size:11px"><span>${escapeHTML(l.itemName||'Barang')}</span><span>× ${Number(l.qty)||0}</span><b style="text-align:right">${partnershipMoney_(l.totalAmount)}</b></div>`).join('');
+  const status = ['PAID','UNPAID'].includes(String(inv.status||'').toUpperCase()) ? String(inv.status).toUpperCase() : 'UNKNOWN';
+  openModal('EDIT INVOICE · '+escapeHTML(inv.id), `<div class="card" style="padding:12px;margin-bottom:12px"><div style="font-size:10px;color:#aaa;margin-bottom:8px">SEMUA BARANG DALAM INVOICE</div>${rows}<div style="display:flex;justify-content:space-between;padding-top:12px;font-weight:800"><span>TOTAL INVOICE</span><span>${partnershipMoney_(total)}</span></div></div>
+    <div class="field"><label>Nominal total invoice (Rp)</label><input id="partnershipGroupAmount" type="number" min="0" step="1" value="${total}" required></div>
+    <div class="field"><label>Status pembayaran</label><select id="partnershipGroupStatus"><option value="UNKNOWN" ${status==='UNKNOWN'?'selected':''}>Belum diatur</option><option value="UNPAID" ${status==='UNPAID'?'selected':''}>Belum dibayar</option><option value="PAID" ${status==='PAID'?'selected':''}>Lunas</option></select></div>
+    <div class="field"><label>Tanggal invoice</label><input id="partnershipGroupDate" type="date" value="${escapeAttr((inv.date||'').split('/').reverse().join('-'))}"></div>
+    <div class="field"><label>Keterangan invoice</label><textarea id="partnershipGroupNote">${escapeHTML(inv.note||'')}</textarea></div>
+    <div class="field-hint">Edit dilakukan untuk satu invoice sebagai kesatuan. Rincian barang ditampilkan bersama; perubahan nominal/status dicatat pada semua baris invoice.</div>
+    <div class="modal-actions"><button class="btn btn-muted" onclick="closeModal()">BATAL</button><button class="btn btn-red" onclick="savePartnershipInvoiceGroup_('${escapeAttr(encodeURIComponent(JSON.stringify(inv)))}')">SIMPAN INVOICE</button></div>`);
+}
+function savePartnershipInvoiceGroup_(payload) {
+  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  let inv; try { inv=JSON.parse(decodeURIComponent(payload)); } catch (_) { toast('Data invoice tidak valid.','error'); return; }
+  const amount=Number(document.getElementById('partnershipGroupAmount')?.value||0);
+  const status=document.getElementById('partnershipGroupStatus')?.value||'UNKNOWN';
+  const date=document.getElementById('partnershipGroupDate')?.value||'';
+  let note=String(document.getElementById('partnershipGroupNote')?.value||'').replace(/\s*\[\[CH_INVOICE_STATUS:(?:PAID|UNPAID)\]\]/ig,'').replace(/\s*\[\[CH_INVOICE_GROUP:[^\]]+\]\]/ig,'').trim();
+  if(!Number.isFinite(amount)||amount<0||!date){toast('Nominal tidak boleh negatif dan tanggal wajib diisi.','error');return;}
+  if(status==='PAID'||status==='UNPAID') note+=(note?' ':'')+'[[CH_INVOICE_STATUS:'+status+']]';
+  google.script.run.withSuccessHandler(function(r){closeModal();toast((r&&r.message)||'Invoice diperbarui.','success');if(typeof pageCacheClearPages==='function')pageCacheClearPages(['kerjasama','stock','finance','dashboard','history']);refreshPartnerPurchases_();})
+    .withFailureHandler(handleServerError).updatePartnershipInvoiceGroup(TOKEN, inv.direction, inv.id, amount, date, note);
+}
+function deletePartnershipInvoiceGroup_(invoiceId, direction) {
+  if (!USER || String(USER.role || '').toUpperCase() !== 'ADMIN') { toast('Khusus ADMIN.', 'error'); return; }
+  if (!confirm('Hapus SELURUH invoice '+invoiceId+' beserta semua barangnya? Stok dan transaksi keuangan terkait akan disesuaikan. Tindakan ini tidak dapat dibatalkan.')) return;
+  google.script.run.withSuccessHandler(function(r){toast((r&&r.message)||'Seluruh invoice dihapus.','success');if(typeof pageCacheClearPages==='function')pageCacheClearPages(['kerjasama','stock','finance','dashboard','history']);refreshPartnerPurchases_();})
+    .withFailureHandler(handleServerError).deletePartnershipInvoiceGroup(TOKEN, direction, invoiceId);
 }
 
 function editPartnershipAmount(id, currentAmount, note, paymentStatus) {
