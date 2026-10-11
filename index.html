@@ -8195,6 +8195,9 @@ function deletePartnershipPurchase(id) {
   google.script.run.withSuccessHandler(function(result) {
     toast(result.message || 'Transaksi Partnership dihapus.', 'success');
     if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','stock','finance','dashboard','history']);
+    // Force the finance view to fetch fresh data next time; don't fabricate a local finance row.
+    if (typeof FINANCE_REPORT !== 'undefined') FINANCE_REPORT = null;
+    if (typeof DASHBOARD_DATA !== 'undefined') DASHBOARD_DATA = null;
     refreshPartnerPurchases_();
   }).withFailureHandler(handleServerError).deletePartnershipPurchase(TOKEN, id);
 }
