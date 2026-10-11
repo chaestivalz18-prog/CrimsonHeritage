@@ -8038,9 +8038,11 @@ function purchaseHistoryHTML_(rows, emptyText, isSell) {
       const statusMatch = rawNote.match(/\[\[CH_INVOICE_STATUS:(PAID|UNPAID)\]\]/i);
       const paymentStatus = statusMatch ? statusMatch[1].toUpperCase() : 'UNKNOWN';
       const cleanNote = rawNote.replace(/\s*\[\[CH_INVOICE_STATUS:(?:PAID|UNPAID)\]\]/ig, '').trim();
+      const groupMatch = rawNote.match(/\[\[CH_INVOICE_GROUP:([^\]]+)\]\]/i);
+      const invoiceLabel = groupMatch ? groupMatch[1] : r.id;
       const invoiceButton = isSell
         ? `<button class="btn btn-gold" style="padding:7px 9px;font-size:9px" onclick="openPartnershipInvoice_('${escapeAttr(r.id)}','${escapeAttr(r.partnerName || (CURRENT_PARTNER && CURRENT_PARTNER.name) || '')}','${escapeAttr(r.itemName)}',${Number(r.qty)||0},${Number(r.unitPrice)||0},${Number(r.totalAmount)||0},'${escapeAttr(r.date)}','${paymentStatus}','${escapeAttr(cleanNote)}')">LIHAT INVOICE</button><div style="font-size:8px;color:${paymentStatus==='PAID'?'#37c978':paymentStatus==='UNPAID'?'#e5b94d':'#aaa'};margin-top:5px">${paymentStatus==='PAID'?'LUNAS':paymentStatus==='UNPAID'?'BELUM DIBAYAR':'STATUS BELUM DIATUR'}</div>`
-        : '<span style="color:#666">—</span>';
+        : '<span style="color:#c7a45b">' + escapeHTML(invoiceLabel) + '</span>';
       return `<tr><td>${invoiceButton}</td><td>${escapeHTML(r.itemName)}</td><td>${number(r.qty)}</td><td>Rp ${number(r.unitPrice)}</td><td><strong>Rp ${number(r.totalAmount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(cleanNote || '-')}</td>${admin ? `<td><button class="btn btn-muted" style="padding:5px 8px;font-size:9px" onclick="editPartnershipAmount('${escapeAttr(r.id)}',${Number(r.totalAmount)||0},'${escapeAttr(cleanNote)}','${paymentStatus}')">EDIT NOMINAL</button> <button class="btn btn-danger" style="padding:5px 8px;font-size:9px" onclick="deletePartnershipPurchase('${escapeAttr(r.id)}')">HAPUS</button></td>` : ''}</tr>`;
     }).join('') +
     `</tbody></table></div>`;
@@ -8155,27 +8157,19 @@ function savePartnerPurchase(direction) {
     toast('Isi tanggal dan setiap barang dengan jumlah minimal 1 serta harga 0 atau lebih.', 'error'); return;
   }
   const groupId = 'INV-' + Date.now().toString(36).toUpperCase();
-  const groupNote = (note ? note + ' ' : '') + '[[CH_INVOICE_GROUP:' + groupId + ']]';
   const total = lines.reduce(function(a,x){return a+x.qty*x.price;},0);
-  let idx = 0; const saved = [];
-  const next = function(){
-    if (idx >= lines.length) {
-      toast('Item invoice diproses. Periksa riwayat sebelum transaksi berikutnya.', 'success');
-      ['pb','ps'].forEach(function(px){ if(px===prefix){ const host=document.getElementById(px+'Lines'); if(host)host.innerHTML=''; addPartnershipLine_(px); ['Date','Note'].forEach(function(k){const e=document.getElementById(px+k);if(e)e.value='';}); }});
-      if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','stock','finance','dashboard','history']);
-      refreshPartnerPurchases_();
-      return;
-    }
-    const line = lines[idx++];
-    google.script.run.withSuccessHandler(function(result){
-      saved.push(result); next();
-    }).withFailureHandler(function(err){
-      toast('Gagal menyimpan item ' + idx + '. Item sebelumnya mungkin sudah tersimpan; cek riwayat sebelum mencoba ulang. ' + (err && err.message ? err.message : ''), 'error');
-      refreshPartnerPurchases_();
-    }).addPartnershipPurchase(TOKEN, direction, CURRENT_PARTNER.id, line.item, line.qty, line.price, date, groupNote);
-  };
-  if (total === 0) toast('Total invoice Rp 0. Backend lama mungkin masih menolak harga 0; jika gagal, SQL backend perlu dipatch dulu.', 'info');
-  next();
+  // One RPC call: backend validates and commits every line atomically. Do not retry on failure without checking history.
+  google.script.run.withSuccessHandler(function(result){
+    toast((result && result.message) || ('Invoice ' + groupId + ' berhasil disimpan.'), 'success');
+    const host = document.getElementById(prefix + 'Lines');
+    if (host) host.innerHTML = '';
+    addPartnershipLine_(prefix);
+    ['Date','Note'].forEach(function(k){const e=document.getElementById(prefix+k);if(e)e.value='';});
+    if (typeof pageCacheClearPages === 'function') pageCacheClearPages(['kerjasama','stock','finance','dashboard','history']);
+    refreshPartnerPurchases_();
+  }).withFailureHandler(function(err){
+    toast('Invoice gagal disimpan dan seluruh perubahan backend dibatalkan. Cek pesan: ' + (err && err.message ? err.message : 'kesalahan server'), 'error');
+  }).addPartnershipInvoice(TOKEN, direction, CURRENT_PARTNER.id, lines, date, note, groupId);
 }
 
 function openAddPartnerModal() {
