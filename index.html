@@ -6382,202 +6382,169 @@ function loadHistoryPage() {
   Promise.all([
     getHistoryPromise(),
     getPickupHistoryPromise(),
-    runPromise('getAuditHistory', [TOKEN])
+    runPromise('getAuditHistory', [TOKEN]),
+    getFinanceHistoryPromise()
   ])
   .then(function(results) {
-      if (CURRENT_PAGE !== 'history') return;
+    if (CURRENT_PAGE !== 'history') return;
 
-    const transactions = results[0];
-    const pickups = results[1] || [];
-    const auditRows = results[2] || [];
+    const transactions = Array.isArray(results[0]) ? results[0] : [];
+    const pickups = Array.isArray(results[1]) ? results[1] : [];
+    const auditRows = Array.isArray(results[2]) ? results[2] : [];
+    const financeRows = Array.isArray(results[3]) ? results[3] : [];
+    const all = [];
+    const auditKnownIds = new Set();
 
-    let rows = '';
+    function safeJson(value) {
+      if (!value) return {};
+      if (typeof value === 'object') return value;
+      try { return JSON.parse(value); } catch (e) { return {}; }
+    }
 
-    transactions.forEach(function(row) {
+    function findIds(value, out) {
+      if (!value || typeof value !== 'object') return;
+      Object.keys(value).forEach(function(key) {
+        const v = value[key];
+        if (v && typeof v === 'object') findIds(v, out);
+        else if (v !== null && v !== undefined && /(^id$|_id$|Id$|ID$)/.test(key)) out.add(String(v));
+      });
+    }
 
-      rows += `
-        <tr>
+    function tableCategory(table, action, details, payload) {
+      const t = String(table || '').toLowerCase();
+      const d = String(details || '').toLowerCase();
+      const itemType = String((payload && (payload.type || payload.jenis)) || '').toLowerCase();
+      if (t.includes('partnership') || t.includes('kerja_sama') || t.includes('partner')) return 'PARTNERSHIP';
+      if (t.includes('keuangan') || t.includes('finance') || t.includes('keuangan_reset')) return 'KEUANGAN';
+      if (t.includes('item') || t.includes('stock') || t.includes('barang')) return 'STOK';
+      if (t.includes('pickup')) return 'PENGAMBILAN';
+      if (t.includes('transaction') || t.includes('transaksi')) return itemType.includes('masuk') || itemType.includes('in') ? 'BARANG MASUK' : 'BARANG KELUAR';
+      if (t.includes('kasbon') || t.includes('setoran')) return 'KASBON & SETORAN';
+      if (t.includes('party')) return 'EVENT';
+      if (t.includes('member') || t.includes('user') || t.includes('partner')) return 'DATA';
+      if (d.includes('partnership')) return 'PARTNERSHIP';
+      return 'SISTEM';
+    }
 
-          <td>${escapeHTML(row.timestamp)}</td>
+    function prettyAction(action, operation) {
+      const a = String(action || '').toUpperCase();
+      const op = String(operation || '').toUpperCase();
+      if (a.includes('DELETE') || op === 'DELETE') return 'DIHAPUS';
+      if (a.includes('UPDATE') || op === 'UPDATE') return 'DIPERBARUI';
+      if (a.includes('CREATE') || a.includes('INSERT') || op === 'INSERT') return 'DITAMBAHKAN';
+      if (a.includes('RESET')) return 'RESET';
+      return a.replaceAll('_', ' ') || 'AKTIVITAS';
+    }
 
-          <td>${escapeHTML(row.type)}</td>
-
-          <td>${escapeHTML(row.itemName)}</td>
-
-          <td>${number(row.qty)}</td>
-
-          <td>${escapeHTML(row.memberName || '-')}</td>
-
-          <td>${escapeHTML(row.staffName || '-')}</td>
-
-          <td>${escapeHTML(row.keterangan || '-')}</td>
-
-        </tr>
-      `;
-
+    auditRows.forEach(function(row) {
+      const detailObj = safeJson(row.details);
+      const table = detailObj.table || '';
+      const operation = detailObj.operation || '';
+      const ids = new Set();
+      findIds(detailObj, ids);
+      ids.forEach(function(id) { auditKnownIds.add(id); });
+      const payload = detailObj.new || detailObj.old || {};
+      const name = payload.item_name || payload.nama_barang || payload.partner_name || payload.nama_partner || payload.nama || payload.itemName || payload.keterangan || '';
+      const amount = payload.total_amount || payload.nominal || payload.amount || payload.harga_jual || payload.harga_mentah;
+      const qty = payload.qty || payload.stock;
+      let detailText = name ? String(name) : '';
+      if (qty !== undefined && qty !== null && qty !== '') detailText += (detailText ? ' · ' : '') + 'Qty/Stok: ' + qty;
+      if (amount !== undefined && amount !== null && amount !== '') detailText += (detailText ? ' · ' : '') + 'Nominal: ' + money(Number(amount) || 0);
+      if (!detailText) detailText = table ? table.replace(/^ch_/, '').replaceAll('_', ' ') : (row.details || '-');
+      all.push({
+        id: row.id || '', timestamp: row.timestamp || '',
+        category: tableCategory(table, row.action, detailText, payload),
+        action: prettyAction(row.action, operation),
+        title: (table || 'Aktivitas sistem').replace(/^ch_/, '').replaceAll('_', ' '),
+        detail: detailText, actor: row.username || row.userId || 'Sistem', role: row.role || '',
+        source: 'AUDIT'
+      });
     });
 
-    document
-      .getElementById('content')
-      .innerHTML = `
+    // Tambahkan data lama dari tabel modul hanya jika ID-nya belum ada di audit,
+    // supaya histori lama tetap terlihat tanpa menggandakan transaksi baru.
+    transactions.forEach(function(row) {
+      const id = String(row.id || '');
+      if (id && auditKnownIds.has(id)) return;
+      all.push({ id:id, timestamp:row.timestamp || '', category:'BARANG KELUAR', action:String(row.type || 'TRANSAKSI').toUpperCase(),
+        title:row.itemName || 'Transaksi barang', detail:(row.keterangan || '-') + ' · Qty: ' + (row.qty || 0),
+        actor:row.staffName || '-', role:'', source:'LEGACY' });
+    });
 
-      <div class="section-title" style="margin-top:0">
-        TRANSACTION HISTORY
+    pickups.forEach(function(row) {
+      const id = String(row.id || '');
+      if (id && auditKnownIds.has(id)) return;
+      all.push({ id:id, timestamp:row.timestamp || '', category:'PENGAMBILAN', action:String(row.status || 'PENGAMBILAN').toUpperCase(),
+        title:row.itemName || 'Pengambilan barang', detail:'Member: ' + (row.memberName || '-') + ' · Qty: ' + (row.qty || 0),
+        actor:row.staffName || '-', role:'', source:'LEGACY' });
+    });
+
+    financeRows.forEach(function(row) {
+      const id = String(row.id || '');
+      if (id && auditKnownIds.has(id)) return;
+      all.push({ id:id, timestamp:row.timestamp || '', category:'KEUANGAN', action:String(row.type || 'TRANSAKSI KEUANGAN').toUpperCase(),
+        title:row.type === 'PEMASUKAN' ? 'Uang masuk' : 'Uang keluar', detail:(row.keterangan || '-') + ' · ' + money(Number(row.amount) || 0),
+        actor:row.nama || '-', role:'', source:'LEGACY' });
+    });
+
+    function dateSortValue(value) {
+      const m = String(value || '').match(/^(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?:?(\d{2})?/);
+      if (!m) return 0;
+      return new Date(Number(m[3]), Number(m[2])-1, Number(m[1]), Number(m[4]||0), Number(m[5]||0), Number(m[6]||0)).getTime();
+    }
+    all.sort(function(a,b) { return dateSortValue(b.timestamp) - dateSortValue(a.timestamp); });
+
+    const categories = ['SEMUA AKTIVITAS','KEUANGAN','STOK','BARANG MASUK','BARANG KELUAR','PENGAMBILAN','PARTNERSHIP','KASBON & SETORAN','EVENT','SISTEM'];
+    const categoryOptions = categories.map(function(c) { return '<option value="'+escapeAttr(c)+'">'+escapeHTML(c)+'</option>'; }).join('');
+
+    document.getElementById('content').innerHTML = `
+      <div class="card" style="margin-bottom:16px;border-color:rgba(201,164,92,.22);background:linear-gradient(135deg,rgba(201,164,92,.07),rgba(18,18,18,.94) 42%)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+          <div><div style="font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:800">CRIMSON HERITAGE / ACTIVITY CENTER</div>
+          <div style="font-size:25px;font-weight:900;margin-top:7px">HISTORY <span style="color:var(--gold)">UTAMA</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Semua aktivitas dalam satu timeline, dari yang terbaru.</div></div>
+          <div style="padding:8px 11px;border:1px solid rgba(201,164,92,.28);border-radius:999px;color:var(--gold);font-size:10px;font-weight:800">${number(all.length)} AKTIVITAS</div>
+        </div>
       </div>
-
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              <th>Waktu</th>
-              <th>Tipe</th>
-              <th>Barang</th>
-              <th>Qty</th>
-              <th>Member</th>
-              <th>Staff</th>
-              <th>Keterangan</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            ${rows || `
-              <tr>
-                <td colspan="7">
-                  <div class="empty">
-                    Belum ada transaksi.
-                  </div>
-                </td>
-              </tr>
-            `}
-
-          </tbody>
-
-        </table>
-
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+          <input id="unifiedHistorySearch" placeholder="Cari aktivitas, barang, nominal, pelaku..." autocomplete="off" style="width:100%;min-width:0;padding:12px;border:1px solid var(--border);border-radius:10px;background:#111;color:white">
+          <select id="unifiedHistoryCategory" style="width:100%;min-width:0;padding:12px;border:1px solid var(--border);border-radius:10px;background:#111;color:white">${categoryOptions}</select>
+        </div>
+        <div id="unifiedHistoryCount" style="font-size:11px;color:var(--muted);margin-top:12px">${number(all.length)} aktivitas</div>
       </div>
-
-
-      <div class="section-title">
-        AUDIT HISTORY — SEMUA AKTIVITAS
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Waktu</th><th>Pengguna</th><th>Role</th><th>Aktivitas</th><th>Detail perubahan</th><th>ID Log</th></tr></thead>
-          <tbody>
-            ${auditRows.map(function(row) {
-              let detail = row.details || '-';
-              try {
-                const parsed = JSON.parse(detail);
-                detail = (parsed.table || '') + ' · ' + (parsed.operation || '') +
-                  (parsed.old && parsed.new ? ' · data sebelum/sesudah tersedia' : '');
-              } catch (e) {}
-              return `<tr>
-                <td>${escapeHTML(row.timestamp || '-')}</td>
-                <td>${escapeHTML(row.username || row.userId || 'Sistem')}</td>
-                <td>${escapeHTML(row.role || '-')}</td>
-                <td>${escapeHTML(row.action || '-')}</td>
-                <td style="max-width:420px;white-space:normal;word-break:break-word">${escapeHTML(detail)}</td>
-                <td>${escapeHTML(row.id || '-')}</td>
-              </tr>`;
-            }).join('') || `<tr><td colspan="6"><div class="empty">Belum ada aktivitas tercatat. Aktivitas baru akan masuk setelah patch Supabase dipasang.</div></td></tr>`}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="section-title">
-        PICKUP / PENGAMBILAN
-      </div>
-
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              <th>Waktu</th>
-              <th>Member</th>
-              <th>Barang</th>
-              <th>Qty</th>
-              <th>Staff</th>
-              <th>Status</th>
-              <th>Aksi</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            ${pickups.map(function(row) {
-
-              return `
-                <tr>
-
-                  <td>${escapeHTML(row.timestamp)}</td>
-
-                  <td>${escapeHTML(row.memberName)}</td>
-
-                  <td>${escapeHTML(row.itemName)}</td>
-
-                  <td>${number(row.qty)}</td>
-
-                  <td>${escapeHTML(row.staffName)}</td>
-
-                  <td>${statusBadge(row.status)}</td>
-
-                  <td>
-
-                    ${
-                      row.status === 'PENDING'
-                      ? `
-                        <button
-                          class="btn btn-green"
-                          style="padding:7px 9px;font-size:9px"
-                          onclick="processPickup('${escapeAttr(row.id)}')"
-                        >
-                          PROSES
-                        </button>
-
-                        <button
-                          class="btn btn-danger"
-                          style="padding:7px 9px;font-size:9px"
-                          onclick="cancelPickup('${escapeAttr(row.id)}')"
-                        >
-                          BATAL
-                        </button>
-                      `
-                      : '-'
-                    }
-
-                  </td>
-
-                </tr>
-              `;
-
-            }).join('')}
-
-          </tbody>
-
-        </table>
-
-      </div>
-
+      <div id="unifiedHistoryList" style="display:grid;gap:10px"></div>
     `;
 
+    function renderUnifiedHistory() {
+      const q = String(document.getElementById('unifiedHistorySearch').value || '').toLowerCase().trim();
+      const category = document.getElementById('unifiedHistoryCategory').value;
+      const filtered = all.filter(function(row) {
+        const text = [row.timestamp,row.category,row.action,row.title,row.detail,row.actor,row.role,row.id].join(' ').toLowerCase();
+        return (category === 'SEMUA AKTIVITAS' || row.category === category) && (!q || text.includes(q));
+      });
+      document.getElementById('unifiedHistoryCount').textContent = number(filtered.length) + ' aktivitas';
+      document.getElementById('unifiedHistoryList').innerHTML = filtered.map(function(row) {
+        const color = row.category === 'KEUANGAN' ? '#7dd9a5' : row.category === 'STOK' || row.category === 'BARANG KELUAR' || row.category === 'PENGAMBILAN' ? '#8cc8ff' : row.category === 'PARTNERSHIP' ? 'var(--gold)' : '#c4b6e8';
+        return `<div class="card" style="padding:15px;border-left:3px solid ${color}">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="min-width:0;flex:1"><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+              <span style="font-size:9px;font-weight:900;letter-spacing:.7px;color:${color};border:1px solid ${color};border-radius:999px;padding:4px 7px">${escapeHTML(row.category)}</span>
+              <span style="font-size:9px;color:#aaa">${escapeHTML(row.action)}</span>
+            </div><div style="font-size:14px;font-weight:800;overflow-wrap:anywhere">${escapeHTML(row.title || 'Aktivitas')}</div>
+            <div style="font-size:12px;color:#aaa;line-height:1.6;margin-top:6px;overflow-wrap:anywhere">${escapeHTML(row.detail || '-')}</div>
+            <div style="font-size:10px;color:#888;margin-top:8px">Pelaku: ${escapeHTML(row.actor || 'Sistem')}${row.role ? ' · '+escapeHTML(row.role) : ''}</div></div>
+            <div style="font-size:10px;color:#aaa;white-space:nowrap">${escapeHTML(row.timestamp || '-')}</div>
+          </div></div>`;
+      }).join('') || '<div class="card"><div class="empty">Tidak ada aktivitas yang cocok dengan pencarian ini.</div></div>';
+    }
+    document.getElementById('unifiedHistorySearch').addEventListener('input', renderUnifiedHistory);
+    document.getElementById('unifiedHistoryCategory').addEventListener('change', renderUnifiedHistory);
+    renderUnifiedHistory();
   })
   .catch(handleServerError);
 
 }
-
 
 function processPickup(id) {
 
