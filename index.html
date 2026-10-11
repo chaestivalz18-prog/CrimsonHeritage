@@ -8059,9 +8059,15 @@ function purchaseHistoryHTML_(rows, emptyText, isSell) {
       const r = g.first;
       const statusLabel = g.status==='PAID'?'LUNAS':g.status==='UNPAID'?'BELUM LUNAS':'STATUS BELUM DIATUR';
       const itemSummary = g.lines.map(function(line){return escapeHTML(line.itemName)+' × '+number(line.qty);}).join('<br>');
-      const invoiceButton = isSell
-        ? `<button class="btn btn-gold" style="padding:7px 9px;font-size:9px" onclick="openPartnershipInvoiceGroup_('${escapeAttr(g.key)}','${escapeAttr(r.partnerName || (CURRENT_PARTNER && CURRENT_PARTNER.name) || '')}','${escapeAttr(r.date)}','${g.status}','${escapeAttr(g.cleanNote)}',${JSON.stringify(g.lines).replace(/</g,'\\u003c').replace(/'/g,'&#39;')})">LIHAT INVOICE (${g.lines.length} ITEM)</button><div style="font-size:8px;color:${g.status==='PAID'?'#37c978':g.status==='UNPAID'?'#e5b94d':'#aaa'};margin-top:5px">${statusLabel}</div>`
-        : `<span style="color:#c7a45b">${escapeHTML(g.key)}</span>`;
+      const invoicePayload = encodeURIComponent(JSON.stringify({
+        id: g.key,
+        partnerName: r.partnerName || (CURRENT_PARTNER && CURRENT_PARTNER.name) || '',
+        date: r.date || '',
+        status: g.status,
+        note: g.cleanNote || '',
+        lines: g.lines
+      }));
+      const invoiceButton = `<button class="btn btn-gold" style="padding:7px 9px;font-size:9px" onclick="openPartnershipInvoiceGroupPayload_('${invoicePayload}')">LIHAT NOTA INVOICE (${g.lines.length} BARANG)</button><div style="font-size:8px;color:${g.status==='PAID'?'#37c978':g.status==='UNPAID'?'#e5b94d':'#aaa'};margin-top:5px">${statusLabel}</div>`;
       // Preserve the existing admin edit/delete controls per stored line to avoid changing backend behavior.
       const adminActions = admin ? g.lines.map(function(line){
         return `<div style="white-space:nowrap;margin:3px 0">${escapeHTML(line.itemName)} <button class="btn btn-muted" style="padding:5px 8px;font-size:9px" onclick="editPartnershipAmount('${escapeAttr(line.id)}',${Number(line.totalAmount)||0},'${escapeAttr(String(line.note||'').replace(/\s*\[\[CH_INVOICE_GROUP:[^\]]+\]\]/ig,'').replace(/\s*\[\[CH_INVOICE_STATUS:(?:PAID|UNPAID)\]\]/ig,'').trim())}','${g.status}')">EDIT</button> <button class="btn btn-danger" style="padding:5px 8px;font-size:9px" onclick="deletePartnershipPurchase('${escapeAttr(line.id)}')">HAPUS</button></div>`;
@@ -8069,6 +8075,16 @@ function purchaseHistoryHTML_(rows, emptyText, isSell) {
       return `<tr><td>${invoiceButton}</td><td>${itemSummary}</td><td>${number(g.qty)}</td><td><strong>Rp ${number(g.amount)}</strong></td><td>${escapeHTML(r.date)}</td><td>${escapeHTML(g.cleanNote || '-')}</td>${admin ? `<td>${adminActions}</td>` : ''}</tr>`;
     }).join('') +
     `</tbody></table></div>`;
+}
+
+function openPartnershipInvoiceGroupPayload_(payload) {
+  try {
+    const data = JSON.parse(decodeURIComponent(payload));
+    openPartnershipInvoiceGroup_(data.id, data.partnerName, data.date, data.status, data.note, data.lines || []);
+  } catch (e) {
+    toast('Nota invoice tidak dapat dibuka. Muat ulang halaman lalu coba lagi.', 'error');
+    console.error('Invoice payload error', e);
+  }
 }
 
 function openPartnershipInvoiceGroup_(invoiceId, partnerName, date, status, note, lines) {
