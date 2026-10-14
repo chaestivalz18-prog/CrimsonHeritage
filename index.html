@@ -4,6 +4,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>CRIMSON HERITAGE</title>
+  <!-- Crimson Heritage favicon: logo pada tab browser -->
+  <link rel="icon" type="image/webp" href="assets/crimson-brand.webp">
+  <link rel="shortcut icon" type="image/webp" href="assets/crimson-brand.webp">
+  <meta name="theme-color" content="#080808">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -5153,18 +5157,36 @@ function loadPartyPage() {
         </div>
       </section>
       <div id="chEventEditor"></div>
-      <section style="padding:20px;border:1px solid rgba(201,164,92,.3);border-radius:16px;background:rgba(20,25,35,.7)">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px"><h3 style="margin:0">Daftar Event</h3><span style="font-size:12px;opacity:.7">${events.length} event tersimpan</span></div>
-        ${events.length ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px">${events.map(e=>`
-          <article style="border:1px solid rgba(201,164,92,.25);border-radius:12px;padding:16px;background:rgba(255,255,255,.025)">
-            <div style="font-size:10px;letter-spacing:1.5px;color:#d8b46a;font-weight:800;margin-bottom:8px">${chEventEscape(e.status || 'DRAFT').toUpperCase()}</div>
-            <h4 style="font-size:18px;margin:0 0 8px">${chEventEscape(e.name || 'Event tanpa nama')}</h4>
-            <div style="font-size:12px;opacity:.75;line-height:1.8">${chEventEscape(e.date || 'Tanggal belum ditentukan')}<br>${chEventEscape(e.location || 'Lokasi belum ditentukan')}<br>${(e.committee||[]).length} anggota panitia</div>
-            <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button onclick="chEventOpen('${e.id}')" style="padding:8px 12px;border:0;border-radius:8px;background:#d8b46a;color:#171717;font-weight:700;cursor:pointer">Buka / Edit</button><button onclick="chEventDelete('${e.id}')" style="padding:8px 12px;border:1px solid #a94d4d;border-radius:8px;background:transparent;color:#ffaaaa;cursor:pointer">Hapus</button></div>
-          </article>`).join('')}</div>` : `<div style="padding:32px 12px;text-align:center;opacity:.7">Belum ada event. Tekan <b>BUAT EVENT</b> untuk memulai.</div>`}
+      <section style="padding:20px;border:1px solid rgba(201,164,92,.3);border-radius:16px;background:linear-gradient(155deg,rgba(20,25,35,.96),rgba(13,18,27,.96));box-shadow:0 16px 42px rgba(0,0,0,.18)">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+          <div><div style="font-size:10px;letter-spacing:2px;color:#d8b46a;font-weight:800;margin-bottom:5px">EVENT DIRECTORY</div><h3 style="margin:0;font-size:22px">Daftar Event</h3><div style="font-size:12px;opacity:.68;margin-top:5px">Semua event tersusun dalam satu tabel, lebih mudah dicari dan dikelola.</div></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:12px;padding:8px 11px;border-radius:9px;border:1px solid rgba(216,180,106,.28);background:rgba(216,180,106,.08);color:#f0d89e"><b>${events.length}</b> event tersimpan</span></div>
+        </div>
+        ${events.length ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <div style="flex:1;min-width:220px;position:relative"><span style="position:absolute;left:12px;top:10px;opacity:.6">⌕</span><input id="chEventListSearch" type="search" placeholder="Cari nama, lokasi, status..." oninput="chEventFilterList()" style="width:100%;box-sizing:border-box;padding:10px 12px 10px 34px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:#0c1119;color:#f4f4f4;outline:none"></div>
+          <select id="chEventListStatus" onchange="chEventFilterList()" style="min-width:150px;padding:10px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:#0c1119;color:#f4f4f4"><option value="">Semua status</option><option value="DRAFT">DRAFT</option><option value="PLANNING">PLANNING</option><option value="ONGOING">ONGOING</option><option value="COMPLETED">COMPLETED</option><option value="CANCELLED">CANCELLED</option></select>
+        </div>
+        <div style="overflow:auto;border:1px solid rgba(216,180,106,.24);border-radius:11px;max-width:100%"><table id="chEventListTable" style="width:100%;min-width:790px;border-collapse:separate;border-spacing:0;font-size:13px">
+          <thead><tr style="background:linear-gradient(90deg,#d8b46a,#f0d9a0);color:#191919;text-align:left"><th style="padding:12px 13px;white-space:nowrap">TGL</th><th style="padding:12px 13px">NAMA EVENT</th><th style="padding:12px 13px">LOKASI</th><th style="padding:12px 13px">STATUS</th><th style="padding:12px 13px;text-align:center">PANITIA</th><th style="padding:12px 13px;white-space:nowrap">DIPERBARUI</th><th style="padding:12px 13px;text-align:center">AKSI</th></tr></thead>
+          <tbody>${events.map((e,i)=>{const status=String(e.status||'DRAFT').toUpperCase();const colors={DRAFT:['#d9e3f0','#30445e'],PLANNING:['#ffedbd','#72531b'],ONGOING:['#c8f0d5','#17623b'],COMPLETED:['#d7dce3','#364152'],CANCELLED:['#ffd5d5','#8b2525']};const sc=colors[status]||colors.DRAFT;return `<tr data-ch-event-row="1" data-search="${chEventEscape([e.name,e.location,e.status,e.date].join(' ').toLowerCase())}" data-status="${chEventEscape(status)}" style="background:${i%2?'rgba(255,255,255,.035)':'rgba(255,255,255,.012)'};color:#edf1f6"><td style="padding:11px 13px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">${chEventEscape(e.date||'—')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06);min-width:180px"><div style="font-weight:800;color:#f2d99f">${chEventEscape(e.name||'Event tanpa nama')}</div><div style="font-size:10px;opacity:.5;margin-top:3px">${chEventEscape(e.id||'')}</div></td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)">${chEventEscape(e.location||'Belum ditentukan')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:${sc[0]};color:${sc[1]};font-size:10px;font-weight:900;letter-spacing:.5px;white-space:nowrap">${chEventEscape(status)}</span></td><td style="padding:11px 13px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;min-width:25px;padding:4px 7px;border-radius:7px;background:rgba(216,180,106,.12);color:#e8cc87;font-weight:800">${(e.committee||[]).length}</span></td><td style="padding:11px 13px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06);opacity:.7">${chEventEscape(e.updatedAt?new Date(e.updatedAt).toLocaleDateString('id-ID'):'—')}</td><td style="padding:9px 12px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)"><button onclick="chEventOpen('${chEventEscape(e.id)}')" style="padding:7px 11px;border:0;border-radius:7px;background:#d8b46a;color:#191919;font-weight:800;cursor:pointer">BUKA ↗</button> <button onclick="chEventDelete('${chEventEscape(e.id)}')" aria-label="Hapus event" title="Hapus event" style="padding:7px 9px;border:1px solid rgba(255,130,130,.4);border-radius:7px;background:rgba(150,30,30,.12);color:#ffaaaa;cursor:pointer">×</button></td></tr>`}).join('')}</tbody>
+        </table><div id="chEventListEmptyFilter" style="display:none;padding:22px;text-align:center;color:#aeb7c4">Tidak ada event yang cocok dengan pencarian.</div></div>` : `<div style="padding:34px 12px;text-align:center;border:1px dashed rgba(216,180,106,.3);border-radius:11px;color:#b7bfca"><div style="font-size:28px;margin-bottom:8px">✦</div><b>Belum ada event</b><div style="font-size:12px;margin-top:5px">Tekan BUAT EVENT untuk menambahkan event pertama.</div></div>`}
       </section>
       <p style="font-size:11px;opacity:.6;margin:12px 2px">Catatan: bagian detail saat ini disimpan bersama event di penyimpanan browser. Sinkronisasi detail ke Supabase dan Spreadsheet memerlukan pembaruan backend/API serta Apps Script.</p>
     </div>`;
+}
+
+function chEventFilterList() {
+  const query = String(document.getElementById('chEventListSearch')?.value || '').trim().toLowerCase();
+  const status = String(document.getElementById('chEventListStatus')?.value || '').toUpperCase();
+  const rows = Array.from(document.querySelectorAll('#chEventListTable tbody tr[data-ch-event-row]'));
+  let visible = 0;
+  rows.forEach(row => {
+    const match = (!query || (row.dataset.search || '').includes(query)) && (!status || row.dataset.status === status);
+    row.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  const empty = document.getElementById('chEventListEmptyFilter');
+  if (empty) empty.style.display = rows.length && !visible ? 'block' : 'none';
 }
 
 function chEventNew() {
