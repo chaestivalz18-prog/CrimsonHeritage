@@ -2720,6 +2720,12 @@ th{color:rgba(216,181,106,.78)!important}
 @media(max-width:640px){.ch-event-detail-grid{grid-template-columns:minmax(0,1fr)!important}.ch-event-detail-card{padding:14px!important}.ch-event-detail-card textarea{min-height:112px!important}}
 @media(prefers-reduced-motion:reduce){.ch-event-detail-card,.ch-event-detail-card textarea{transition:none!important}}
 </style>
+
+<style id="ch-event-table-polish">
+.ch-event-table-card{transition:border-color .18s ease,transform .18s ease}.ch-event-table-card:hover{border-color:rgba(216,180,106,.52)!important;transform:translateY(-1px)}
+.ch-event-edit-table input:focus{border-color:#d8b46a!important;box-shadow:0 0 0 2px rgba(216,180,106,.12)}
+@media(max-width:650px){.ch-event-detail-grid{grid-template-columns:minmax(0,1fr)!important}.ch-event-table-card header{align-items:flex-start}.ch-event-table-card header button{padding:7px 8px!important}}
+</style>
 </head>
 
 <body>
@@ -5174,14 +5180,35 @@ function chEventOpen(id) {
   if (editor) editor.scrollIntoView({behavior:'smooth',block:'start'});
 }
 const CH_EVENT_SECTIONS = [
-  {key:'rundown', title:'Rundown Acara', hint:'Satu agenda per baris. Contoh: 19:00 | Pembukaan | PIC: Bearnad'},
-  {key:'rules', title:'Rules / Peraturan', hint:'Tulis peraturan, larangan, dan sanksi; satu poin per baris.'},
-  {key:'equipment', title:'Perlengkapan', hint:'Nama barang, jumlah, PIC, dan status; satu item per baris.'},
-  {key:'fundingPlan', title:'Funding Plan', hint:'Sumber dana, rencana anggaran, pemasukan, dan pengeluaran.'},
-  {key:'publicRelations', title:'Humas & Sponsorship', hint:'Kontak humas, calon sponsor, PIC, nominal, dan status follow-up.'},
-  {key:'benefits', title:'Benefit', hint:'Paket sponsor, benefit yang dijanjikan, kuota, dan status pemenuhan.'},
-  {key:'participants', title:'Data Peserta', hint:'Nama peserta, ID/identitas RP, kontak, status pendaftaran, dan catatan.'}
+  {key:'rundown', title:'Rundown Acara', hint:'Susun urutan kegiatan event.', cols:['WAKTU','AGENDA','PIC','CATATAN']},
+  {key:'rules', title:'Rules / Peraturan', hint:'Daftar aturan dan konsekuensi.', cols:['NO','PERATURAN','SANKSI','CATATAN']},
+  {key:'equipment', title:'Perlengkapan', hint:'Daftar barang dan penanggung jawab.', cols:['NO','PERLENGKAPAN','JUMLAH','PIC / STATUS']},
+  {key:'fundingPlan', title:'Funding Plan', hint:'Rencana pemasukan dan pengeluaran.', cols:['JENIS','KETERANGAN','ANGGARAN','STATUS']},
+  {key:'publicRelations', title:'Humas & Sponsorship', hint:'Pantau sponsor dan tindak lanjut.', cols:['SPONSOR / KONTAK','PIC','NOMINAL','STATUS FOLLOW-UP']},
+  {key:'benefits', title:'Benefit', hint:'Pantau benefit sponsor/peserta.', cols:['PAKET / PIHAK','BENEFIT','KUOTA','STATUS']},
+  {key:'participants', title:'Data Peserta', hint:'Catat peserta dan status pendaftaran.', cols:['NAMA','ID / IDENTITAS RP','KONTAK','STATUS / CATATAN']}
 ];
+function chEventParseRows(value, cols) {
+  if (Array.isArray(value)) return value.map(r => Array.isArray(r) ? r : cols.map(() => ''));
+  if (!value) return [];
+  return String(value).split('\n').filter(line => line.trim()).map(line => line.split('|').map(v=>v.trim()).concat(Array(cols.length).fill('')).slice(0,cols.length));
+}
+function chEventTableSection(sec, value) {
+  const rows = chEventParseRows(value, sec.cols);
+  if (!rows.length) rows.push(sec.cols.map(()=>''));
+  return `<section class="ch-event-table-card" style="min-width:0;border:1px solid rgba(216,180,106,.28);border-radius:15px;overflow:hidden;background:#151b26;box-shadow:0 10px 26px rgba(0,0,0,.15)">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;background:linear-gradient(100deg,rgba(216,180,106,.13),rgba(216,180,106,.025));border-bottom:1px solid rgba(216,180,106,.2)"><div style="display:flex;align-items:center;gap:10px;min-width:0"><span style="display:grid;place-items:center;flex-shrink:0;width:31px;height:31px;border-radius:9px;background:rgba(216,180,106,.13);color:#e4c47a;font-size:12px;font-weight:900">${String(CH_EVENT_SECTIONS.indexOf(sec)+1).padStart(2,'0')}</span><div><h4 style="margin:0;font-size:15px;color:#f5f0e5">${sec.title}</h4><small style="display:block;margin-top:3px;color:#aeb5c2;font-size:11px">${sec.hint}</small></div></div><button type="button" onclick="chEventAddTableRow('${sec.key}')" style="flex-shrink:0;padding:8px 10px;border:1px solid #d8b46a;border-radius:8px;background:transparent;color:#e4c47a;font-size:12px;font-weight:700;cursor:pointer">＋ Baris</button></header>
+    <div style="overflow-x:auto"><table class="ch-event-edit-table" data-ch-event-table="${sec.key}" style="width:100%;min-width:610px;border-collapse:collapse;font-size:12px"><thead><tr>${sec.cols.map(c=>`<th style="padding:11px 10px;text-align:left;white-space:nowrap;background:rgba(216,180,106,.11);color:#e8d7ad;border-bottom:1px solid rgba(216,180,106,.24);font-size:10px;letter-spacing:.7px">${c}</th>`).join('')}<th style="width:42px;background:rgba(216,180,106,.11);border-bottom:1px solid rgba(216,180,106,.24)"></th></tr></thead><tbody>${rows.map(row=>chEventTableRow(sec,row)).join('')}</tbody></table></div>
+    <footer style="padding:9px 13px;border-top:1px solid rgba(255,255,255,.045);color:#858e9d;font-size:10px">${rows.filter(r=>r.some(v=>String(v||'').trim())).length} baris terisi · Tambahkan baris sesuai kebutuhan</footer>
+  </section>`;
+}
+function chEventTableRow(sec, row) {
+ return `<tr>${sec.cols.map((col,i)=>`<td style="padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.065);background:rgba(255,255,255,.012)"><input data-ch-event-cell="${sec.key}" value="${chEventEscape(row[i]||'')}" aria-label="${col}" placeholder="${col.toLowerCase()}" style="width:100%;min-width:110px;box-sizing:border-box;padding:9px 8px;border:1px solid rgba(151,161,180,.16);border-radius:6px;background:#0d1119;color:#f7f7f7;font:inherit;outline:none"></td>`).join('')}<td style="padding:5px;text-align:center;border-bottom:1px solid rgba(255,255,255,.065)"><button type="button" onclick="this.closest('tr').remove()" title="Hapus baris" style="border:1px solid rgba(220,100,100,.45);border-radius:6px;background:transparent;color:#ff9b9b;padding:6px 8px;cursor:pointer">×</button></td></tr>`;
+}
+function chEventAddTableRow(key) {
+ const sec=CH_EVENT_SECTIONS.find(s=>s.key===key); const table=document.querySelector(`[data-ch-event-table="${key}"] tbody`); if(sec&&table)table.insertAdjacentHTML('beforeend',chEventTableRow(sec,sec.cols.map(()=>'')));
+}
+
 function chEventRenderEditor(event) {
   const host = document.getElementById('chEventEditor'); if (!host) return;
   const committee = Array.isArray(event.committee) ? event.committee : [];
@@ -5199,8 +5226,8 @@ function chEventRenderEditor(event) {
     <div id="chEventCommitteeRows" style="display:grid;gap:9px">${committee.map(chEventCommitteeRow).join('')}</div>
     <div class="ch-event-detail-wrap" style="margin-top:30px;padding:clamp(14px,2vw,24px);border:1px solid rgba(216,180,106,.25);border-radius:20px;background:linear-gradient(145deg,rgba(216,180,106,.055),rgba(12,16,25,.2) 42%,rgba(255,255,255,.018));box-shadow:0 18px 48px rgba(0,0,0,.16)">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px"><div style="width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(216,180,106,.55);border-radius:13px;background:linear-gradient(145deg,rgba(216,180,106,.18),rgba(216,180,106,.035));color:#e5c77f;font-size:21px;flex-shrink:0">✦</div><div><div style="font-size:10px;letter-spacing:2.5px;color:#d8b46a;font-weight:800;margin-bottom:4px">EVENT CONTROL CENTER</div><h3 style="margin:0;color:#f5f0e5;font-size:clamp(20px,2vw,26px);letter-spacing:-.5px">Detail Acara</h3><p style="margin:5px 0 0;opacity:.68;font-size:12px;line-height:1.6">Satu tempat untuk mengatur seluruh kebutuhan event. Isi sekarang, edit kapan saja.</p></div></div>
-      <div class="ch-event-detail-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,255px),1fr));gap:14px">${CH_EVENT_SECTIONS.map((sec,i)=>`<label class="ch-event-detail-card" style="--card-index:${i};display:flex;flex-direction:column;gap:11px;min-width:0;padding:17px;border:1px solid rgba(216,180,106,.22);border-radius:16px;background:linear-gradient(150deg,rgba(26,32,44,.94),rgba(17,21,30,.94));box-shadow:inset 0 1px 0 rgba(255,255,255,.035);transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease"><span style="display:flex;align-items:center;gap:10px"><span style="display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(216,180,106,.1);border:1px solid rgba(216,180,106,.25);color:#e2c477;font-size:15px;font-weight:800;flex-shrink:0">${String(i+1).padStart(2,'0')}</span><strong style="font-size:14px;letter-spacing:.1px;color:#f4f0e7">${sec.title}</strong></span><textarea data-ch-event-detail="${sec.key}" rows="5" placeholder="${sec.hint}" style="width:100%;min-height:126px;box-sizing:border-box;padding:13px 14px;border-radius:11px;border:1px solid rgba(151,161,180,.18);background:rgba(7,10,16,.72);color:#f7f7f7;resize:vertical;line-height:1.55;font:inherit;font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s">${chEventEscape(details[sec.key] || '')}</textarea><small style="display:flex;align-items:center;gap:6px;color:#9da4b1;font-size:11px"><span style="color:#d8b46a">●</span> Tersimpan bersama data event</small></label>`).join('')}</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:16px;padding:11px 13px;border-radius:11px;background:rgba(216,180,106,.055);border:1px solid rgba(216,180,106,.12);color:#b8bdc7;font-size:11px;line-height:1.5"><span style="color:#d8b46a;font-size:15px">ⓘ</span><span>Tips: gunakan satu poin per baris agar rundown, perlengkapan, peserta, dan anggaran lebih mudah dibaca saat event berjalan.</span></div>
+      <div class="ch-event-detail-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px">${CH_EVENT_SECTIONS.map(sec=>chEventTableSection(sec,details[sec.key])).join('')}</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:16px;padding:11px 13px;border-radius:11px;background:rgba(216,180,106,.055);border:1px solid rgba(216,180,106,.12);color:#b8bdc7;font-size:11px;line-height:1.5"><span style="color:#d8b46a;font-size:15px">ⓘ</span><span>Tips: isi data per kolom seperti spreadsheet. Tabel bisa digeser ke samping di layar kecil dan baris dapat ditambah atau dihapus.</span></div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px"><button type="button" onclick="chEventSave()" style="padding:12px 18px;border:0;border-radius:9px;background:#d8b46a;color:#171717;font-weight:800;cursor:pointer">SIMPAN EVENT & DETAIL</button><button type="button" onclick="loadPartyPage()" style="padding:12px 16px;border:1px solid #777;border-radius:9px;background:transparent;color:inherit;cursor:pointer">BATAL</button></div>
   </section>`;
@@ -5235,7 +5262,7 @@ function chEventSave() {
     status: document.getElementById('chEventStatus')?.value || 'DRAFT',
     description: (document.getElementById('chEventDescription')?.value || '').trim(),
     committee,
-    details: Object.fromEntries(Array.from(document.querySelectorAll('[data-ch-event-detail]')).map(el => [el.dataset.chEventDetail, el.value || ''])),
+    details: Object.fromEntries(CH_EVENT_SECTIONS.map(sec => [sec.key, Array.from(document.querySelectorAll(`[data-ch-event-cell=\"${sec.key}\"]`)).reduce((rows,el,i)=>{const n=sec.cols.length;const ri=Math.floor(i/n);(rows[ri]||(rows[ri]=[]))[i%n]=el.value||'';return rows;},[]).filter(row=>row.some(v=>String(v||'').trim()))])),
     createdAt: existing?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString()
   };
   const next = oldRows.filter(e => e.id !== item.id); next.push(item);
