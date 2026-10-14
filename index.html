@@ -5193,24 +5193,53 @@ function chEventParseRows(value, cols) {
   if (!value) return [];
   return String(value).split('\n').filter(line => line.trim()).map(line => line.split('|').map(v=>v.trim()).concat(Array(cols.length).fill('')).slice(0,cols.length));
 }
+/* EVENT detail-table usability polish */
+(function chEventInstallTableStyles(){
+  if (document.getElementById('chEventPremiumTableStyles')) return;
+  const style = document.createElement('style'); style.id='chEventPremiumTableStyles';
+  style.textContent = `
+    .ch-event-table-card{transition:border-color .18s ease,box-shadow .18s ease;}
+    .ch-event-table-card:hover{border-color:rgba(216,180,106,.48)!important;box-shadow:0 14px 32px rgba(0,0,0,.22)!important}
+    .ch-event-edit-table thead th{position:sticky;top:0;z-index:2}
+    .ch-event-edit-table tbody tr:nth-child(even) td{background:rgba(255,255,255,.025)!important}
+    .ch-event-edit-table tbody tr:hover td{background:rgba(216,180,106,.045)!important}
+    .ch-event-edit-table input:focus{border-color:#d8b46a!important;box-shadow:0 0 0 3px rgba(216,180,106,.12);background:#121925!important;outline:none}
+    .ch-event-edit-table input::placeholder{color:#778191}
+    .ch-event-add-row{transition:background .15s ease,transform .15s ease}
+    .ch-event-add-row:hover{background:rgba(216,180,106,.12)!important;transform:translateY(-1px)}
+    .ch-event-remove-row:hover{background:rgba(220,90,90,.14)!important}
+    .ch-event-committee-row input:focus{border-color:#d8b46a!important;outline:none;box-shadow:0 0 0 3px rgba(216,180,106,.1)}
+    @media(max-width:640px){.ch-event-detail-grid{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}.ch-event-table-card{border-radius:12px!important}.ch-event-table-card header{padding:12px!important}.ch-event-edit-table{min-width:570px!important}.ch-event-detail-wrap{padding:12px!important}}
+    @media(prefers-reduced-motion:reduce){.ch-event-table-card,.ch-event-add-row{transition:none!important}}
+  `;
+  document.head.appendChild(style);
+})();
+
 function chEventTableSection(sec, value) {
   const rows = chEventParseRows(value, sec.cols);
   if (!rows.length) rows.push(sec.cols.map(()=>''));
   return `<section class="ch-event-table-card" style="min-width:0;border:1px solid rgba(216,180,106,.28);border-radius:15px;overflow:hidden;background:#151b26;box-shadow:0 10px 26px rgba(0,0,0,.15)">
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;background:linear-gradient(100deg,rgba(216,180,106,.13),rgba(216,180,106,.025));border-bottom:1px solid rgba(216,180,106,.2)"><div style="display:flex;align-items:center;gap:10px;min-width:0"><span style="display:grid;place-items:center;flex-shrink:0;width:31px;height:31px;border-radius:9px;background:rgba(216,180,106,.13);color:#e4c47a;font-size:12px;font-weight:900">${String(CH_EVENT_SECTIONS.indexOf(sec)+1).padStart(2,'0')}</span><div><h4 style="margin:0;font-size:15px;color:#f5f0e5">${sec.title}</h4><small style="display:block;margin-top:3px;color:#aeb5c2;font-size:11px">${sec.hint}</small></div></div><button type="button" onclick="chEventAddTableRow('${sec.key}')" style="flex-shrink:0;padding:8px 10px;border:1px solid #d8b46a;border-radius:8px;background:transparent;color:#e4c47a;font-size:12px;font-weight:700;cursor:pointer">＋ Baris</button></header>
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;background:linear-gradient(100deg,rgba(216,180,106,.13),rgba(216,180,106,.025));border-bottom:1px solid rgba(216,180,106,.2)"><div style="display:flex;align-items:center;gap:10px;min-width:0"><span style="display:grid;place-items:center;flex-shrink:0;width:31px;height:31px;border-radius:9px;background:rgba(216,180,106,.13);color:#e4c47a;font-size:12px;font-weight:900">${String(CH_EVENT_SECTIONS.indexOf(sec)+1).padStart(2,'0')}</span><div><h4 style="margin:0;font-size:15px;color:#f5f0e5">${sec.title}</h4><small style="display:block;margin-top:3px;color:#aeb5c2;font-size:11px">${sec.hint}</small></div></div><button type="button" class="ch-event-add-row" onclick="chEventAddTableRow('${sec.key}')" style="flex-shrink:0;padding:8px 10px;border:1px solid #d8b46a;border-radius:8px;background:transparent;color:#e4c47a;font-size:12px;font-weight:700;cursor:pointer">＋ Baris</button></header>
     <div style="overflow-x:auto"><table class="ch-event-edit-table" data-ch-event-table="${sec.key}" style="width:100%;min-width:610px;border-collapse:collapse;font-size:12px"><thead><tr>${sec.cols.map(c=>`<th style="padding:11px 10px;text-align:left;white-space:nowrap;background:rgba(216,180,106,.11);color:#e8d7ad;border-bottom:1px solid rgba(216,180,106,.24);font-size:10px;letter-spacing:.7px">${c}</th>`).join('')}<th style="width:42px;background:rgba(216,180,106,.11);border-bottom:1px solid rgba(216,180,106,.24)"></th></tr></thead><tbody>${rows.map(row=>chEventTableRow(sec,row)).join('')}</tbody></table></div>
-    <footer style="padding:9px 13px;border-top:1px solid rgba(255,255,255,.045);color:#858e9d;font-size:10px">${rows.filter(r=>r.some(v=>String(v||'').trim())).length} baris terisi · Tambahkan baris sesuai kebutuhan</footer>
+    <footer style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 13px;border-top:1px solid rgba(255,255,255,.045);color:#858e9d;font-size:10px"><span id="chEventCount-${sec.key}">${rows.filter(r=>r.some(v=>String(v||'').trim())).length} baris terisi</span><span>Geser tabel untuk melihat semua kolom</span></footer>
   </section>`;
 }
 function chEventTableRow(sec, row) {
- return `<tr>${sec.cols.map((col,i)=>`<td style="padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.065);background:rgba(255,255,255,.012)"><input data-ch-event-cell="${sec.key}" value="${chEventEscape(row[i]||'')}" aria-label="${col}" placeholder="${col.toLowerCase()}" style="width:100%;min-width:110px;box-sizing:border-box;padding:9px 8px;border:1px solid rgba(151,161,180,.16);border-radius:6px;background:#0d1119;color:#f7f7f7;font:inherit;outline:none"></td>`).join('')}<td style="padding:5px;text-align:center;border-bottom:1px solid rgba(255,255,255,.065)"><button type="button" onclick="this.closest('tr').remove()" title="Hapus baris" style="border:1px solid rgba(220,100,100,.45);border-radius:6px;background:transparent;color:#ff9b9b;padding:6px 8px;cursor:pointer">×</button></td></tr>`;
+ return `<tr>${sec.cols.map((col,i)=>`<td style="padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.065);background:rgba(255,255,255,.012)"><input data-ch-event-cell="${sec.key}" value="${chEventEscape(row[i]||'')}" aria-label="${col}" placeholder="${col.toLowerCase()}" style="width:100%;min-width:110px;box-sizing:border-box;padding:9px 8px;border:1px solid rgba(151,161,180,.16);border-radius:6px;background:#0d1119;color:#f7f7f7;font:inherit;outline:none"></td>`).join('')}<td style="padding:5px;text-align:center;border-bottom:1px solid rgba(255,255,255,.065)"><button type="button" class="ch-event-remove-row" onclick="this.closest('tr').remove();chEventUpdateRowCount('${sec.key}')" title="Hapus baris" aria-label="Hapus baris" style="border:1px solid rgba(220,100,100,.45);border-radius:6px;background:transparent;color:#ff9b9b;padding:6px 8px;cursor:pointer">×</button></td></tr>`;
+}
+function chEventUpdateRowCount(key) {
+ const sec=CH_EVENT_SECTIONS.find(s=>s.key===key); const table=document.querySelector(`[data-ch-event-table="${key}"] tbody`); const label=document.getElementById(`chEventCount-${key}`);
+ if(!sec||!table||!label)return;
+ const filled=Array.from(table.querySelectorAll('tr')).filter(tr=>Array.from(tr.querySelectorAll(`[data-ch-event-cell="${key}"]`)).some(el=>el.value.trim())).length;
+ label.textContent=`${filled} baris terisi`;
 }
 function chEventAddTableRow(key) {
- const sec=CH_EVENT_SECTIONS.find(s=>s.key===key); const table=document.querySelector(`[data-ch-event-table="${key}"] tbody`); if(sec&&table)table.insertAdjacentHTML('beforeend',chEventTableRow(sec,sec.cols.map(()=>'')));
+ const sec=CH_EVENT_SECTIONS.find(s=>s.key===key); const table=document.querySelector(`[data-ch-event-table="${key}"] tbody`); if(sec&&table){table.insertAdjacentHTML('beforeend',chEventTableRow(sec,sec.cols.map(()=>'')));const input=table.lastElementChild?.querySelector('input');if(input)input.focus();chEventUpdateRowCount(key);}
 }
 
 function chEventRenderEditor(event) {
   const host = document.getElementById('chEventEditor'); if (!host) return;
+  if (!host.dataset.chEventCountBound) { host.addEventListener('input', ev=>{const cell=ev.target.closest('[data-ch-event-cell]');if(cell)chEventUpdateRowCount(cell.dataset.chEventCell);});host.dataset.chEventCountBound='1'; }
   const committee = Array.isArray(event.committee) ? event.committee : [];
   const details = event.details && typeof event.details === 'object' ? event.details : {};
   host.innerHTML = `<section style="padding:20px;margin-bottom:18px;border:1px solid rgba(201,164,92,.45);border-radius:16px;background:rgba(20,25,35,.82)">
