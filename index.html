@@ -5149,11 +5149,11 @@ function loadPartyPage() {
   const events = chEventReadAll().sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
   content.innerHTML = `
     <div style="max-width:1200px;margin:0 auto;color:var(--text-color,#f5f5f5)">
-      <section style="padding:26px;border-radius:18px;background:linear-gradient(135deg,#111827,#202938);border:1px solid rgba(201,164,92,.45);margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:3px;color:#d8b46a;font-weight:800">CRIMSON HERITAGE • EVENT</div>
-        <div style="display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:8px">
-          <div><h2 style="margin:0 0 8px;font-size:28px">EVENT MANAGEMENT</h2><p style="margin:0;opacity:.78">Kelola rundown, rules, perlengkapan, funding plan, humas & sponsorship, benefit, peserta, dan panitia untuk setiap event.</p></div>
-          <button type="button" onclick="chEventNew()" style="border:0;border-radius:10px;padding:12px 17px;background:#d8b46a;color:#171717;font-weight:800;cursor:pointer">＋ BUAT EVENT</button>
+      <section style="position:relative;overflow:hidden;padding:clamp(22px,3.2vw,36px);border-radius:22px;background:radial-gradient(ellipse at 92% 8%,rgba(216,180,106,.15),transparent 34%),linear-gradient(125deg,#10151f 0%,#192333 58%,#111722 100%);border:1px solid rgba(216,180,106,.42);box-shadow:0 18px 50px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.04);margin-bottom:22px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:10px;letter-spacing:3px;color:#e1bf70;font-weight:900"><span style="display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;border:1px solid rgba(216,180,106,.5);border-radius:9px;background:rgba(216,180,106,.09);font-size:14px">✦</span><span>CRIMSON HERITAGE <span style="opacity:.55">/</span> EVENT</span></div>
+        <div style="display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:14px">
+          <div style="min-width:220px;flex:1"><div style="font-size:10px;letter-spacing:2.5px;color:rgba(230,205,145,.7);font-weight:800;margin-bottom:7px">EVENT OPERATIONS</div><h2 style="margin:0;font-size:clamp(28px,3.2vw,38px);line-height:1.08;letter-spacing:-.8px">EVENT MANAGEMENT</h2><div style="height:3px;width:58px;margin-top:15px;border-radius:4px;background:linear-gradient(90deg,#d8b46a,#f3e1ad);box-shadow:0 0 18px rgba(216,180,106,.22)"></div></div>
+          <button type="button" onclick="chEventNew()" style="display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(255,239,194,.5);border-radius:12px;padding:14px 20px;background:linear-gradient(135deg,#f0d28b,#c9a24f);color:#171717;font-weight:900;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 24px rgba(201,164,92,.18);transition:transform .18s,box-shadow .18s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(201,164,92,.25)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 8px 24px rgba(201,164,92,.18)'"><span style="font-size:18px;line-height:1">＋</span> BUAT EVENT</button>
         </div>
       </section>
       <div id="chEventEditor"></div>
