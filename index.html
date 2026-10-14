@@ -5107,122 +5107,86 @@ function loadMyPickupHistory() {
    EVENT MANAGEMENT
 ===================================================== */
 
+let CH_EVENT_CACHE_ = [];
+let CH_EVENT_CURRENT_ID_ = '';
+let CH_EVENT_COMMITTEE_ = [];
 
 function loadPartyPage() {
-  const content = document.getElementById('content');
-  if (!content) return;
-  content.innerHTML = `
-    <div class="ch-warship-template">
-      <div class="ch-warship-template-hero">
-        <div class="ch-warship-template-eyebrow">CRIMSON HERITAGE • EVENT</div>
-        <h2>EVENT MANAGEMENT</h2>
-        <p>Kelola struktur panitia, rundown, perlengkapan, anggaran, sponsor, peserta, dan kebutuhan event Crimson Heritage.</p>
-      </div>
-      <div class="ch-warship-template-grid">
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">♙</div>
-          <h3>Panitia</h3><p>Template data panitia dan pembagian tugas.</p>
-        </section>
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">◷</div>
-          <h3>Rundown Acara</h3><p>Template susunan jadwal dan agenda acara.</p>
-        </section>
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">▣</div>
-          <h3>Perlengkapan</h3><p>Template daftar kebutuhan perlengkapan.</p>
-        </section>
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">◆</div>
-          <h3>Funding Plan</h3><p>Template rencana anggaran dan realisasi.</p>
-        </section>
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">♢</div>
-          <h3>Sponsorship</h3><p>Template pendataan sponsor dan status proposal.</p>
-        </section>
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">✦</div>
-          <h3>Benefit</h3><p>Template paket dan benefit sponsor.</p>
-        </section>
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">♟</div>
-          <h3>Peserta</h3><p>Template daftar peserta dan registrasi ulang.</p>
-        </section>
-        <section class="ch-warship-template-card">
-          <div class="ch-warship-template-card-icon">🏆</div>
-          <h3>Bagan Pertandingan</h3><p>Template susunan babak dan hasil pertandingan.</p>
-        </section>
-      </div>
-      <div class="ch-warship-template-note">Tampilan ini hanya template. Belum terhubung ke database dan tidak mengubah data EVENT yang sudah ada.</div>
-    </div>`;
+  document.getElementById('content').innerHTML = '<div class="card"><div class="section-title">EVENT MANAGEMENT</div><div class="muted">Memuat daftar event...</div></div>';
+  google.script.run
+    .withSuccessHandler(function(rows) {
+      if (CURRENT_PAGE !== 'party') return;
+      CH_EVENT_CACHE_ = Array.isArray(rows) ? rows : [];
+      renderEventManagementPage_();
+    })
+    .withFailureHandler(function(err) { handleServerError(err); })
+    .getEvents(TOKEN);
 }
 
+function renderEventManagementPage_() {
+  const rows = CH_EVENT_CACHE_ || [];
+  const cards = rows.map(function(ev) {
+    const committee = Array.isArray(ev.committee) ? ev.committee : [];
+    return `<div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div><div class="stat-label">${escapeHTML(ev.eventDate || 'Tanggal belum diatur')}</div><div style="font-size:17px;font-weight:850;margin-top:7px">${escapeHTML(ev.name || 'Event tanpa nama')}</div><div style="color:var(--muted);font-size:11px;margin-top:6px">${escapeHTML(ev.location || 'Lokasi belum diatur')}</div></div>
+        <span class="status">${escapeHTML(ev.status || 'DRAFT')}</span>
+      </div>
+      <div style="color:var(--muted);font-size:12px;line-height:1.5">${escapeHTML(ev.description || 'Belum ada deskripsi.')}</div>
+      <div style="display:flex;gap:14px;color:var(--gold);font-size:11px"><span>♟ ${committee.length} panitia</span><span>Disimpan: ${escapeHTML(ev.updatedAt || '-')}</span></div>
+      <button class="btn btn-red" onclick="openEventEditor_('${escapeHTML(ev.eventId)}')">BUKA / EDIT EVENT</button>
+    </div>`;
+  }).join('');
+  document.getElementById('content').innerHTML = `
+    <div class="topbar"><div><div class="page-title">EVENT MANAGEMENT</div><div class="page-subtitle">Buat event baru, kelola struktur panitia, dan buka kembali event lama.</div></div><button class="btn btn-red" onclick="createNewEvent_()">＋ BUAT EVENT</button></div>
+    <div class="grid grid-3">${cards || '<div class="card"><div class="empty">Belum ada event. Klik BUAT EVENT untuk memulai.</div></div>'}</div>
+    <div class="field-hint" style="margin-top:16px">Data event disimpan di Supabase dan disalin ke Google Spreadsheet melalui sinkronisasi Apps Script.</div>`;
+}
 
+function createNewEvent_() {
+  CH_EVENT_CURRENT_ID_ = '';
+  CH_EVENT_COMMITTEE_ = [{name:'', role:'Ketua Panitia', task:''}];
+  renderEventEditor_({name:'',eventDate:'',location:'',status:'DRAFT',description:'',committee:CH_EVENT_COMMITTEE_});
+}
 
-function submitParty() {
+function openEventEditor_(eventId) {
+  const ev = (CH_EVENT_CACHE_ || []).find(function(item){ return String(item.eventId) === String(eventId); });
+  if (!ev) { toast('Event tidak ditemukan. Muat ulang daftar event.', 'error'); return; }
+  CH_EVENT_CURRENT_ID_ = ev.eventId;
+  CH_EVENT_COMMITTEE_ = Array.isArray(ev.committee) ? ev.committee.map(function(m){ return {name:m.name || '',role:m.role || '',task:m.task || ''}; }) : [];
+  renderEventEditor_(ev);
+}
 
-  const button =
-    document.getElementById('partySaveButton');
+function renderEventEditor_(ev) {
+  const committee = Array.isArray(CH_EVENT_COMMITTEE_) ? CH_EVENT_COMMITTEE_ : [];
+  const committeeHtml = committee.map(function(m, i) { return `<div class="card" style="padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><strong>Panitia #${i+1}</strong><button type="button" class="btn btn-danger" onclick="removeEventCommittee_(${i})">Hapus</button></div><div class="grid grid-3"><div class="field"><label>Nama</label><input id="eventCommitteeName_${i}" value="${escapeHTML(m.name)}" placeholder="Nama anggota"></div><div class="field"><label>Jabatan</label><input id="eventCommitteeRole_${i}" value="${escapeHTML(m.role)}" placeholder="Ketua / Wakil / Sekretaris"></div><div class="field"><label>Tugas</label><input id="eventCommitteeTask_${i}" value="${escapeHTML(m.task)}" placeholder="Tugas dan tanggung jawab"></div></div></div>`; }).join('');
+  document.getElementById('content').innerHTML = `<div class="topbar"><div><div class="page-title">${CH_EVENT_CURRENT_ID_ ? 'EDIT EVENT' : 'BUAT EVENT BARU'}</div><div class="page-subtitle">Isi detail event dan struktur panitia. Perubahan disimpan ke Supabase.</div></div><button class="btn btn-muted" onclick="loadPartyPage()">← KEMBALI</button></div>
+  <div class="card"><div class="grid grid-2"><div class="field"><label>Nama Event *</label><input id="eventName" value="${escapeHTML(ev.name || '')}" placeholder="Nama event"></div><div class="field"><label>Tanggal</label><input id="eventDate" type="date" value="${escapeHTML(ev.eventDate || '')}"></div><div class="field"><label>Lokasi</label><input id="eventLocation" value="${escapeHTML(ev.location || '')}" placeholder="Lokasi event"></div><div class="field"><label>Status</label><select id="eventStatus"><option value="DRAFT" ${ev.status==='DRAFT'?'selected':''}>DRAFT</option><option value="PLANNING" ${ev.status==='PLANNING'?'selected':''}>PERSIAPAN</option><option value="ACTIVE" ${ev.status==='ACTIVE'?'selected':''}>BERLANGSUNG</option><option value="COMPLETED" ${ev.status==='COMPLETED'?'selected':''}>SELESAI</option><option value="CANCELLED" ${ev.status==='CANCELLED'?'selected':''}>DIBATALKAN</option></select></div></div><div class="field"><label>Deskripsi</label><textarea id="eventDescription" placeholder="Deskripsi atau catatan event">${escapeHTML(ev.description || '')}</textarea></div></div>
+  <div class="card" style="margin-top:16px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px"><div><div class="section-title" style="margin:0">STRUKTUR PANITIA</div><div class="page-subtitle">Nama, jabatan, dan tugas bisa diedit kapan saja.</div></div><button class="btn btn-gold" onclick="addEventCommittee_()">＋ TAMBAH PANITIA</button></div><div id="eventCommitteeList">${committeeHtml || '<div class="empty">Belum ada anggota panitia.</div>'}</div><button id="eventSaveButton" class="btn btn-red" onclick="saveEventEditor_()">SIMPAN EVENT</button> ${CH_EVENT_CURRENT_ID_ ? `<button class="btn btn-muted" onclick="deleteEvent_('${escapeHTML(CH_EVENT_CURRENT_ID_)}')">HAPUS EVENT</button>` : ''}</div>`;
+}
 
-  const tanggal =
-    document.getElementById('partyTanggal').value;
+function collectEventCommittee_() {
+  (CH_EVENT_COMMITTEE_ || []).forEach(function(m,i) {
+    const name = document.getElementById('eventCommitteeName_'+i);
+    const role = document.getElementById('eventCommitteeRole_'+i);
+    const task = document.getElementById('eventCommitteeTask_'+i);
+    if (name) m.name = name.value.trim(); if (role) m.role = role.value.trim(); if (task) m.task = task.value.trim();
+  });
+}
+function addEventCommittee_() { collectEventCommittee_(); CH_EVENT_COMMITTEE_.push({name:'',role:'',task:''}); renderEventEditor_({name:document.getElementById('eventName').value,eventDate:document.getElementById('eventDate').value,location:document.getElementById('eventLocation').value,status:document.getElementById('eventStatus').value,description:document.getElementById('eventDescription').value,committee:CH_EVENT_COMMITTEE_}); }
+function removeEventCommittee_(i) { collectEventCommittee_(); CH_EVENT_COMMITTEE_.splice(i,1); renderEventEditor_({name:document.getElementById('eventName').value,eventDate:document.getElementById('eventDate').value,location:document.getElementById('eventLocation').value,status:document.getElementById('eventStatus').value,description:document.getElementById('eventDescription').value,committee:CH_EVENT_COMMITTEE_}); }
 
-  const nama =
-    document.getElementById('partyNama').value.trim();
-
-  const jumlah =
-    document.getElementById('partyJumlah').value;
-
-  const dpWd =
-    document.getElementById('partyDpWd').value;
-
-  const namaPJ =
-    document.getElementById('partyNamaPJ').value.trim();
-
-  const keterangan =
-    document.getElementById('partyKeterangan').value.trim();
-
-  if (!tanggal || !nama || !jumlah || !dpWd || !namaPJ) {
-    toast(
-      'Tanggal, Nama, Jumlah, DP/WD, dan Nama PJ wajib diisi.',
-      'error'
-    );
-    return;
-  }
-
-  button.disabled = true;
-  button.textContent = 'MENYIMPAN...';
-
-  google.script.run
-    .withSuccessHandler(function(result) {
-
-      button.disabled = false;
-      button.textContent = 'SIMPAN EVENT';
-
-      toast(
-        result.message || 'Data Event berhasil disimpan.',
-        'success'
-      );
-
-      loadPartyPage();
-
-    })
-    .withFailureHandler(function(err) {
-
-      button.disabled = false;
-      button.textContent = 'SIMPAN EVENT';
-
-      handleServerError(err);
-
-    })
-    .addParty(
-      TOKEN,
-      keterangan,
-      namaPJ,
-      tanggal,
-      nama,
-      jumlah,
-      dpWd
-    );
+function saveEventEditor_() {
+  collectEventCommittee_();
+  const name = document.getElementById('eventName').value.trim();
+  if (!name) { toast('Nama event wajib diisi.', 'error'); return; }
+  const payload = {eventId:CH_EVENT_CURRENT_ID_,name:name,eventDate:document.getElementById('eventDate').value || null,location:document.getElementById('eventLocation').value.trim(),status:document.getElementById('eventStatus').value,description:document.getElementById('eventDescription').value.trim(),committee:CH_EVENT_COMMITTEE_};
+  const button = document.getElementById('eventSaveButton'); button.disabled = true; button.textContent = 'MENYIMPAN...';
+  google.script.run.withSuccessHandler(function(result) { toast((result && result.message) || 'Event tersimpan.', 'success'); loadPartyPage(); }).withFailureHandler(function(err) { button.disabled = false; button.textContent = 'SIMPAN EVENT'; handleServerError(err); }).saveEvent(TOKEN,payload);
+}
+function deleteEvent_(eventId) {
+  if (!confirm('Hapus event ini? Data event dan struktur panitianya akan dihapus.')) return;
+  google.script.run.withSuccessHandler(function(result) { toast((result && result.message) || 'Event dihapus.', 'success'); loadPartyPage(); }).withFailureHandler(handleServerError).deleteEvent(TOKEN,eventId);
 }
 
 
@@ -9882,20 +9846,4 @@ tbody tr:hover td{
 }
 @media(prefers-reduced-motion:reduce){.partnership-switch-btn{transition:none!important;}}
 
-
-/* CRIMSON HERITAGE — EVENT TEMPLATE */
-.ch-warship-template{max-width:1300px;margin:0 auto 28px;color:var(--text-primary,#f5f0e7)}
-.ch-warship-template-hero{padding:30px;border:1px solid rgba(201,164,92,.35);border-radius:16px;background:radial-gradient(circle at 88% 25%,rgba(160,15,28,.18),transparent 32%),linear-gradient(125deg,rgba(255,255,255,.045),rgba(0,0,0,.16));}
-.ch-warship-template-eyebrow{font-size:9px;font-weight:800;letter-spacing:2px;color:#c9a45c}
-.ch-warship-template-hero h2{margin:10px 0 8px;font:700 clamp(26px,3vw,36px) Georgia,serif;letter-spacing:1px}
-.ch-warship-template-hero p{margin:0;color:#999;font-size:12px;line-height:1.7}
-.ch-warship-template-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-top:16px}
-.ch-warship-template-card{min-height:145px;padding:19px;border:1px solid rgba(201,164,92,.18);border-radius:13px;background:rgba(255,255,255,.025);transition:border-color .15s ease,transform .15s ease}
-.ch-warship-template-card:hover{border-color:rgba(201,164,92,.5);transform:translateY(-2px)}
-.ch-warship-template-card-icon{display:flex;align-items:center;justify-content:center;width:35px;height:35px;border:1px solid rgba(201,164,92,.25);border-radius:10px;color:#d8b66f;font-size:18px}
-.ch-warship-template-card h3{margin:14px 0 6px;font-size:12px;letter-spacing:.5px}
-.ch-warship-template-card p{margin:0;color:#888;font-size:10px;line-height:1.7}
-.ch-warship-template-note{margin-top:13px;padding:12px 14px;border:1px dashed rgba(201,164,92,.2);border-radius:10px;color:#888;font-size:10px;line-height:1.6}
-@media(max-width:950px){.ch-warship-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:520px){.ch-warship-template-hero{padding:22px}.ch-warship-template-grid{grid-template-columns:1fr}.ch-warship-template-card{min-height:0;padding:16px}}
 </style>
