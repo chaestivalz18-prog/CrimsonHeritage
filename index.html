@@ -2730,6 +2730,12 @@ th{color:rgba(216,181,106,.78)!important}
 .ch-event-edit-table input:focus{border-color:#d8b46a!important;box-shadow:0 0 0 2px rgba(216,180,106,.12)}
 @media(max-width:650px){.ch-event-detail-grid{grid-template-columns:minmax(0,1fr)!important}.ch-event-table-card header{align-items:flex-start}.ch-event-table-card header button{padding:7px 8px!important}}
 </style>
+<style id="crimson-crafting-catalog-style">
+.crafting-hero{position:relative;overflow:hidden;padding:24px;border:1px solid rgba(201,164,92,.22);border-radius:18px;background:radial-gradient(circle at 90% 0,rgba(181,18,27,.2),transparent 38%),linear-gradient(130deg,rgba(25,25,25,.96),rgba(8,8,8,.92));margin-bottom:18px}
+.crafting-kicker{font-size:9px;letter-spacing:2.5px;color:var(--gold);font-weight:800}.crafting-title{font-size:clamp(22px,3vw,32px);font-weight:950;letter-spacing:1px;margin-top:9px}.crafting-desc{font-size:12px;color:#aaa;line-height:1.7;max-width:700px;margin-top:8px}.crafting-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}.crafting-search{flex:1;min-width:180px;padding:12px 14px;border-radius:11px;border:1px solid var(--border);background:#111;color:white;outline:none}.crafting-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.crafting-product{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:17px;background:linear-gradient(145deg,rgba(28,28,28,.95),rgba(10,10,10,.95));min-width:0}.crafting-product:before{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,var(--red),var(--gold),transparent)}.crafting-product-head{display:flex;gap:12px;align-items:center}.crafting-product-icon{width:48px;height:48px;display:grid;place-items:center;flex:0 0 48px;border-radius:13px;background:rgba(181,18,27,.15);border:1px solid rgba(181,18,27,.25);font-size:22px}.crafting-product-name{font-size:13px;font-weight:900;line-height:1.4}.crafting-yield{font-size:10px;color:var(--gold);margin-top:5px}.crafting-product-meta{display:flex;justify-content:space-between;gap:8px;margin:15px 0 12px;font-size:10px;color:#999}.crafting-product-meta strong{color:#eee}.crafting-recipe-btn{width:100%;padding:10px 12px;border:1px solid rgba(201,164,92,.28);background:rgba(201,164,92,.08);color:#e8cf9b;border-radius:10px;font-size:10px;font-weight:800}.crafting-table-wrap{margin-top:22px;border:1px solid var(--border);border-radius:15px;overflow:hidden;background:rgba(15,15,15,.85)}.crafting-table-title{padding:16px 18px;border-bottom:1px solid var(--border);font-size:12px;font-weight:900;letter-spacing:.7px}.crafting-table-scroll{overflow:auto}.crafting-table{width:100%;border-collapse:collapse;min-width:680px;font-size:11px}.crafting-table th,.crafting-table td{padding:12px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top}.crafting-table th{font-size:9px;letter-spacing:1px;color:var(--gold);background:rgba(255,255,255,.025)}.crafting-table tr:last-child td{border-bottom:0}.crafting-ingredients{color:#bbb;line-height:1.8}.crafting-status{display:inline-block;padding:5px 8px;border-radius:7px;font-size:9px;font-weight:800;white-space:nowrap}.crafting-status.ready{color:#62dfa0;background:rgba(55,201,120,.1)}.crafting-status.low{color:#ff8790;background:rgba(239,77,90,.1)}.crafting-detail{margin-top:15px;border:1px solid rgba(201,164,92,.2);border-radius:15px;padding:16px;background:rgba(201,164,92,.035)}.crafting-detail h3{margin:0 0 10px;font-size:12px}.crafting-detail-table{width:100%;border-collapse:collapse;font-size:11px}.crafting-detail-table td{padding:9px 5px;border-bottom:1px solid rgba(255,255,255,.06)}.crafting-detail-table td:last-child{text-align:right}.crafting-batch{width:86px;padding:9px;border-radius:9px;background:#101010;color:white;border:1px solid var(--border)}.crafting-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px}.crafting-note{font-size:10px;color:#858585;line-height:1.7;margin-top:13px}
+@media(max-width:1000px){.crafting-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.crafting-hero{padding:18px}.crafting-grid{grid-template-columns:1fr}.crafting-toolbar{align-items:stretch}.crafting-search{width:100%;flex-basis:100%}.crafting-actions .btn{flex:1}.crafting-product{padding:15px}}
+</style>
 </head>
 
 <body>
@@ -3501,6 +3507,11 @@ function buildNavigation() {
     html += navButton('stock', '▣', 'STOCK BRANGKAS');
   }
 
+  // Crafting tersedia untuk staff operasional yang memiliki izin inventory.
+  if (USER && ['ADMIN', 'MANAGER', 'STAFF'].indexOf(String(USER.role || '').toUpperCase()) !== -1 && PERMISSIONS.stock) {
+    html += navButton('crafting', '⚒', 'KATALOG CRAFTING');
+  }
+
   if (PERMISSIONS.masuk) {
     html += navButton('stockin', '↑', 'BARANG MASUK');
   }
@@ -3747,6 +3758,9 @@ function showPage(page, title) {
       break;
     case 'stock':
       loadStockPage();
+      break;
+    case 'crafting':
+      loadCraftingPage();
       break;
     case 'stockin':
       loadStockInPage();
@@ -4391,6 +4405,40 @@ function loadRulesPage() {
   `;
 }
 
+
+
+
+/* =====================================================
+   CRAFTING CATALOG — PANDUAN SAJA (READ ONLY)
+   Tidak membaca atau mengubah stok; tidak menjalankan transaksi.
+===================================================== */
+const CH_CRAFT_RECIPES = [
+  {key:'KOREK',name:'KOREK',yield:10,icon:'🔥',ingredients:[['ZATKIM',1],['MICIN',5],['SAWIT',10],['TEMBAGA',5],['UMER',10000],['BESI',5],['KAYU MENTAH',5],['KECUBUNG',5]]},
+  {key:'ROKOK_BATANG',name:'ROKOK BATANG',yield:12,icon:'🚬',ingredients:[['MICIN',2],['DAUN',5],['BUAH-BUAHAN',5],['RANTING KAYU',5],['CENGKEH',10],['TEMBAKAU',10],['KECUBUNG',2]]},
+  {key:'CRIMSON_TOBACCO',name:'CRIMSON TOBACCO',yield:10,icon:'♨',ingredients:[['ZATKIM',2],['MICIN',1],['UMER',20000],['ROKOK',24],['KECUBUNG',1]]},
+  {key:'LIGHTER_CRIMSON',name:'LIGHTER CRIMSON',yield:1,icon:'✦',ingredients:[['ZATKIM',2],['TEMBAGA',5],['MICIN',5],['KECUBUNG',5],['BESI',5],['UANG MERAH',30000],['KAYU MENTAH',5],['SAWIT',10]]},
+  {key:'CROCKEY',name:'CROCKEY',yield:10,icon:'⚗',ingredients:[['BERAS',3],['UMER',20000],['CENGKEH',5],['ZATKIM',2],['MICIN',7],['BUAH-BUAHAN',10],['BOTOL',10],['BAMBU',10],['SAWIT',5],['KECUBUNG',7]]},
+  {key:'SUPLEMEN',name:'SUPLEMEN',yield:1,icon:'🌿',ingredients:[['AKAR',20],['DAUN',20]]}
+];
+function loadCraftingPage() { renderCraftingPage_(''); }
+function renderCraftingPage_(query) {
+  const q=String(query||'').trim().toLowerCase();
+  const recipes=CH_CRAFT_RECIPES.filter(function(r){return r.name.toLowerCase().includes(q)||r.ingredients.some(function(i){return i[0].toLowerCase().includes(q);});});
+  const cards=recipes.map(function(r){
+    return `<article class="crafting-product"><div class="crafting-product-head"><div class="crafting-product-icon">${r.icon}</div><div><div class="crafting-product-name">${escapeHTML(r.name)}</div><div class="crafting-yield">HASIL PER RESEP: ${number(r.yield)} PCS</div></div></div><div class="crafting-product-meta"><span>Jumlah bahan</span><strong>${r.ingredients.length} jenis</strong></div><button class="crafting-recipe-btn" onclick="showCraftingRecipe_('${r.key}')">LIHAT PANDUAN RESEP →</button></article>`;
+  }).join('')||'<div class="card">Tidak ada resep atau bahan yang cocok dengan pencarian.</div>';
+  const rows=recipes.map(function(r){const details=r.ingredients.map(function(ing){return `<div>${escapeHTML(ing[0])}: <b>${number(ing[1])}</b></div>`;}).join('');return `<tr><td><b>${escapeHTML(r.name)}</b></td><td>${number(r.yield)} pcs</td><td class="crafting-ingredients">${details}</td><td><button class="btn btn-muted" style="padding:8px 10px;font-size:9px" onclick="showCraftingRecipe_('${r.key}')">LIHAT</button></td></tr>`;}).join('');
+  document.getElementById('content').innerHTML=`<section class="crafting-hero"><div class="crafting-kicker">CRIMSON HERITAGE • RECIPE GUIDE</div><div class="crafting-title">KATALOG PANDUAN CRAFTING</div><div class="crafting-desc">Panduan resep untuk membantu staff melihat bahan dan jumlah yang benar sebelum crafting. Halaman ini hanya untuk referensi dan tidak mengubah Stock Brangkas maupun menjalankan transaksi.</div></section><div class="crafting-toolbar"><input id="craftingSearch" class="crafting-search" type="search" placeholder="Cari produk atau bahan..." value="${escapeAttr(query||'')}" autocomplete="off"><span style="font-size:10px;color:#888">${recipes.length} resep tersedia</span></div><div class="crafting-grid">${cards}</div><section class="crafting-table-wrap"><div class="crafting-table-title">TABEL PANDUAN RESEP • BAHAN PER 1 RESEP</div><div class="crafting-table-scroll"><table class="crafting-table"><thead><tr><th>PRODUK</th><th>HASIL / RESEP</th><th>BAHAN & QTY PER RESEP</th><th>DETAIL</th></tr></thead><tbody>${rows}</tbody></table></div></section><div id="craftingDetail"></div><p class="crafting-note">Katalog ini hanya panduan. Angka bahan menunjukkan kebutuhan untuk satu resep/batch; kalikan jumlah bahan dengan jumlah batch yang ingin dibuat. Tidak ada stok yang dipotong atau ditambahkan dari halaman ini.</p>`;
+  const input=document.getElementById('craftingSearch'); if(input) input.addEventListener('input',function(){renderCraftingPage_(this.value);});
+}
+function showCraftingRecipe_(key) {
+  const r=CH_CRAFT_RECIPES.find(function(x){return x.key===key;});if(!r)return;
+  const rows=r.ingredients.map(function(ing){return `<tr><td>${escapeHTML(ing[0])}</td><td>${number(ing[1])}</td><td><span class="crafting-status ready">PANDUAN</span></td></tr>`;}).join('');
+  const host=document.getElementById('craftingDetail');if(!host)return;
+  host.innerHTML=`<section class="crafting-detail"><h3>RESEP: ${escapeHTML(r.name)} <span style="color:var(--gold)">• hasil ${number(r.yield)} pcs per resep</span></h3><div class="crafting-table-scroll"><table class="crafting-detail-table"><thead><tr><th style="text-align:left">BAHAN</th><th style="text-align:left">QTY PER RESEP</th><th style="text-align:left">KETERANGAN</th></tr></thead><tbody>${rows}</tbody></table></div><div class="crafting-actions"><label for="craftBatch" style="font-size:10px;color:#aaa">JUMLAH RESEP / BATCH</label><input id="craftBatch" class="crafting-batch" type="number" min="1" max="1000" step="1" value="1" oninput="updateCraftingTotals_('${r.key}')"><strong id="craftYieldTotal" style="font-size:11px;color:var(--gold)">Hasil: ${number(r.yield)} pcs</strong><button class="btn btn-muted" onclick="document.getElementById('craftingDetail').innerHTML=''">TUTUP PANDUAN</button></div><div id="craftingTotals" class="crafting-note"></div></section>`;
+  updateCraftingTotals_(r.key);host.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function updateCraftingTotals_(key){const r=CH_CRAFT_RECIPES.find(function(x){return x.key===key;});const input=document.getElementById('craftBatch');if(!r||!input)return;const batches=Math.max(1,Math.min(1000,Math.floor(Number(input.value)||1)));input.value=batches;const out=document.getElementById('craftYieldTotal');if(out)out.textContent='Perkiraan hasil: '+number(r.yield*batches)+' pcs';const lines=r.ingredients.map(function(ing){return `<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0"><span>${escapeHTML(ing[0])}</span><b>${number(ing[1]*batches)}</b></div>`;}).join('');const target=document.getElementById('craftingTotals');if(target)target.innerHTML='<b>JUMLAH BAHAN UNTUK '+number(batches)+' RESEP</b>'+lines+'<div style="margin-top:8px;color:#c9a45c">Panduan saja — tidak ada perubahan stok.</div>';}
 
 /* =====================================================
    STOCK
