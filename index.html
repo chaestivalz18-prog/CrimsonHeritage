@@ -2739,8 +2739,8 @@ th{color:rgba(216,181,106,.78)!important}
 @media(max-width:1000px){.crafting-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.crafting-hero{padding:18px}.crafting-grid{grid-template-columns:1fr}.crafting-toolbar{align-items:stretch}.crafting-search{width:100%;flex-basis:100%}.crafting-actions .btn{flex:1}.crafting-product{padding:15px}}
 
-/* Editable QTY ORDER for the read-only crafting guide */
-.crafting-order-field{display:flex!important;align-items:center;gap:10px;justify-content:space-between}.crafting-order-field label{font-size:9px;color:#aaa;font-weight:800;line-height:1.4}.crafting-order-input{width:76px;min-width:60px;padding:7px 8px;border-radius:7px;border:1px solid rgba(201,164,92,.38);background:#111;color:#f3dfb1;font-size:12px;font-weight:800;text-align:center;outline:none}.crafting-order-input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,164,92,.12)}.crafting-order-input::-webkit-inner-spin-button,.crafting-order-input::-webkit-outer-spin-button{opacity:1}@media(max-width:420px){.crafting-guide-summary span{min-width:100px}.crafting-order-field{align-items:flex-start;flex-direction:column;gap:6px}.crafting-order-input{width:100%}}
+/* Fixed QTY ORDER display for the read-only crafting guide */
+.crafting-order-field{display:flex!important;align-items:center;gap:10px;justify-content:space-between}.crafting-order-field label{font-size:9px;color:#aaa;font-weight:800;line-height:1.4}.crafting-order-value{display:inline-flex;align-items:center;justify-content:center;min-width:76px;padding:7px 12px;border-radius:7px;background:#111;color:#f3dfb1;font-size:12px;font-weight:900;text-align:center;border:1px solid rgba(255,255,255,.035)}@media(max-width:420px){.crafting-guide-summary span{min-width:100px}.crafting-order-field{align-items:center;flex-direction:row;gap:6px}.crafting-order-value{min-width:64px}}
 </style>
 </head>
 
@@ -4432,24 +4432,10 @@ function renderCraftingPage_(query) {
   const cards=recipes.map(function(r){
     const ingredients=r.ingredients.map(function(ing){return `<tr><td>${escapeHTML(ing[0])}</td><td>${number(ing[1])}</td><td data-craft-total="${escapeAttr(r.key)}" data-ingredient="${escapeAttr(ing[0])}">${number(ing[1]*r.orderQty)}</td></tr>`;}).join('');
     const totalOutput=r.yield*r.orderQty;
-    return `<article class="crafting-product crafting-guide-card" data-craft-card="${escapeAttr(r.key)}"><div class="crafting-product-head"><div class="crafting-product-icon">${r.icon}</div><div><div class="crafting-product-name">${escapeHTML(r.name)}</div><div class="crafting-yield">HASIL PER RESEP: ${number(r.yield)} PCS</div></div></div><div class="crafting-guide-summary"><span class="crafting-order-field"><label for="craft-order-${escapeAttr(r.key)}">QTY ORDER (KALI)</label><input id="craft-order-${escapeAttr(r.key)}" class="crafting-order-input" data-craft-order="${escapeAttr(r.key)}" type="number" min="0" step="1" value="${r.orderQty}" inputmode="numeric" aria-label="Jumlah kali crafting ${escapeAttr(r.name)}"></span><span>TOTAL HASIL <b data-craft-output="${escapeAttr(r.key)}">${number(totalOutput)} PCS</b></span></div><div class="crafting-simple-label">DAFTAR BAHAN</div><div class="crafting-guide-table-wrap"><table class="crafting-guide-table"><thead><tr><th>BAHAN</th><th>QTY / RESEP</th><th>TOTAL BAHAN</th></tr></thead><tbody>${ingredients}</tbody></table></div></article>`;
+    return `<article class="crafting-product crafting-guide-card" data-craft-card="${escapeAttr(r.key)}"><div class="crafting-product-head"><div class="crafting-product-icon">${r.icon}</div><div><div class="crafting-product-name">${escapeHTML(r.name)}</div></div></div><div class="crafting-guide-summary"><span class="crafting-order-field"><label>QTY ORDER (KALI)</label><strong class="crafting-order-value">${number(r.orderQty)}×</strong></span><span>TOTAL HASIL <b data-craft-output="${escapeAttr(r.key)}">${number(totalOutput)} PCS</b></span></div><div class="crafting-simple-label">DAFTAR BAHAN</div><div class="crafting-guide-table-wrap"><table class="crafting-guide-table"><thead><tr><th>BAHAN</th><th>QTY / RESEP</th><th>TOTAL BAHAN</th></tr></thead><tbody>${ingredients}</tbody></table></div></article>`;
   }).join('')||'<div class="card">Resep atau bahan tidak ditemukan.</div>';
-  document.getElementById('content').innerHTML=`<section class="crafting-hero crafting-hero-simple"><div class="crafting-kicker">CRIMSON HERITAGE</div><div class="crafting-title">PANDUAN CRAFTING</div><div class="crafting-desc">Ubah QTY ORDER untuk menghitung kebutuhan bahan dan hasil. QTY ORDER berarti jumlah kali resep dibuat.</div><div class="crafting-readonly-note">ⓘ Panduan saja — stok dan saldo tidak akan berubah.</div></section><div class="crafting-toolbar"><input id="craftingSearch" class="crafting-search" type="search" placeholder="Cari produk atau bahan…" value="${escapeAttr(query||'')}" autocomplete="off"><span class="crafting-count">${recipes.length} resep</span></div><div class="crafting-grid crafting-grid-simple">${cards}</div>`;
+  document.getElementById('content').innerHTML=`<section class="crafting-hero crafting-hero-simple"><div class="crafting-kicker">CRIMSON HERITAGE</div><div class="crafting-title">PANDUAN CRAFTING</div><div class="crafting-desc">Jumlah craft dan hasil sudah ditetapkan sesuai tabel resep.</div><div class="crafting-readonly-note">ⓘ Panduan saja — stok dan saldo tidak akan berubah.</div></section><div class="crafting-toolbar"><input id="craftingSearch" class="crafting-search" type="search" placeholder="Cari produk atau bahan…" value="${escapeAttr(query||'')}" autocomplete="off"><span class="crafting-count">${recipes.length} resep</span></div><div class="crafting-grid crafting-grid-simple">${cards}</div>`;
   const searchInput=document.getElementById('craftingSearch'); if(searchInput) searchInput.addEventListener('input',function(){const pos=this.selectionStart;renderCraftingPage_(this.value);const next=document.getElementById('craftingSearch');if(next){next.focus();next.setSelectionRange(pos,pos);}});
-  document.querySelectorAll('[data-craft-order]').forEach(function(orderInput){
-    orderInput.addEventListener('input',function(){
-      const recipe=CH_CRAFT_RECIPES.find(function(r){return r.key===orderInput.getAttribute('data-craft-order');});
-      if(!recipe)return;
-      const parsed=parseInt(orderInput.value,10);
-      const qty=Number.isFinite(parsed)?Math.max(0,parsed):0;
-      const output=document.querySelector('[data-craft-output="'+recipe.key+'"]');
-      if(output)output.textContent=number(recipe.yield*qty)+' PCS';
-      recipe.ingredients.forEach(function(ingredient){
-        const cell=document.querySelector('[data-craft-total="'+recipe.key+'"][data-ingredient="'+ingredient[0].replace(/\"/g,'&quot;')+'"]');
-        if(cell)cell.textContent=number(ingredient[1]*qty);
-      });
-    });
-  });
 }
 
 /* =====================================================
