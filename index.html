@@ -2739,6 +2739,15 @@ th{color:rgba(216,181,106,.78)!important}
 @media(max-width:1000px){.crafting-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.crafting-hero{padding:18px}.crafting-grid{grid-template-columns:1fr}.crafting-toolbar{align-items:stretch}.crafting-search{width:100%;flex-basis:100%}.crafting-actions .btn{flex:1}.crafting-product{padding:15px}}
 
+/* Responsive crafting ingredients: show every column without horizontal scrolling on phone or desktop */
+.crafting-guide-table-wrap{width:100%;max-width:100%;overflow-x:hidden!important;}
+.crafting-guide-table{width:100%!important;min-width:0!important;table-layout:fixed!important;}
+.crafting-guide-table th,.crafting-guide-table td{padding:8px 7px;white-space:normal;overflow-wrap:anywhere;word-break:normal;}
+.crafting-guide-table th:nth-child(1),.crafting-guide-table td:nth-child(1){width:38%;}
+.crafting-guide-table th:nth-child(2),.crafting-guide-table td:nth-child(2){width:27%;text-align:center;white-space:normal;}
+.crafting-guide-table th:nth-child(3),.crafting-guide-table td:nth-child(3){width:35%;text-align:right;white-space:normal;}
+@media(max-width:420px){.crafting-guide-table{font-size:10px!important}.crafting-guide-table th,.crafting-guide-table td{padding:8px 4px;font-size:9px}.crafting-guide-table th{letter-spacing:0}.crafting-guide-summary span{min-width:0;}}
+
 /* Fixed QTY ORDER display for the read-only crafting guide */
 .crafting-order-field{display:flex!important;align-items:center;gap:10px;justify-content:space-between}.crafting-order-field label{font-size:9px;color:#aaa;font-weight:800;line-height:1.4}.crafting-order-value{display:inline-flex;align-items:center;justify-content:center;min-width:76px;padding:7px 12px;border-radius:7px;background:#111;color:#f3dfb1;font-size:12px;font-weight:900;text-align:center;border:1px solid rgba(255,255,255,.035)}@media(max-width:420px){.crafting-guide-summary span{min-width:100px}.crafting-order-field{align-items:center;flex-direction:row;gap:6px}.crafting-order-value{min-width:64px}}
 </style>
