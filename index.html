@@ -3887,6 +3887,38 @@ function showPage(page, title) {
    DASHBOARD
 ===================================================== */
 
+/* =====================================================
+   DASHBOARD ADMIN — KEGIATAN YANG SEDANG BERJALAN
+===================================================== */
+function chDashboardRenderOngoingEvents() {
+  if (!USER || !['ADMIN','STAFF'].includes(String(USER.role || '').trim().toUpperCase())) return;
+  if (CURRENT_PAGE !== 'dashboard') return;
+  const content = document.getElementById('content');
+  if (!content) return;
+  let panel = content.querySelector('#chDashboardOngoingEvents');
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.id = 'chDashboardOngoingEvents';
+    panel.style.cssText = 'margin-top:22px;padding:20px;border:1px solid rgba(201,164,92,.32);border-radius:16px;background:linear-gradient(145deg,rgba(18,18,18,.96),rgba(10,10,10,.94));box-shadow:0 14px 36px rgba(0,0,0,.22)';
+    panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px"><div><div style="font-size:10px;letter-spacing:2px;color:#d8b46a;font-weight:900">ACTIVITY OVERVIEW</div><h3 style="margin:5px 0 0;font-size:20px">Event Sedang Berjalan</h3><div style="font-size:12px;color:#aaa;margin-top:4px">Event dan wedding dengan status ON PROGRESS / ONGOING.</div></div><span id="chDashboardOngoingCount" style="padding:8px 11px;border:1px solid rgba(201,164,92,.35);border-radius:9px;color:#f0d28b;font-size:12px;font-weight:800">Memuat…</span></div><div id="chDashboardOngoingRows" style="display:grid;gap:9px"><div style="padding:18px;text-align:center;color:#999">Memuat daftar kegiatan…</div></div>';
+    content.appendChild(panel);
+  }
+  const normalize = v => String(v || '').trim().toUpperCase().replace(/[_-]+/g, ' ');
+  const isOngoing = v => ['ON PROGRESS','ONGOING','SEDANG BERJALAN','BERJALAN'].includes(normalize(v));
+  const esc = v => typeof chEventEscape === 'function' ? chEventEscape(v == null ? '' : v) : String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const eventRows = (typeof chEventReadAll === 'function' ? chEventReadAll() : []).filter(e => isOngoing(e.status)).map(e => ({type:'EVENT',name:e.name||'Event tanpa nama',date:e.date||'Tanggal belum ditentukan',location:e.location||'Lokasi belum ditentukan',status:normalize(e.status),action:`<button onclick="chEventOpen('${esc(e.id)}')" style="padding:8px 11px;border:0;border-radius:8px;background:#d8b46a;color:#191919;font-weight:900;cursor:pointer">BUKA ↗</button>`}));
+  function paint(weddings) {
+    if (CURRENT_PAGE !== 'dashboard' || !document.getElementById('chDashboardOngoingRows')) return;
+    const all = eventRows.concat((Array.isArray(weddings)?weddings:[]).filter(w=>isOngoing(w.status)).map(w=>({type:'WEDDING',name:(w.groom||'Mempelai pria')+' & '+(w.bride||'Mempelai wanita'),date:w.eventDate||'Tanggal belum ditentukan',location:w.venue||'Lokasi belum ditentukan',status:normalize(w.status),action:`<button onclick="showPage('wedding','WEDDING ORGANIZER')" style="padding:8px 11px;border:0;border-radius:8px;background:#d8b46a;color:#191919;font-weight:900;cursor:pointer">KELOLA ↗</button>`})));
+    const rows=document.getElementById('chDashboardOngoingRows'), count=document.getElementById('chDashboardOngoingCount');
+    if(count) count.textContent=all.length+' kegiatan'; if(!rows)return;
+    if(!all.length){rows.innerHTML='<div style="padding:20px;text-align:center;border:1px dashed rgba(201,164,92,.25);border-radius:11px;color:#999">Belum ada event atau wedding berstatus ON PROGRESS.</div>';return;}
+    rows.innerHTML=all.map((e,i)=>`<article style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:${i%2?'rgba(255,255,255,.025)':'rgba(0,0,0,.16)'}"><div style="min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="padding:4px 7px;border-radius:6px;background:${e.type==='WEDDING'?'rgba(201,164,92,.14)':'rgba(181,18,27,.16)'};border:1px solid ${e.type==='WEDDING'?'rgba(201,164,92,.4)':'rgba(181,18,27,.4)'};color:${e.type==='WEDDING'?'#f0d28b':'#f3a4a8'};font-size:9px;font-weight:900">${e.type}</span><strong style="font-size:13px;overflow-wrap:anywhere">${esc(e.name)}</strong></div><div style="margin-top:6px;color:#aaa;font-size:11px">${esc(e.date)} · ${esc(e.location)}</div></div><div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end"><span style="padding:5px 8px;border-radius:20px;background:#ffedbd;color:#72531b;font-size:10px;font-weight:900;white-space:nowrap">${esc(e.status)}</span>${e.action}</div></article>`).join('');
+  }
+  paint([]);
+  if(typeof google!=='undefined'&&google.script&&google.script.run&&typeof TOKEN!=='undefined'&&typeof google.script.run.listWeddings==='function') google.script.run.withSuccessHandler(paint).withFailureHandler(function(err){console.warn('Wedding dashboard tidak dapat dimuat:',err);paint([]);}).listWeddings(TOKEN);
+}
+
 function loadDashboardPageLegacy() {
 
   const actions = [];
@@ -4024,6 +4056,7 @@ function loadDashboardPageLegacy() {
       `}
     </div>
   `;
+  chDashboardRenderOngoingEvents();
 }
 
 
@@ -4425,6 +4458,7 @@ function loadDashboardPage() {
 
       </div>
     `;
+    chDashboardRenderOngoingEvents();
 
   })
   .catch(handleServerError);
@@ -5374,44 +5408,71 @@ function loadPartyPage() {
       <div id="chEventEditor"></div>
       <section style="padding:20px;border:1px solid rgba(201,164,92,.3);border-radius:16px;background:linear-gradient(155deg,rgba(20,25,35,.96),rgba(13,18,27,.96));box-shadow:0 16px 42px rgba(0,0,0,.18)">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
-          <div><div style="font-size:10px;letter-spacing:2px;color:#d8b46a;font-weight:800;margin-bottom:5px">EVENT DIRECTORY</div><h3 style="margin:0;font-size:22px">Daftar Event</h3><div style="font-size:12px;opacity:.68;margin-top:5px">Semua event tersusun dalam satu tabel, lebih mudah dicari dan dikelola.</div></div>
+          <div><div style="font-size:10px;letter-spacing:2px;color:#d8b46a;font-weight:800;margin-bottom:5px">EVENT DIRECTORY</div><h3 style="margin:0;font-size:22px">Daftar Event</h3><div style="font-size:12px;opacity:.68;margin-top:5px">Event biasa dan wedding ditampilkan dalam satu daftar. Gunakan penanda JENIS untuk membedakan keduanya.</div></div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:12px;padding:8px 11px;border-radius:9px;border:1px solid rgba(216,180,106,.28);background:rgba(216,180,106,.08);color:#f0d89e"><b>${events.length}</b> event tersimpan</span></div>
         </div>
         ${events.length ? `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
           <div style="flex:1;min-width:220px;position:relative"><span style="position:absolute;left:12px;top:10px;opacity:.6">⌕</span><input id="chEventListSearch" type="search" placeholder="Cari nama, lokasi, status..." oninput="chEventFilterList()" style="width:100%;box-sizing:border-box;padding:10px 12px 10px 34px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:#0c1119;color:#f4f4f4;outline:none"></div>
           <select id="chEventListStatus" onchange="chEventFilterList()" style="min-width:150px;padding:10px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:#0c1119;color:#f4f4f4"><option value="">Semua status</option><option value="DRAFT">DRAFT</option><option value="PLANNING">PLANNING</option><option value="ONGOING">ONGOING</option><option value="COMPLETED">COMPLETED</option><option value="CANCELLED">CANCELLED</option></select>
         </div>
-        <div style="overflow:auto;border:1px solid rgba(216,180,106,.24);border-radius:11px;max-width:100%"><table id="chEventListTable" style="width:100%;min-width:790px;border-collapse:separate;border-spacing:0;font-size:13px">
-          <thead><tr style="background:linear-gradient(90deg,#d8b46a,#f0d9a0);color:#191919;text-align:left"><th style="padding:12px 13px;white-space:nowrap">TGL</th><th style="padding:12px 13px">NAMA EVENT</th><th style="padding:12px 13px">LOKASI</th><th style="padding:12px 13px">STATUS</th><th style="padding:12px 13px;text-align:center">PANITIA</th><th style="padding:12px 13px;white-space:nowrap">DIPERBARUI</th><th style="padding:12px 13px;text-align:center">AKSI</th></tr></thead>
-          <tbody>${events.map((e,i)=>{const status=String(e.status||'DRAFT').toUpperCase();const colors={DRAFT:['#d9e3f0','#30445e'],PLANNING:['#ffedbd','#72531b'],ONGOING:['#c8f0d5','#17623b'],COMPLETED:['#d7dce3','#364152'],CANCELLED:['#ffd5d5','#8b2525']};const sc=colors[status]||colors.DRAFT;return `<tr data-ch-event-row="1" data-search="${chEventEscape([e.name,e.location,e.status,e.date].join(' ').toLowerCase())}" data-status="${chEventEscape(status)}" style="background:${i%2?'rgba(255,255,255,.035)':'rgba(255,255,255,.012)'};color:#edf1f6"><td style="padding:11px 13px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">${chEventEscape(e.date||'—')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06);min-width:180px"><div style="font-weight:800;color:#f2d99f">${chEventEscape(e.name||'Event tanpa nama')}</div><div style="font-size:10px;opacity:.5;margin-top:3px">${chEventEscape(e.id||'')}</div></td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)">${chEventEscape(e.location||'Belum ditentukan')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:${sc[0]};color:${sc[1]};font-size:10px;font-weight:900;letter-spacing:.5px;white-space:nowrap">${chEventEscape(status)}</span></td><td style="padding:11px 13px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;min-width:25px;padding:4px 7px;border-radius:7px;background:rgba(216,180,106,.12);color:#e8cc87;font-weight:800">${(e.committee||[]).length}</span></td><td style="padding:11px 13px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06);opacity:.7">${chEventEscape(e.updatedAt?new Date(e.updatedAt).toLocaleDateString('id-ID'):'—')}</td><td style="padding:9px 12px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)"><button onclick="chEventOpen('${chEventEscape(e.id)}')" style="padding:7px 11px;border:0;border-radius:7px;background:#d8b46a;color:#191919;font-weight:800;cursor:pointer">BUKA ↗</button> <button onclick="chEventDelete('${chEventEscape(e.id)}')" aria-label="Hapus event" title="Hapus event" style="padding:7px 9px;border:1px solid rgba(255,130,130,.4);border-radius:7px;background:rgba(150,30,30,.12);color:#ffaaaa;cursor:pointer">×</button></td></tr>`}).join('')}</tbody>
+        <div style="overflow:auto;border:1px solid rgba(216,180,106,.24);border-radius:11px;max-width:100%"><table id="chEventListTable" style="width:100%;min-width:1020px;border-collapse:separate;border-spacing:0;font-size:13px">
+          <thead><tr style="background:linear-gradient(90deg,#d8b46a,#f0d9a0);color:#191919;text-align:left"><th style="padding:12px 13px">JENIS</th><th style="padding:12px 13px;white-space:nowrap">TANGGAL</th><th style="padding:12px 13px">NAMA KEGIATAN</th><th style="padding:12px 13px">LOKASI</th><th style="padding:12px 13px">STATUS ACARA</th><th style="padding:12px 13px;white-space:nowrap">PEMBAYARAN</th><th style="padding:12px 13px">DETAIL</th><th style="padding:12px 13px;text-align:center">AKSI</th></tr></thead>
+          <tbody>${events.map((e,i)=>{const status=String(e.status||'DRAFT').toUpperCase();const colors={DRAFT:['#d9e3f0','#30445e'],PLANNING:['#ffedbd','#72531b'],ONGOING:['#c8f0d5','#17623b'],COMPLETED:['#d7dce3','#364152'],CANCELLED:['#ffd5d5','#8b2525']};const sc=colors[status]||colors.DRAFT;return `<tr data-ch-event-row="1" data-search="${chEventEscape([e.name,e.location,e.status,e.date,'event'].join(' ').toLowerCase())}" data-status="${chEventEscape(status)}" style="background:${i%2?'rgba(255,255,255,.035)':'rgba(255,255,255,.012)'};color:#edf1f6"><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:5px 8px;border-radius:16px;background:rgba(181,18,27,.18);border:1px solid rgba(181,18,27,.4);color:#f0b5b5;font-size:10px;font-weight:900">EVENT</span></td><td style="padding:11px 13px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">${chEventEscape(e.date||'—')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06);min-width:180px"><div style="font-weight:800;color:#f2d99f">${chEventEscape(e.name||'Event tanpa nama')}</div><div style="font-size:10px;opacity:.5;margin-top:3px">${chEventEscape(e.id||'')}</div></td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)">${chEventEscape(e.location||'Belum ditentukan')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:4px 9px;border-radius:20px;background:${sc[0]};color:${sc[1]};font-size:10px;font-weight:900;letter-spacing:.5px;white-space:nowrap">${chEventEscape(status)}</span></td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06);opacity:.6">—</td><td style="padding:11px 13px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;min-width:25px;padding:4px 7px;border-radius:7px;background:rgba(216,180,106,.12);color:#e8cc87;font-weight:800">${(e.committee||[]).length} panitia</span><div style="font-size:10px;opacity:.5;margin-top:4px">${chEventEscape(e.updatedAt?new Date(e.updatedAt).toLocaleDateString('id-ID'):'—')}</div></td><td style="padding:9px 12px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)"><button onclick="chEventOpen('${chEventEscape(e.id)}')" style="padding:7px 11px;border:0;border-radius:7px;background:#d8b46a;color:#191919;font-weight:800;cursor:pointer">BUKA ↗</button> <button onclick="chEventDelete('${chEventEscape(e.id)}')" aria-label="Hapus event" title="Hapus event" style="padding:7px 9px;border:1px solid rgba(255,130,130,.4);border-radius:7px;background:rgba(150,30,30,.12);color:#ffaaaa;cursor:pointer">×</button></td></tr>`}).join('')}</tbody>
         </table><div id="chEventListEmptyFilter" style="display:none;padding:22px;text-align:center;color:#aeb7c4">Tidak ada event yang cocok dengan pencarian.</div></div>` : `<div style="padding:34px 12px;text-align:center;border:1px dashed rgba(216,180,106,.3);border-radius:11px;color:#b7bfca"><div style="font-size:28px;margin-bottom:8px">✦</div><b>Belum ada event</b><div style="font-size:12px;margin-top:5px">Tekan BUAT EVENT untuk menambahkan event pertama.</div></div>`}
       </section>
       <p style="font-size:11px;opacity:.6;margin:12px 2px">Catatan: bagian detail saat ini disimpan bersama event di penyimpanan browser. Sinkronisasi detail ke Supabase dan Spreadsheet memerlukan pembaruan backend/API serta Apps Script.</p>
     </div>`;
-  // Gabungkan daftar wedding ke area "Daftar Event" agar semua kegiatan terlihat dalam satu halaman.
+  // Satukan EVENT biasa dan Wedding Organizer ke satu tabel dengan penanda jenis kegiatan.
   try {
     if (typeof google !== 'undefined' && google.script && google.script.run && typeof TOKEN !== 'undefined') {
       google.script.run.withSuccessHandler(function(rows) {
         const weddings = Array.isArray(rows) ? rows : [];
         const directoryTitle = Array.from(content.querySelectorAll('h3')).find(el => (el.textContent || '').trim() === 'Daftar Event');
         const directory = directoryTitle ? directoryTitle.closest('section') : null;
-        if (!directory || document.getElementById('chWeddingEventDirectory')) return;
-        const panel = document.createElement('div');
-        panel.id = 'chWeddingEventDirectory';
-        panel.style.cssText = 'margin-top:18px;padding-top:18px;border-top:1px solid rgba(201,164,92,.25)';
+        if (!directory) return;
         const esc = value => chEventEscape(value == null ? '' : value);
         const money = value => 'Rp ' + Number(value || 0).toLocaleString('id-ID');
-        panel.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><div><div style="font-size:10px;letter-spacing:2px;color:#d8b46a;font-weight:800;margin-bottom:5px">WEDDING ORGANIZER</div><h3 style="margin:0;font-size:19px">Daftar Wedding & Kegiatan Berjalan</h3><div style="font-size:12px;opacity:.7;margin-top:5px">Pemesanan pernikahan ditampilkan bersama daftar kegiatan EVENT.</div></div><span style="font-size:12px;padding:8px 11px;border-radius:9px;border:1px solid rgba(216,180,106,.28);background:rgba(216,180,106,.08);color:#f0d89e"><b>${weddings.length}</b> wedding</span></div>`;
-        if (!weddings.length) {
-          panel.insertAdjacentHTML('beforeend', '<div style="padding:18px;text-align:center;border:1px dashed rgba(216,180,106,.25);border-radius:10px;color:#aeb7c4;font-size:12px">Belum ada pemesanan wedding. Wedding baru akan muncul di sini setelah disimpan.</div>');
+        let table = directory.querySelector('#chEventListTable');
+        let tbody = table && table.querySelector('tbody');
+        if (!table) {
+          const emptyState = directory.querySelector('div[style*="border:1px dashed"]');
+          if (emptyState) emptyState.remove();
+          const wrap = document.createElement('div');
+          wrap.style.cssText = 'overflow:auto;border:1px solid rgba(216,180,106,.24);border-radius:11px;max-width:100%';
+          wrap.innerHTML = '<table id="chEventListTable" style="width:100%;min-width:1020px;border-collapse:separate;border-spacing:0;font-size:13px"><thead><tr style="background:linear-gradient(90deg,#d8b46a,#f0d9a0);color:#191919;text-align:left"><th style="padding:12px 13px">JENIS</th><th style="padding:12px 13px">TANGGAL</th><th style="padding:12px 13px">NAMA KEGIATAN</th><th style="padding:12px 13px">LOKASI</th><th style="padding:12px 13px">STATUS ACARA</th><th style="padding:12px 13px">PEMBAYARAN</th><th style="padding:12px 13px">DETAIL</th><th style="padding:12px 13px;text-align:center">AKSI</th></tr></thead><tbody></tbody></table><div id="chEventListEmptyFilter" style="display:none;padding:22px;text-align:center;color:#aeb7c4">Tidak ada kegiatan yang cocok dengan pencarian.</div>';
+          directory.appendChild(wrap);
+          table = wrap.querySelector('#chEventListTable'); tbody = table.querySelector('tbody');
         } else {
-          const statusColors = {'ON PROGRESS':['#ffedbd','#72531b'],'ONGOING':['#c8f0d5','#17623b'],'LUNAS':['#c8f0d5','#17623b'],'SELESAI':['#d7dce3','#364152'],'CANCELLED':['#ffd5d5','#8b2525'],'PROSPEK':['#d9e3f0','#30445e'],'DRAFT':['#d9e3f0','#30445e']};
-          panel.insertAdjacentHTML('beforeend', `<div style="overflow:auto;border:1px solid rgba(216,180,106,.22);border-radius:10px"><table style="width:100%;min-width:680px;border-collapse:collapse;font-size:13px"><thead><tr style="background:linear-gradient(90deg,#d8b46a,#f0d9a0);color:#191919;text-align:left"><th style="padding:11px">TANGGAL</th><th style="padding:11px">NAMA MEMPELAI / WEDDING</th><th style="padding:11px">LOKASI</th><th style="padding:11px">STATUS ACARA</th><th style="padding:11px">STATUS PEMBAYARAN</th><th style="padding:11px">SISA PEMBAYARAN</th><th style="padding:11px">AKSI</th></tr></thead><tbody>${weddings.map((w,i)=>{const status=String(w.status||'PROSPEK').toUpperCase();const c=statusColors[status]||['#e4e4e7','#27272a'];const total=Number(w.packagePrice||0)+Number(w.addons||0)-Number(w.discount||0);const due=Math.max(0,total-Number(w.paid||0));return `<tr style="background:${i%2?'rgba(255,255,255,.035)':'rgba(255,255,255,.012)'};color:#edf1f6"><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06);white-space:nowrap">${esc(w.eventDate||'—')}</td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)"><b style="color:#f2d99f">${esc((w.groom||'Mempelai pria')+' & '+(w.bride||'Mempelai wanita'))}</b><div style="opacity:.55;font-size:10px;margin-top:3px">${esc(w.id||'')}</div></td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)">${esc(w.venue||'Belum ditentukan')}</td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:4px 8px;border-radius:18px;background:${c[0]};color:${c[1]};font-size:10px;font-weight:900;white-space:nowrap">${esc(status)}</span></td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)"><select aria-label="Status pembayaran wedding" data-wedding-payment-status="${esc(w.id)}" onchange="chWeddingSetPaymentStatus('${esc(w.id)}',this.value)" style="padding:7px 8px;border-radius:8px;border:1px solid #78643d;background:#191713;color:#f2d99f;font-size:11px;font-weight:800"><option value="UNPAID" ${chWeddingPaymentValue(w)==='UNPAID'?'selected':''}>BELUM LUNAS</option><option value="PAID" ${chWeddingPaymentValue(w)==='PAID'?'selected':''}>SUDAH LUNAS</option></select></td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06);white-space:nowrap">${money(due)}</td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)"><button onclick="showPage('wedding','WEDDING ORGANIZER')" style="padding:7px 10px;border:0;border-radius:7px;background:#d8b46a;color:#191919;font-weight:800;cursor:pointer">KELOLA ↗</button></td></tr>`}).join('')}</tbody></table></div>`);
+          // Support the prior directory layout while migrating to a unified table.
+          const oldPanel = directory.querySelector('#chWeddingEventDirectory'); if (oldPanel) oldPanel.remove();
+          const head = table.querySelector('thead');
+          if (head && !head.textContent.includes('JENIS')) head.innerHTML = '<tr style="background:linear-gradient(90deg,#d8b46a,#f0d9a0);color:#191919;text-align:left"><th style="padding:12px 13px">JENIS</th><th style="padding:12px 13px">TANGGAL</th><th style="padding:12px 13px">NAMA KEGIATAN</th><th style="padding:12px 13px">LOKASI</th><th style="padding:12px 13px">STATUS ACARA</th><th style="padding:12px 13px">PEMBAYARAN</th><th style="padding:12px 13px">DETAIL</th><th style="padding:12px 13px;text-align:center">AKSI</th></tr>';
+          table.style.minWidth = '1020px';
         }
-        directory.appendChild(panel);
+        if (!tbody) return;
+        // Append only once per render; preserve event rows already generated by loadPartyPage.
+        tbody.querySelectorAll('tr[data-ch-wedding-row]').forEach(row => row.remove());
+        const statusColors = {'ON PROGRESS':['#ffedbd','#72531b'],'ONGOING':['#c8f0d5','#17623b'],'LUNAS':['#c8f0d5','#17623b'],'SELESAI':['#d7dce3','#364152'],'CANCELLED':['#ffd5d5','#8b2525'],'PROSPEK':['#d9e3f0','#30445e'],'DRAFT':['#d9e3f0','#30445e']};
+        const weddingRows = weddings.map((w,i)=>{
+          const status=String(w.status||'PROSPEK').toUpperCase(); const c=statusColors[status]||['#e4e4e7','#27272a'];
+          const total=Number(w.packagePrice||0)+Number(w.addons||0)-Number(w.discount||0); const due=Math.max(0,total-Number(w.paid||0));
+          const search=[w.groom,w.bride,w.id,w.venue,w.status,w.eventDate,'wedding pernikahan'].join(' ').toLowerCase();
+          return `<tr data-ch-wedding-row="1" data-ch-event-row="1" data-search="${esc(search)}" data-status="${esc(status)}" style="background:${i%2?'rgba(255,255,255,.035)':'rgba(255,255,255,.012)'};color:#edf1f6"><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:5px 8px;border-radius:16px;background:rgba(201,164,92,.12);border:1px solid rgba(201,164,92,.4);color:#f2d99f;font-size:10px;font-weight:900">WEDDING</span></td><td style="padding:11px 13px;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)">${esc(w.eventDate||'—')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06);min-width:190px"><b style="color:#f2d99f">${esc((w.groom||'Mempelai pria')+' & '+(w.bride||'Mempelai wanita'))}</b><div style="opacity:.55;font-size:10px;margin-top:3px">${esc(w.id||'')}</div></td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)">${esc(w.venue||'Belum ditentukan')}</td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:4px 8px;border-radius:18px;background:${c[0]};color:${c[1]};font-size:10px;font-weight:900;white-space:nowrap">${esc(status)}</span></td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)"><select aria-label="Status pembayaran wedding" data-wedding-payment-status="${esc(w.id)}" onchange="chWeddingSetPaymentStatus('${esc(w.id)}',this.value)" style="padding:7px 8px;border-radius:8px;border:1px solid #78643d;background:#191713;color:#f2d99f;font-size:11px;font-weight:800"><option value="UNPAID" ${chWeddingPaymentValue(w)==='UNPAID'?'selected':''}>BELUM LUNAS</option><option value="PAID" ${chWeddingPaymentValue(w)==='PAID'?'selected':''}>SUDAH LUNAS</option></select><div style="font-size:10px;opacity:.5;margin-top:4px">Sisa: ${money(due)}</div></td><td style="padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.06)">${esc(w.packageName||'Paket wedding')}<div style="font-size:10px;opacity:.5;margin-top:3px">Kontrak ${money(total)}</div></td><td style="padding:9px 12px;text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.06)"><button onclick="showPage('wedding','WEDDING ORGANIZER')" style="padding:7px 10px;border:0;border-radius:7px;background:#d8b46a;color:#191919;font-weight:800;cursor:pointer">KELOLA ↗</button></td></tr>`;
+        }).join('');
+        tbody.insertAdjacentHTML('beforeend', weddingRows);
+        const count = directory.querySelector('section') || directory;
+        const countBadge = Array.from(directory.querySelectorAll('span')).find(el => /event tersimpan/i.test(el.textContent||''));
+        if (countBadge) countBadge.innerHTML = `<b>${tbody.querySelectorAll('tr[data-ch-event-row]').length}</b> kegiatan tersimpan`;
+        const empty = directory.querySelector('#chEventListEmptyFilter');
+        if (!tbody.querySelector('tr[data-ch-event-row]')) {
+          const wrap = table.parentElement;
+          if (empty) { empty.style.display='block'; empty.textContent='Belum ada kegiatan. Tekan BUAT EVENT atau WEDDING BARU untuk menambahkan kegiatan.'; }
+          else if (wrap) wrap.insertAdjacentHTML('beforeend','<div id="chEventListEmptyFilter" style="padding:22px;text-align:center;color:#aeb7c4">Belum ada kegiatan. Tekan BUAT EVENT atau WEDDING BARU untuk menambahkan kegiatan.</div>');
+        } else if (empty) { empty.style.display='none'; }
       }).withFailureHandler(function(err) { console.warn('Wedding list tidak dapat dimuat pada direktori EVENT:', err); }).listWeddings(TOKEN);
     }
   } catch (err) { console.warn('Wedding directory integration:', err); }
+
 }
 
 function chEventFilterList() {
