@@ -2774,6 +2774,33 @@ th{color:rgba(216,181,106,.78)!important}
 /* Fixed QTY ORDER display for the read-only crafting guide */
 .crafting-order-field{display:flex!important;align-items:center;gap:10px;justify-content:space-between}.crafting-order-field label{font-size:9px;color:#aaa;font-weight:800;line-height:1.4}.crafting-order-value{display:inline-flex;align-items:center;justify-content:center;min-width:76px;padding:7px 12px;border-radius:7px;background:#111;color:#f3dfb1;font-size:12px;font-weight:900;text-align:center;border:1px solid rgba(255,255,255,.035)}@media(max-width:420px){.crafting-guide-summary span{min-width:100px}.crafting-order-field{align-items:center;flex-direction:row;gap:6px}.crafting-order-value{min-width:64px}}
 </style>
+
+<style id="ch-wedding-form-premium-v2">
+/* Wedding Organizer booking form refinement — visual-only, preserves existing fields and handlers */
+#chWeddingEditor{background:rgba(5,6,8,.96)!important;backdrop-filter:blur(14px)!important;padding:clamp(8px,1.6vw,24px)!important}
+#chWeddingEditor>section{width:min(1480px,100%)!important;max-width:1480px!important;margin:0 auto 18px!important;padding:clamp(18px,2.5vw,36px)!important;border:1px solid rgba(201,164,92,.42)!important;border-radius:20px!important;background:linear-gradient(145deg,#151515 0%,#101114 58%,#171311 100%)!important;box-shadow:0 24px 70px rgba(0,0,0,.45)!important;min-height:calc(100vh - 48px)!important}
+#chWeddingEditor>section>div:first-child{padding-bottom:20px!important;border-bottom:1px solid rgba(201,164,92,.24)!important;position:relative}
+#chWeddingEditor>section>div:first-child h3{font-size:clamp(23px,2.4vw,32px)!important;letter-spacing:.4px!important;color:#f4e6c5!important}
+#chWeddingEditor>section>div:first-child button{background:#201d18!important;border:1px solid #7b6338!important;color:#f0d28b!important;padding:10px 16px!important;border-radius:10px!important;font-weight:700!important}
+#chWeddingEditor h4{display:flex!important;align-items:center!important;gap:12px!important;margin:26px 0 16px!important;padding:0 0 12px!important;border-bottom:1px solid rgba(201,164,92,.24)!important;color:#f0d28b!important;font-size:15px!important;letter-spacing:.35px!important}
+#chWeddingEditor h4:before{content:"";display:block;width:4px;height:22px;border-radius:4px;background:linear-gradient(#f0d28b,#8e6a2c)}
+#chWeddingEditor label{font-size:12px!important;line-height:1.5!important;color:#c8c5bd!important;min-width:0!important}
+#chWeddingEditor input[data-wkey],#chWeddingEditor textarea[data-wkey]{box-sizing:border-box!important;width:100%!important;margin-top:7px!important;padding:13px 14px!important;border-radius:10px!important;border:1px solid #38342c!important;background:#0d0e10!important;color:#f7f5ef!important;font:500 14px/1.5 system-ui,sans-serif!important;outline:none!important;transition:border-color .15s,box-shadow .15s!important}
+#chWeddingEditor input[data-wkey]{min-height:47px!important}
+#chWeddingEditor textarea[data-wkey]{min-height:116px!important;resize:vertical!important;line-height:1.6!important}
+#chWeddingEditor input[data-wkey]:focus,#chWeddingEditor textarea[data-wkey]:focus{border-color:#c9a45c!important;box-shadow:0 0 0 3px rgba(201,164,92,.12)!important}
+#chWeddingEditor input[type=date],#chWeddingEditor input[type=time]{color-scheme:dark}
+#chWeddingEditor>section>div[style*="grid-template-columns"]{gap:16px!important}
+#chWeddingEditor>section>div[style*="grid-template-columns"] label{display:block!important}
+#chWeddingEditor>section>p{padding:13px 16px!important;border:1px solid rgba(201,164,92,.22)!important;border-radius:10px!important;background:rgba(201,164,92,.06)!important;line-height:1.8!important;color:#d4d0c6!important}
+#chWeddingEditor>section>div:last-child{position:sticky!important;bottom:-1px!important;margin:24px calc(clamp(18px,2.5vw,36px)*-1) calc(clamp(18px,2.5vw,36px)*-1)!important;padding:16px clamp(18px,2.5vw,36px)!important;background:rgba(15,15,15,.96)!important;border-top:1px solid rgba(201,164,92,.25)!important;backdrop-filter:blur(12px)!important;z-index:2!important}
+#chWeddingEditor>section>div:last-child button{min-height:46px!important;padding:12px 20px!important;border-radius:10px!important;font-size:13px!important;font-weight:800!important;letter-spacing:.25px!important}
+#chWeddingEditor>section>div:last-child button:first-child{background:linear-gradient(135deg,#f3d993,#c59a43)!important;border:1px solid #f5dfa5!important;color:#17130a!important;box-shadow:0 5px 18px rgba(197,154,67,.13)!important}
+#chWeddingEditor>section>div:last-child button:last-child{background:#222!important;border:1px solid #504b40!important;color:#eee!important}
+@media(min-width:1100px){#chWeddingEditor>section>div[style*="grid-template-columns"]:has(textarea[data-wkey]){grid-template-columns:repeat(2,minmax(0,1fr))!important}#chWeddingEditor textarea[data-wkey]{min-height:140px!important}}
+@media(max-width:700px){#chWeddingEditor{padding:6px!important}#chWeddingEditor>section{padding:16px!important;border-radius:14px!important;min-height:calc(100vh - 12px)!important}#chWeddingEditor h4{font-size:13px!important;margin-top:22px!important}#chWeddingEditor input[data-wkey]{min-height:45px!important;font-size:16px!important}#chWeddingEditor textarea[data-wkey]{min-height:108px!important;font-size:14px!important}#chWeddingEditor>section>div:last-child{margin:20px -16px -16px!important;padding:12px 16px!important}#chWeddingEditor>section>div:last-child button{flex:1 1 140px!important}}
+</style>
+
 </head>
 
 <body>
@@ -5317,6 +5344,30 @@ function loadPartyPage() {
       </section>
       <p style="font-size:11px;opacity:.6;margin:12px 2px">Catatan: bagian detail saat ini disimpan bersama event di penyimpanan browser. Sinkronisasi detail ke Supabase dan Spreadsheet memerlukan pembaruan backend/API serta Apps Script.</p>
     </div>`;
+  // Gabungkan daftar wedding ke area "Daftar Event" agar semua kegiatan terlihat dalam satu halaman.
+  try {
+    if (typeof google !== 'undefined' && google.script && google.script.run && typeof TOKEN !== 'undefined') {
+      google.script.run.withSuccessHandler(function(rows) {
+        const weddings = Array.isArray(rows) ? rows : [];
+        const directoryTitle = Array.from(content.querySelectorAll('h3')).find(el => (el.textContent || '').trim() === 'Daftar Event');
+        const directory = directoryTitle ? directoryTitle.closest('section') : null;
+        if (!directory || document.getElementById('chWeddingEventDirectory')) return;
+        const panel = document.createElement('div');
+        panel.id = 'chWeddingEventDirectory';
+        panel.style.cssText = 'margin-top:18px;padding-top:18px;border-top:1px solid rgba(201,164,92,.25)';
+        const esc = value => chEventEscape(value == null ? '' : value);
+        const money = value => 'Rp ' + Number(value || 0).toLocaleString('id-ID');
+        panel.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><div><div style="font-size:10px;letter-spacing:2px;color:#d8b46a;font-weight:800;margin-bottom:5px">WEDDING ORGANIZER</div><h3 style="margin:0;font-size:19px">Daftar Wedding & Kegiatan Berjalan</h3><div style="font-size:12px;opacity:.7;margin-top:5px">Pemesanan pernikahan ditampilkan bersama daftar kegiatan EVENT.</div></div><span style="font-size:12px;padding:8px 11px;border-radius:9px;border:1px solid rgba(216,180,106,.28);background:rgba(216,180,106,.08);color:#f0d89e"><b>${weddings.length}</b> wedding</span></div>`;
+        if (!weddings.length) {
+          panel.insertAdjacentHTML('beforeend', '<div style="padding:18px;text-align:center;border:1px dashed rgba(216,180,106,.25);border-radius:10px;color:#aeb7c4;font-size:12px">Belum ada pemesanan wedding. Wedding baru akan muncul di sini setelah disimpan.</div>');
+        } else {
+          const statusColors = {'ON PROGRESS':['#ffedbd','#72531b'],'ONGOING':['#c8f0d5','#17623b'],'LUNAS':['#c8f0d5','#17623b'],'SELESAI':['#d7dce3','#364152'],'CANCELLED':['#ffd5d5','#8b2525'],'PROSPEK':['#d9e3f0','#30445e'],'DRAFT':['#d9e3f0','#30445e']};
+          panel.insertAdjacentHTML('beforeend', `<div style="overflow:auto;border:1px solid rgba(216,180,106,.22);border-radius:10px"><table style="width:100%;min-width:680px;border-collapse:collapse;font-size:13px"><thead><tr style="background:linear-gradient(90deg,#d8b46a,#f0d9a0);color:#191919;text-align:left"><th style="padding:11px">TANGGAL</th><th style="padding:11px">NAMA MEMPELAI / WEDDING</th><th style="padding:11px">LOKASI</th><th style="padding:11px">STATUS</th><th style="padding:11px">SISA PEMBAYARAN</th><th style="padding:11px">AKSI</th></tr></thead><tbody>${weddings.map((w,i)=>{const status=String(w.status||'PROSPEK').toUpperCase();const c=statusColors[status]||['#e4e4e7','#27272a'];const total=Number(w.packagePrice||0)+Number(w.addons||0)-Number(w.discount||0);const due=Math.max(0,total-Number(w.paid||0));return `<tr style="background:${i%2?'rgba(255,255,255,.035)':'rgba(255,255,255,.012)'};color:#edf1f6"><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06);white-space:nowrap">${esc(w.eventDate||'—')}</td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)"><b style="color:#f2d99f">${esc((w.groom||'Mempelai pria')+' & '+(w.bride||'Mempelai wanita'))}</b><div style="opacity:.55;font-size:10px;margin-top:3px">${esc(w.id||'')}</div></td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)">${esc(w.venue||'Belum ditentukan')}</td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)"><span style="display:inline-block;padding:4px 8px;border-radius:18px;background:${c[0]};color:${c[1]};font-size:10px;font-weight:900;white-space:nowrap">${esc(status)}</span></td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06);white-space:nowrap">${money(due)}</td><td style="padding:11px;border-top:1px solid rgba(255,255,255,.06)"><button onclick="showPage('wedding','WEDDING ORGANIZER')" style="padding:7px 10px;border:0;border-radius:7px;background:#d8b46a;color:#191919;font-weight:800;cursor:pointer">KELOLA ↗</button></td></tr>`}).join('')}</tbody></table></div>`);
+        }
+        directory.appendChild(panel);
+      }).withFailureHandler(function(err) { console.warn('Wedding list tidak dapat dimuat pada direktori EVENT:', err); }).listWeddings(TOKEN);
+    }
+  } catch (err) { console.warn('Wedding directory integration:', err); }
 }
 
 function chEventFilterList() {
