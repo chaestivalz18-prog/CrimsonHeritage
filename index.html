@@ -3704,6 +3704,7 @@ function showPage(page, title) {
     stockout: 'pickup',
     pickup: 'pickup',
     party: 'party',
+    wedding: 'party',
     kerjasama: 'kerjasama',
     kasbon: 'kasbon',
     finance: 'finance',
@@ -3786,6 +3787,9 @@ function showPage(page, title) {
       break;
     case 'party':
       loadPartyPage();
+      break;
+    case 'wedding':
+      loadWeddingOrganizerPage();
       break;
     case 'kerjasama':
       loadPartnershipPage();
@@ -5176,6 +5180,57 @@ function loadMyPickupHistory() {
 
 
 /* =====================================================
+   WEDDING ORGANIZER — add-on module, independent from EVENT legacy data
+   Data persists through Supabase ch_api; Google Sheets sync is handled by Apps Script.
+===================================================== */
+let CH_WEDDING_ROWS = [];
+let CH_WEDDING_ACTIVE = null;
+function chWeddingEsc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function chWeddingMoney(v){ return 'Rp ' + Number(v||0).toLocaleString('id-ID'); }
+function chWeddingBlank(){
+  return {id:'WED-'+Date.now().toString(36).toUpperCase(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),status:'PROSPEK',
+    groom:'',bride:'',phone:'',email:'',packageName:'',packagePrice:0,addons:0,discount:0,venue:'',eventDate:'',guestCount:0,theme:'',ceremonyTime:'',receptionTime:'',notes:'',
+    dp:0,paid:0,payments:[],costs:[],staff:[],checklist:[],form:{}};
+}
+function loadWeddingOrganizerPage(){
+ const content=document.getElementById('content'); if(!content)return;
+ content.innerHTML=`<div style="max-width:1240px;margin:0 auto;color:var(--text,#f5f5f5)">
+ <section style="padding:clamp(20px,3vw,32px);border:1px solid rgba(201,164,92,.42);border-radius:20px;background:radial-gradient(ellipse at 95% 0%,rgba(201,164,92,.16),transparent 35%),linear-gradient(130deg,#10141b,#1a202b 65%,#101114);margin-bottom:18px">
+ <div style="color:#d8b46a;font-size:10px;letter-spacing:3px;font-weight:900">CRIMSON HERITAGE / EVENT</div><div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:10px"><div><h2 style="margin:0;font-size:clamp(25px,3vw,36px)">WEDDING ORGANIZER</h2><p style="color:#aeb4bf;margin:8px 0 0">Pemesanan, data mempelai, pembayaran, biaya, panitia, dan checklist dalam satu tempat.</p></div><button onclick="chWeddingNew()" style="padding:13px 18px;border-radius:11px;border:1px solid #f0d28b;background:linear-gradient(135deg,#f0d28b,#c9a24f);font-weight:900;cursor:pointer">＋ WEDDING BARU</button></div></section>
+ <div id="chWeddingEditor"></div><section style="border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px;background:rgba(20,20,20,.88)"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h3 style="margin:0">Daftar Pemesanan</h3><button onclick="chWeddingLoad()" style="padding:8px 12px;border-radius:9px;background:#20232a;border:1px solid #444;color:white;cursor:pointer">↻ Muat ulang</button></div><div id="chWeddingList" style="margin-top:14px">Memuat data...</div></section></div>`;
+ chWeddingLoad();
+}
+function chWeddingNew(){ CH_WEDDING_ACTIVE=chWeddingBlank(); chWeddingRenderForm(); }
+function chWeddingEdit(id){ CH_WEDDING_ACTIVE=CH_WEDDING_ROWS.find(x=>x.id===id)||null; if(CH_WEDDING_ACTIVE)chWeddingRenderForm(); }
+function chWeddingLoad(){
+ const box=document.getElementById('chWeddingList'); if(box)box.innerHTML='Memuat data pemesanan...';
+ google.script.run.withSuccessHandler(function(rows){ CH_WEDDING_ROWS=Array.isArray(rows)?rows:[]; chWeddingRenderList(); }).withFailureHandler(function(err){ if(box)box.innerHTML='<p style="color:#ef9a9a">Gagal memuat data: '+chWeddingEsc(err&&err.message||err)+'<br>Pastikan SQL Wedding Organizer sudah dijalankan.</p>'; }).listWeddings(TOKEN);
+}
+function chWeddingRenderList(){
+ const box=document.getElementById('chWeddingList'); if(!box)return;
+ if(!CH_WEDDING_ROWS.length){box.innerHTML='<div style="padding:22px;text-align:center;color:#999">Belum ada pemesanan. Tekan <b>WEDDING BARU</b> untuk mulai.</div>';return;}
+ box.innerHTML='<div style="display:grid;gap:10px">'+CH_WEDDING_ROWS.map(function(w){const total=Number(w.packagePrice||0)+Number(w.addons||0)-Number(w.discount||0);const paid=Number(w.paid||0);return `<article style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:15px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.025)"><div style="min-width:200px;flex:1"><div style="font-weight:900;color:#f0d28b">${chWeddingEsc(w.groom||'Calon mempelai pria')} &amp; ${chWeddingEsc(w.bride||'Calon mempelai wanita')}</div><div style="font-size:12px;color:#a7a7a7;margin-top:5px">${chWeddingEsc(w.id)} · ${chWeddingEsc(w.eventDate||'Tanggal belum ditentukan')} · ${chWeddingEsc(w.venue||'Lokasi belum ditentukan')}</div><div style="font-size:12px;margin-top:7px">${chWeddingEsc(w.status||'PROSPEK')} · Kontrak ${chWeddingMoney(total)} · Sisa ${chWeddingMoney(Math.max(0,total-paid))}</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="chWeddingEdit('${chWeddingEsc(w.id)}')" style="padding:9px 12px;border-radius:8px;border:1px solid #6b614b;background:#25231e;color:#f3dfaa;cursor:pointer">Buka / Edit</button><button onclick="chWeddingPrint('${chWeddingEsc(w.id)}')" style="padding:9px 12px;border-radius:8px;border:1px solid #444;background:#202020;color:white;cursor:pointer">PDF / Cetak</button><button onclick="chWeddingDelete('${chWeddingEsc(w.id)}')" style="padding:9px 12px;border-radius:8px;border:1px solid #65363a;background:#261719;color:#ffc5c5;cursor:pointer">Hapus</button></div></article>`}).join('')+'</div>';
+}
+function chWeddingRenderForm(){
+ const w=CH_WEDDING_ACTIVE;const box=document.getElementById('chWeddingEditor');if(!box||!w)return;
+ w.formText=w.formText||'';w.costText=w.costText||((w.costs||[]).map(x=>(x.name||'')+' | '+(x.actual||0)).join('\n'));w.staffText=w.staffText||((w.staff||[]).map(x=>(x.name||'')+' | '+(x.role||'')+' | '+(x.pay||0)).join('\n'));w.checklistText=w.checklistText||((w.checklist||[]).map(x=>(x.item||'')+' | '+(x.status||'BELUM')+' | '+(x.notes||'')).join('\n'));
+ const inp=(label,key,type='text',extra='')=>`<label style="display:block;font-size:11px;color:#b9b9b9">${label}<input data-wkey="${key}" type="${type}" value="${chWeddingEsc(w[key]??'')}" ${extra} style="display:block;width:100%;margin-top:6px;padding:11px;border-radius:9px;border:1px solid #373737;background:#111;color:#fff;min-width:0"></label>`;
+ const area=(label,key)=>`<label style="display:block;font-size:11px;color:#b9b9b9">${label}<textarea data-wkey="${key}" rows="3" style="display:block;width:100%;margin-top:6px;padding:11px;border-radius:9px;border:1px solid #373737;background:#111;color:#fff">${chWeddingEsc(w[key]||'')}</textarea></label>`;
+ box.innerHTML=`<section style="padding:18px;border:1px solid rgba(201,164,92,.35);border-radius:16px;background:#141414;margin-bottom:18px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><div style="color:#d8b46a;font-size:10px;letter-spacing:2px;font-weight:800">FORM PEMESANAN</div><h3 style="margin:6px 0 0">${chWeddingEsc(w.id)}</h3></div><button onclick="chWeddingCloseForm()" style="background:transparent;color:#bbb;border:1px solid #444;border-radius:8px;padding:8px 11px;cursor:pointer">Tutup form</button></div>
+ <h4 style="color:#f0d28b;margin:20px 0 10px">01 · Data Mempelai & Acara</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px">${inp('Nama mempelai pria','groom')}${inp('Nama mempelai wanita','bride')}${inp('Nomor WhatsApp','phone','tel')}${inp('Email','email','email')}${inp('Tanggal acara','eventDate','date')}${inp('Lokasi / venue','venue')}${inp('Tema / konsep','theme')}${inp('Jumlah tamu','guestCount','number','min="0"')}${inp('Nama paket','packageName')}${inp('Harga paket (Rp)','packagePrice','number','min="0"')}${inp('Tambahan / add-on (Rp)','addons','number','min="0"')}${inp('Diskon (Rp)','discount','number','min="0"')}${inp('Status pemesanan','status')}${inp('Jam akad','ceremonyTime','time')}${inp('Jam resepsi','receptionTime','time')}</div>
+ <h4 style="color:#f0d28b;margin:22px 0 10px">02 · Pembayaran & Operasional</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px">${inp('DP diterima (Rp)','dp','number','min="0"')}${inp('Total pembayaran diterima (Rp)','paid','number','min="0"')}</div><p style="font-size:12px;color:#aaa">Total kontrak: <b>${chWeddingMoney(Number(w.packagePrice||0)+Number(w.addons||0)-Number(w.discount||0))}</b> · Sisa pembayaran: <b>${chWeddingMoney(Math.max(0,Number(w.packagePrice||0)+Number(w.addons||0)-Number(w.discount||0)-Number(w.paid||0)))}</b>. Pembayaran DP dicatat sebagai bagian dari total pembayaran, bukan pengurang nilai kontrak.</p>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px;margin-top:14px">${area('Catatan / kebutuhan khusus','notes')}${area('Form detail mempelai (alamat, keluarga, rundown, preferensi, dll.)','formText')}${area('Rincian biaya aktual (satu item per baris: nama | nominal)','costText')}${area('Panitia & gaji (satu orang per baris: nama | tugas | gaji)','staffText')}${area('Checklist / vendor (satu item per baris: item | status | catatan)','checklistText')}</div>
+ <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:16px"><button onclick="chWeddingSave()" style="padding:12px 17px;border-radius:9px;border:1px solid #f0d28b;background:linear-gradient(135deg,#f0d28b,#c9a24f);color:#111;font-weight:900;cursor:pointer">SIMPAN PEMESANAN</button><button onclick="chWeddingPrintDraft()" style="padding:12px 15px;border-radius:9px;border:1px solid #555;background:#222;color:white;cursor:pointer">PDF / CETAK A4</button></div></section>`;
+ box.querySelectorAll('[data-wkey]').forEach(el=>{el.addEventListener('input',()=>{w[el.dataset.wkey]=el.type==='number'?Number(el.value||0):el.value;});});
+}
+function chWeddingCollect(){const w=CH_WEDDING_ACTIVE;const box=document.getElementById('chWeddingEditor');if(!w||!box)return;box.querySelectorAll('[data-wkey]').forEach(el=>{w[el.dataset.wkey]=el.type==='number'?Number(el.value||0):el.value;});w.updatedAt=new Date().toISOString();w.payments=w.payments||[];w.costs=String(w.costText||'').split('\n').filter(Boolean).map((line)=>{const a=line.split('|');return {name:(a[0]||'').trim(),actual:Number((a[1]||'0').trim())||0};});w.staff=String(w.staffText||'').split('\n').filter(Boolean).map(line=>{const a=line.split('|');return {name:(a[0]||'').trim(),role:(a[1]||'').trim(),pay:Number((a[2]||'0').trim())||0};});w.checklist=String(w.checklistText||'').split('\n').filter(Boolean).map(line=>{const a=line.split('|');return {item:(a[0]||'').trim(),status:(a[1]||'BELUM'),notes:(a[2]||'').trim()};});}
+function chWeddingSave(){chWeddingCollect();const w=CH_WEDDING_ACTIVE;if(!w.groom&&!w.bride){if(typeof toast==='function')toast('Isi minimal salah satu nama mempelai.','error');return;}google.script.run.withSuccessHandler(function(){if(typeof toast==='function')toast('Pemesanan Wedding berhasil disimpan.','success');CH_WEDDING_ACTIVE=null;const box=document.getElementById('chWeddingEditor');if(box)box.innerHTML='';chWeddingLoad();}).withFailureHandler(function(err){if(typeof toast==='function')toast('Gagal menyimpan: '+(err&&err.message||err),'error');}).saveWedding(w,TOKEN);}
+function chWeddingDelete(id){if(!confirm('Hapus data pemesanan '+id+'? Tindakan ini tidak dapat dibatalkan.'))return;google.script.run.withSuccessHandler(function(){if(typeof toast==='function')toast('Pemesanan dihapus.','success');chWeddingLoad();}).withFailureHandler(function(err){if(typeof toast==='function')toast('Gagal menghapus: '+(err&&err.message||err),'error');}).deleteWedding(id,TOKEN);}
+function chWeddingCloseForm(){CH_WEDDING_ACTIVE=null;const box=document.getElementById('chWeddingEditor');if(box)box.innerHTML='';}
+function chWeddingPrint(id){const w=CH_WEDDING_ROWS.find(x=>x.id===id);if(!w)return;CH_WEDDING_ACTIVE=JSON.parse(JSON.stringify(w));chWeddingPrintDraft();}
+function chWeddingPrintDraft(){if(CH_WEDDING_ACTIVE){chWeddingCollect();}const w=CH_WEDDING_ACTIVE;if(!w)return;const total=Number(w.packagePrice||0)+Number(w.addons||0)-Number(w.discount||0);const html=`<!doctype html><html><head><meta charset="utf-8"><title>Wedding ${chWeddingEsc(w.id)}</title><style>body{font:12px Arial;color:#222;margin:24px}h1{letter-spacing:2px;color:#7e1018}h2{border-bottom:1px solid #c9a45c;padding-bottom:6px;margin-top:22px}table{border-collapse:collapse;width:100%}td{border:1px solid #ddd;padding:8px}.gold{color:#8a6b27}.muted{color:#666}@page{size:A4;margin:15mm}</style></head><body><h1>CRIMSON HERITAGE</h1><div class="muted">WEDDING ORGANIZER · BOOKING SHEET</div><h2>Informasi Pemesanan</h2><table>${[['ID Pemesanan',w.id],['Status',w.status],['Mempelai pria',w.groom],['Mempelai wanita',w.bride],['Tanggal',w.eventDate],['Venue',w.venue],['Paket',w.packageName],['Tema',w.theme],['Jumlah tamu',w.guestCount],['Kontak',w.phone],['Total kontrak',chWeddingMoney(total)],['DP',chWeddingMoney(w.dp)],['Total dibayar',chWeddingMoney(w.paid)],['Sisa',chWeddingMoney(Math.max(0,total-Number(w.paid||0)))],['Catatan',w.notes]].map(r=>'<tr><td><b>'+chWeddingEsc(r[0])+'</b></td><td>'+chWeddingEsc(r[1]??'')+'</td></tr>').join('')}</table><h2>Form Detail Mempelai</h2><p>${chWeddingEsc(w.formText||'—').replace(/\n/g,'<br>')}</p><h2>Rincian Biaya Aktual</h2><table><tr><td><b>Item</b></td><td><b>Nominal</b></td></tr>${(w.costs||[]).map(x=>'<tr><td>'+chWeddingEsc(x.name)+'</td><td>'+chWeddingMoney(x.actual)+'</td></tr>').join('')}</table><h2>Panitia & Gaji</h2><table><tr><td><b>Nama</b></td><td><b>Tugas</b></td><td><b>Gaji</b></td></tr>${(w.staff||[]).map(x=>'<tr><td>'+chWeddingEsc(x.name)+'</td><td>'+chWeddingEsc(x.role)+'</td><td>'+chWeddingMoney(x.pay)+'</td></tr>').join('')}</table><h2>Checklist / Vendor</h2><table><tr><td><b>Item</b></td><td><b>Status</b></td><td><b>Catatan</b></td></tr>${(w.checklist||[]).map(x=>'<tr><td>'+chWeddingEsc(x.item)+'</td><td>'+chWeddingEsc(x.status)+'</td><td>'+chWeddingEsc(x.notes)+'</td></tr>').join('')}</table><p class="muted" style="margin-top:30px">Dokumen internal Crimson Heritage · Dicetak dari Wedding Organizer</p><script>window.onload=()=>window.print()<\/script></body></html>`;const win=window.open('','_blank');if(!win){if(typeof toast==='function')toast('Izinkan pop-up untuk mencetak PDF.','error');return;}win.document.open();win.document.write(html);win.document.close();}
+
+/* =====================================================
    EVENT MANAGEMENT
 ===================================================== */
 
@@ -5211,6 +5266,9 @@ function loadPartyPage() {
           <button type="button" onclick="chEventNew()" style="display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(255,239,194,.5);border-radius:12px;padding:14px 20px;background:linear-gradient(135deg,#f0d28b,#c9a24f);color:#171717;font-weight:900;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 24px rgba(201,164,92,.18);transition:transform .18s,box-shadow .18s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(201,164,92,.25)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 8px 24px rgba(201,164,92,.18)'"><span style="font-size:18px;line-height:1">＋</span> BUAT EVENT</button>
         </div>
       </section>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 18px">
+        <button type="button" onclick="showPage('wedding','WEDDING ORGANIZER')" style="border:1px solid rgba(216,180,106,.45);border-radius:12px;padding:12px 16px;background:linear-gradient(135deg,rgba(216,180,106,.16),rgba(181,18,27,.12));color:#f4dfaa;font-weight:800;cursor:pointer">♛ WEDDING ORGANIZER <span style="opacity:.7;font-weight:500">· Kelola pemesanan pernikahan</span></button>
+      </div>
       <div id="chEventEditor"></div>
       <section style="padding:20px;border:1px solid rgba(201,164,92,.3);border-radius:16px;background:linear-gradient(155deg,rgba(20,25,35,.96),rgba(13,18,27,.96));box-shadow:0 16px 42px rgba(0,0,0,.18)">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
